@@ -1,33 +1,36 @@
 using System;
 using UnityEngine;
 
-public class Tile : MonoBehaviour
+public class Tile
 {
-    //public Vector3 pos;
+    public Vector3 pos;
 
-    private Mesh mesh;
-    private MeshFilter meshFilter;
+    //private Mesh mesh;
+    //private MeshFilter meshFilter;
+
+    public Vector3[] vertices;
+    public int[] triangles;
 
 
-    private void Start()
-    {
-        meshFilter = gameObject.AddComponent<MeshFilter>();
-        MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        meshRenderer.material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+    //private void Start()
+    //{
+    //    meshFilter = gameObject.AddComponent<MeshFilter>();
+    //    MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
+    //    meshRenderer.material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
 
-        mesh = GenerateMesh();
-        meshFilter.mesh = mesh;
-    }
+    //    mesh = GenerateMesh();
+    //    meshFilter.mesh = mesh;
+    //}
 
     public Tile(Vector3 pos)
     {
+        this.pos = pos;
 
+        GenerateMeshData();
     }
 
-    private Mesh GenerateMesh()
+    private void GenerateMeshData()
     {
-        mesh = new Mesh();
-
         //Vector3[] vertices = new Vector3[]
         //{
         //    new Vector3(0, 0, 0), //Bottom left
@@ -35,27 +38,27 @@ public class Tile : MonoBehaviour
         //    new Vector3(0, 0, 1), //Top left
         //    new Vector3(1, 0, 1)  //Top right
         //};
-        Vector3[] vertices = new Vector3[]
-{
-            new Vector3(-0.5f, 0, -0.5f), //Bottom left
-            new Vector3(0.5f, 0, -0.5f), //Bottom right
-            new Vector3(-0.5f, 0, 0.5f), //Top left
-            new Vector3(0.5f, 0, 0.5f)  //Top right
-};
-        int[] triangles = new int[]
+        vertices = new Vector3[]
         {
-        0, 2, 1, //First triangle
-        1, 2, 3  //Second triangle
+            new Vector3(-0.5f, 0, -0.5f) + pos, //Bottom left
+            new Vector3(0.5f, 0, -0.5f) + pos,  //Bottom right
+            new Vector3(-0.5f, 0, 0.5f) + pos,  //Top left
+            new Vector3(0.5f, 0, 0.5f)+ pos     //Top right
         };
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-        mesh.RecalculateNormals();
+        triangles = new int[]
+        {
+            0, 2, 1, //First triangle
+            1, 2, 3  //Second triangle
+        };
+        //mesh.vertices = vertices;
+        //mesh.triangles = triangles;
+        //mesh.RecalculateNormals();
 
-        return mesh;
+        //return mesh;
     }
 
     public float GetHeight()
     {
-        return 0f;
+        return pos.y;
     }
 }
