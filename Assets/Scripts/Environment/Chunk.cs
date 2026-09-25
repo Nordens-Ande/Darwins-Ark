@@ -17,6 +17,9 @@ namespace Assets.Scripts.Environment
         public List<Vector3> vertices;
         public List<int> triangles;
 
+        public Tile[,] Tiles        //i added this bossMovement needs it :) //milton
+        { get { return tiles; } }
+
         public Chunk(Vector2 position, int size)
         {
             this.position = position;

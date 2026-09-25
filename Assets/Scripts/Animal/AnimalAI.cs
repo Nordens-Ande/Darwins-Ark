@@ -177,8 +177,11 @@ public class AnimalAI : MonoBehaviour
         if (health > 25)
         {
             Vector3 bossPosition = BossManager.Instance.CurrentBoss.transform.position;
+            bossPosition.y = 0.5f;
+            Vector3 directionToBoss = Vector3.Normalize(bossPosition - transform.position);
+            
             transform.LookAt(bossPosition);
-            transform.position = Vector3.MoveTowards(transform.position, bossPosition, runSpeed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, bossPosition - directionToBoss, runSpeed * Time.deltaTime);
             float distanceToBoss = Vector3.Distance(bossPosition, transform.position);
 
             if(distanceToBoss < attackDistance)

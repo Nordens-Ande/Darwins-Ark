@@ -1,3 +1,4 @@
+using Assets.Scripts.Environment;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -29,23 +30,25 @@ public class AnimalManager : MonoBehaviour
 
     Vector3 SpawnPosition()
     {
-        int x = Random.Range(1, 19);
+        int maxSpawn = TileManager.Instance.ChunkGridSize.x * TileManager.Instance.ChunkSize;
+        maxSpawn--;
+        int x = Random.Range(0, maxSpawn);
         int side = Random.Range(1, 5);
         switch (side)
         {
             case 1:
-                return new Vector3(x, 0.5f, 1);
+                return new Vector3(x, 0.5f, 0);
 
             case 2:
-                return new Vector3(x, 0.5f, 19);
+                return new Vector3(x, 0.5f, maxSpawn);
 
             case 3:
-                return new Vector3(1, 0.5f, x);
+                return new Vector3(0, 0.5f, x);
 
             case 4:
-                return new Vector3(19, 0.5f, x);
+                return new Vector3(maxSpawn, 0.5f, x);
         }
-        return new Vector3(10, 0.5f, 0);
+        return new Vector3(0, 0.5f, 0);
     }
 
     void SpawnAnimal()

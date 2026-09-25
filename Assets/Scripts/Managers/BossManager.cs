@@ -1,3 +1,4 @@
+using Assets.Scripts.Environment;
 using UnityEngine;
 
 public class BossManager : MonoBehaviour
@@ -23,25 +24,27 @@ public class BossManager : MonoBehaviour
         SpawnBoss();
     }
 
-    Vector2 GetSpawnLocation()
+    Vector2 GetSpawnLocation() //only works for square maps
     {
-        int x = Random.Range(0, 19);
+        int maxSpawn = TileManager.Instance.ChunkGridSize.x * TileManager.Instance.ChunkSize;
+        maxSpawn--;
+        int x = Random.Range(0, maxSpawn);
         int side = Random.Range(1, 5);
         switch(side)
         {
             case 1:
-                return new Vector2(x, -1);
+                return new Vector2(x, 0);
                 
             case 2:
-                return new Vector2(x, 20);
+                return new Vector2(x, maxSpawn);
                 
             case 3:
-                return new Vector2(-1, x);
+                return new Vector2(0, x);
                 
             case 4:
-                return new Vector2(20, x);
+                return new Vector2(maxSpawn, x);
         }
-        return new Vector2(10, 0);
+        return new Vector2(0, 0);
     }
 
     public void SpawnBoss()

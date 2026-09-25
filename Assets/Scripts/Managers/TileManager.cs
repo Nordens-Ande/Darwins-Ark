@@ -14,6 +14,12 @@ namespace Assets.Scripts.Environment
         [SerializeField] private int chunkSize = 8; 
         [SerializeField] private Vector2Int chunkGridSize = Vector2Int.one;
 
+        public int ChunkSize
+        { get { return chunkSize; } }
+
+        public Vector2Int ChunkGridSize
+        { get { return chunkGridSize; } }
+
         private void Awake()
         {
             if (Instance == null)
@@ -120,6 +126,20 @@ namespace Assets.Scripts.Environment
             }
         }
 
+        public Chunk GetChunk(float x, float z)
+        {
+            foreach(Chunk chunk in chunks)
+            {
+                if (chunk.position / chunkSize == new Vector2(Mathf.Floor(x / chunkSize), Mathf.Floor(z / chunkSize)))
+                    return chunk;
+            }
+            return null;
+        }
+
+        public Chunk GetChunk(Vector3 position)
+        {
+            return GetChunk(position.x, position.y);
+        }
 
         public Tile GetTile(float x, float z)
         {
