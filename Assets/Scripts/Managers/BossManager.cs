@@ -37,6 +37,14 @@ public class BossManager : MonoBehaviour
         currentBoss = Instantiate(bossPrefab, spawnLocation3D, Quaternion.identity);
     }
     
+    void BossDied()
+    {
+
+        currentBoss.SetActive(false);
+        Destroy(currentBoss);
+        currentBoss = null;
+    }
+
     void Update()
     {
         if(currentBoss != null)
@@ -45,9 +53,7 @@ public class BossManager : MonoBehaviour
             {
                 if (currentBoss.GetComponent<BossHealth>().IsAlive == false)
                 {
-                    currentBoss.SetActive(false);
-                    Destroy(currentBoss);
-                    currentBoss = null;
+                    BossDied();
                 }
             }
         }
