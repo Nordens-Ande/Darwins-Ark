@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Assets.Scripts.Environment;
+
 
 public class PlantManager : MonoBehaviour
 {
@@ -83,7 +85,7 @@ public class PlantManager : MonoBehaviour
         }
 
         //create a new plant on the tile
-        Plant newPlant = Instantiate(prefab, tile.transform.position, Quaternion.identity);
+        Plant newPlant = Instantiate(prefab, tile.position, Quaternion.identity);
 
         //couple the plant to the tile
         newPlant.OccupyTile(tile);

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using Assets.Scripts.Environment;
 
 public class BossMovement : MonoBehaviour
 {
@@ -15,7 +16,7 @@ public class BossMovement : MonoBehaviour
         movementSpeed = 2;
         targetTile = NewTargetTile();
 
-        Vector3 direction = targetTile.transform.position - transform.position;
+        Vector3 direction = targetTile.position - transform.position;
         direction.y = 0;
         direction.Normalize();
 
@@ -23,53 +24,58 @@ public class BossMovement : MonoBehaviour
         moveDirection = Vector3.zero;
     }
 
-    Tile NewTargetTile()
+    //THIS BROKE DURING MERGE. PLEASE FIX THIS FIRST
+    Tile NewTargetTile() //Temp method to unbreak rest of script, remove when NewTargetTile is solved
     {
-        if (TileManager.Instance.tiles.Count == 0) return null;
-
-        Debug.Log("choosing new target tile");
-        int currentX = Mathf.RoundToInt(transform.position.x);
-        int currentZ = Mathf.RoundToInt(transform.position.z);
-
-        List<Tile> possibleTiles = new List<Tile>();
-
-        foreach (Tile tile in TileManager.Instance.tiles)
-        {
-            int x = Mathf.RoundToInt(tile.transform.localPosition.x);
-            int z = Mathf.RoundToInt(tile.transform.localPosition.z);
-
-            Vector3 direction = tile.transform.position - transform.position;
-            direction.Normalize();
-            if (direction == -moveDirection) continue; //dont move backwards
-
-            if (z == currentZ && x != currentX)
-            {
-                possibleTiles.Add(tile);
-            }
-
-            if (x == currentX && z != currentZ)
-            {
-                possibleTiles.Add(tile);
-            }
-        }
-
-        //safeguard if only backtracking tiles are available
-        if(possibleTiles.Count <= 0)
-        {
-            foreach (Tile tile in TileManager.Instance.tiles)
-            {
-                Vector3 direction = tile.transform.position - transform.position;
-                direction.Normalize();
-                if(direction == moveDirection)
-                {
-                    possibleTiles.Add(tile);
-                }
-            }
-        }
-
-        Tile chosenTile = possibleTiles[Random.Range(0, possibleTiles.Count)];
-        return chosenTile;
+        return null;
     }
+    //Tile NewTargetTile()
+    //{
+    //    if (TileManager.Instance.tiles.Count == 0) return null;
+
+    //    Debug.Log("choosing new target tile");
+    //    int currentX = Mathf.RoundToInt(transform.position.x);
+    //    int currentZ = Mathf.RoundToInt(transform.position.z);
+
+    //    List<Tile> possibleTiles = new List<Tile>();
+
+    //    foreach (Tile tile in TileManager.Instance.tiles)
+    //    {
+    //        int x = Mathf.RoundToInt(tile.localPosition.x);
+    //        int z = Mathf.RoundToInt(tile.localPosition.z);
+
+    //        Vector3 direction = tile.position - transform.position;
+    //        direction.Normalize();
+    //        if (direction == -moveDirection) continue; //dont move backwards
+
+    //        if (z == currentZ && x != currentX)
+    //        {
+    //            possibleTiles.Add(tile);
+    //        }
+
+    //        if (x == currentX && z != currentZ)
+    //        {
+    //            possibleTiles.Add(tile);
+    //        }
+    //    }
+
+    //    //safeguard if only backtracking tiles are available
+    //    if(possibleTiles.Count <= 0)
+    //    {
+    //        foreach (Tile tile in TileManager.Instance.tiles)
+    //        {
+    //            Vector3 direction = tile.position - transform.position;
+    //            direction.Normalize();
+    //            if(direction == moveDirection)
+    //            {
+    //                possibleTiles.Add(tile);
+    //            }
+    //        }
+    //    }
+
+    //    Tile chosenTile = possibleTiles[Random.Range(0, possibleTiles.Count)];
+    //    return chosenTile;
+    //}
 
     Tile GetNextTile(Vector3 direction)
     {
@@ -94,7 +100,7 @@ public class BossMovement : MonoBehaviour
 
     (bool, bool) ReachedNextTile()
     {
-        float distance = Vector3.Distance(nextTile.transform.position, transform.position);
+        float distance = Vector3.Distance(nextTile.position, transform.position);
         if (distance < 0.1f)
         {
             if(CheckIfReachedTargetTile(nextTile))
@@ -124,7 +130,7 @@ public class BossMovement : MonoBehaviour
     {
         if(nextTile != null)
         {
-            moveDirection = targetTile.transform.position - transform.position;
+            moveDirection = targetTile.position - transform.position;
             moveDirection.Normalize();
 
             (bool reachedNextTile, bool reachedTargetTile) = ReachedNextTile();
@@ -137,7 +143,7 @@ public class BossMovement : MonoBehaviour
                     nextTile.CurrentPlant.DamagePlant(101.0f);
                 }
  
-                transform.position = nextTile.transform.position;
+                transform.position = nextTile.position;
                 if (reachedTargetTile)
                 {
                     targetTile = NewTargetTile();
@@ -146,7 +152,7 @@ public class BossMovement : MonoBehaviour
                 nextTile = GetNextTile(moveDirection);
             }
             
-            transform.position = Vector3.MoveTowards(transform.position, nextTile.transform.position, movementSpeed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, nextTile.position, movementSpeed * Time.deltaTime);
             transform.position = new Vector3(transform.position.x, 0.0f, transform.position.z);
             Rotate(moveDirection);
         }
