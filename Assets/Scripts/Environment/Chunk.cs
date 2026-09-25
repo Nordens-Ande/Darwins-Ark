@@ -26,20 +26,25 @@ namespace Assets.Scripts.Environment
             tiles = new Tile[size, size];
             for (int x = 0; x < size; x++)
                 for (int z = 0; z < size; z++)
-                    tiles[x, z] = new Tile(new Vector3(x, 0f/*UnityEngine.Random.Range(0f, 1f)*/, z));
+                    tiles[x, z] = new Tile(new Vector3(x + position.x, 0f, z + position.y), new Vector3(x, 0f, z));
 
-            vertices = new List<Vector3>();
-            triangles = new List<int>();
+            //vertices = new List<Vector3>();
+            //triangles = new List<int>();
         }
 
 
         public void GenerateMeshData()
         {
+            vertices = new List<Vector3>();
+            triangles = new List<int>();
+
+            isDirty = false;
+
             for (int x = 0; x < size; x++)
             {
                 for (int z = 0; z < size; z++)
                 {
-                    Vector3 tilePos = tiles[x, z].pos + new Vector3(position.x, 0, position.y);
+                    Vector3 tilePos = tiles[x, z].position/* + new Vector3(position.x, 0, position.y)*/;
                     float[] neighbourHeights = new float[4] { GetTileHeight(x, z + 1), GetTileHeight(x - 1, z), GetTileHeight(x, z - 1), GetTileHeight(x + 1, z) }; //NWSE 
 
                     //Top face
@@ -112,7 +117,21 @@ namespace Assets.Scripts.Environment
             if (x > tiles.GetLength(0) - 1 || z > tiles.GetLength(1) - 1 || x < 0 || z < 0)
                 return -10f;
 
-            return tiles[x, z].pos.y;
+            return tiles[x, z].position.y;
+        }
+
+        public Tile GetTile(int x, int z, Space space = Space.World)
+        {
+            if (space == Space.World)
+            {
+                x -= (int)position.x;
+                z -= (int)position.y;
+            }
+
+            if (x > tiles.GetLength(0) - 1 || z > tiles.GetLength(1) - 1 || x < 0 || z < 0)
+                return null;
+
+            return tiles[x, z];
         }
 
         //Ideally we would not like to use abcd variables, but I cannot think of any other names that would work in this context
@@ -133,5 +152,27 @@ namespace Assets.Scripts.Environment
             triangles.Add(index + 2);
             triangles.Add(index + 3);
         }
+
+        public void ModifyTile(int x, int z, float newY, Space space = Space.World)
+        {
+            if (space == Space.World)
+            {
+                x -= (int)position.x;
+                z -= (int)position.y;
+            }
+
+            if (x > size - 1 || z > size - 1 || x < 0 || z < 0)
+                return;
+
+            isDirty = true;
+
+            //Vector3 localPosition = new Vector3();
+            tiles[x, z].position.y = newY;
+            tiles[x, z].localPosition.y = newY;
+        }
+        //public void ModifyTile(Vector2 tilePos)
+        //{
+
+        //}
     }
 }

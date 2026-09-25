@@ -9,13 +9,11 @@ namespace Assets.Scripts.Environment
     {
         public static TileManager Instance = null;
 
-        private Mesh mesh;
-        private MeshFilter meshFilter;
+        [HideInInspector] public List<Chunk> chunks;
+        [HideInInspector] public List<GameObject> chunkObjects;
 
-        public List<Tile> tiles = new List<Tile>();
-
-        public List<Chunk> chunks;
-        public List<GameObject> chunkObjects;
+        [SerializeField] private int chunkSize = 8; 
+        [SerializeField] private Vector2Int chunkGridSize = Vector2Int.one;
 
         private void Awake()
         {
@@ -51,10 +49,18 @@ namespace Assets.Scripts.Environment
             chunks = new List<Chunk>();
             chunkObjects = new List<GameObject>();
 
-            chunks.Add(new Chunk(Vector2.zero, 8));
-            chunks.Add(new Chunk(new Vector2(-8, 0), 8));
-            chunks.Add(new Chunk(new Vector2(-8, -8), 8));
-            chunks.Add(new Chunk(new Vector2(0, -8), 8));
+            //chunks.Add(new Chunk(Vector2.zero, 8));
+            //chunks.Add(new Chunk(new Vector2(-8, 0), 8));
+            //chunks.Add(new Chunk(new Vector2(-8, -8), 8));
+            //chunks.Add(new Chunk(new Vector2(0, -8), 8));
+
+            for (int x = 0; x < chunkGridSize.x; x++)
+            {
+                for (int z = 0; z < chunkGridSize.y; z++)
+                {
+                    chunks.Add(new Chunk(new Vector2(x * chunkSize, z * chunkSize), chunkSize));
+                }
+            }
 
             for (int i = 0; i < chunks.Count; i++)
             {
@@ -62,6 +68,7 @@ namespace Assets.Scripts.Environment
                 chunk.GenerateMeshData();
                 
                 GameObject chunkObject = new GameObject($"Chunk (x:{chunk.position.x}, z:{chunk.position.y})", typeof(MeshFilter), typeof(MeshRenderer));
+                chunkObject.transform.parent = transform;
                 chunkObjects.Add(chunkObject);
 
                 chunkObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
@@ -78,30 +85,60 @@ namespace Assets.Scripts.Environment
             }
         }
 
-        // Update is called once per frame
-        void Update()
-        {
 
+        //[SerializeField, ReadOnly] int updateCounter = 0;
+        //[SerializeField, ReadOnly] int index = 0;
+        void FixedUpdate()
+        {
+            //updateCounter++;
+
+            //if (updateCounter > 30)
+            //{
+            //    updateCounter = 0;
+
+            //    chunks[0].ModifyTile(index % chunkSize, index / chunkSize, Random.Range(0, 1f), Space.Self);
+                
+            //    index++;
+            //    if (index >= 64)
+            //        index = 0;
+            //}
+
+            for (int i = 0; i < chunks.Count; i++)
+            {
+                if (!chunks[i].isDirty)
+                    continue;
+
+                chunks[i].GenerateMeshData();
+                Mesh mesh = new Mesh();
+
+                mesh.SetVertices(chunks[i].vertices);
+                mesh.SetTriangles(chunks[i].triangles, 0);
+
+                mesh.RecalculateNormals();
+                mesh.RecalculateBounds();
+
+                chunkObjects[i].GetComponent<MeshFilter>().sharedMesh = mesh;
+            }
         }
 
 
-        //public Tile GetTile(float x, float z)
-        //{
-        //    foreach (Tile tile in tiles)
-        //    {
-        //        if (tile.transform.localPosition.x == x && tile.transform.position.z == z)
-        //            return tile;
-        //    }
-        //    return null;
-        //}
-        //public Tile GetTile(Vector2 posXZ)
-        //{
-        //    return GetTile(posXZ.x, posXZ.y);
-        //}
-        //public Tile GetTile(Vector3 pos)
-        //{
-        //    return GetTile(pos.x, pos.z);
-        //}
+        public Tile GetTile(float x, float z)
+        {
+            foreach (Chunk chunk in chunks)
+            {
+                if (chunk.position / chunkSize == new Vector2(Mathf.Floor(x / chunkSize), Mathf.Floor(z / chunkSize)))
+                    return chunk.GetTile((int)x, (int)z);
+            }
+            return null;
+        }
+        public Tile GetTile(Vector2 posXZ)
+        {
+            return GetTile(posXZ.x, posXZ.y);
+        }
+        public Tile GetTile(Vector3 pos)
+        {
+            return GetTile(pos.x, pos.z);
+        }
     }
 }
 
