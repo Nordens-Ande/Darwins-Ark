@@ -13,8 +13,9 @@ public class Plant : MonoBehaviour
     [Header("Plant Stats")]
     [SerializeField] float growthSpeed = 1.0f;
     [SerializeField] float health = 100.0f;
-    [SerializeField] float timeSinceLastGrowth = 0.0f;
-    [SerializeField] bool canBeEaten = false;
+    [SerializeField, ReadOnly] float timeSinceLastGrowth = 0.0f;
+    [SerializeField, ReadOnly] bool canBeEaten = false;
+    [SerializeField, ReadOnly] Tile currentTile; //The tile that the plant is currently on
     [Space]
 
     [Header("Plant Growth Stage")]
@@ -31,6 +32,7 @@ public class Plant : MonoBehaviour
 
 
     private GameObject currentModelInstance; //this is the model currently used for the plant
+    public Tile CurrentTile => currentTile; //this is the tile that the plant is currently on
 
     public enum GrowthStage
     {
@@ -136,6 +138,16 @@ public class Plant : MonoBehaviour
         }
     }
 
+    private void OnDestroy()
+    {
+        //if the plant is destroyed, we need to clear the tile it was on
+        if (currentTile != null)
+        {
+            currentTile.ClearPlant();
+        }
+    }
+
+
 
 
 
@@ -176,6 +188,15 @@ public class Plant : MonoBehaviour
         if (canBeEaten)
         {
             DamagePlant(health); 
+        }
+    }
+
+    public void OccupyTile(Tile tile)
+    {
+        currentTile = tile;
+        if (tile != null)
+        {
+            tile.SetPlant(this);
         }
     }
 
