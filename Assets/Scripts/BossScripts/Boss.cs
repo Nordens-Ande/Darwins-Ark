@@ -7,21 +7,17 @@ public class Boss : MonoBehaviour
 
     public Boss()
     {
-        healthScript = new BossHealth(100);
-        movementScript = new BossMovement();
+        
     }
 
     void Start()
     {
-        
+        healthScript = gameObject.GetComponent<BossHealth>();
+        movementScript = gameObject.GetComponent<BossMovement>();
     }
 
-    
     void Update()
     {
-        if(movementScript != null)
-        {
-            movementScript.Update();
-        }
+        
     }
 }

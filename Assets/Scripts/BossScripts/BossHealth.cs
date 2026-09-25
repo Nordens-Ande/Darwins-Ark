@@ -1,17 +1,28 @@
 using UnityEngine;
 
-public class BossHealth
+public class BossHealth : MonoBehaviour
 {
     int health;
+    bool isAlive;
 
-    public BossHealth(int startingHealth)
+    public bool IsAlive 
+    { 
+        get { return isAlive; }
+        set { isAlive = value; } 
+    }
+
+    void Start()
     {
-        health = startingHealth;
+        health = 100;
+        isAlive = true;
     }
 
     public void TakeDamage(int damage)
     {
         health -= damage;
+        if(health < 0)
+        {
+            isAlive = false;
+        }
     }
-    
 }
