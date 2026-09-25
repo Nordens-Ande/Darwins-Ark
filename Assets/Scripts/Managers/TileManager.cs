@@ -41,7 +41,7 @@ public class TileManager : MonoBehaviour
     {
         foreach (Tile tile in tiles)
         {
-            if (tile.transform.localPosition.x == x && tile.transform.position.z == z)
+            if (tile.transform.localPosition.x == x && tile.transform.localPosition.z == z)
                 return tile;
         }
         return null;
