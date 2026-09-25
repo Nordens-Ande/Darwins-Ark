@@ -1,96 +1,136 @@
 using NUnit.Framework.Internal;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
-public class TileManager : MonoBehaviour
+namespace Assets.Scripts.Environment
 {
-    public static TileManager Instance = null;
-
-    private Mesh mesh;
-    private MeshFilter meshFilter;
-
-    public List<Tile> tiles = new List<Tile>();
-
-    private void Awake()
+    public class TileManager : MonoBehaviour
     {
-        if (Instance == null)
-            TileManager.Instance = this;
-    }
+        public static TileManager Instance = null;
 
-    void Start()
-    {
-        //GameObject tile = new GameObject("testTile", typeof(Tile));
+        private Mesh mesh;
+        private MeshFilter meshFilter;
 
-        meshFilter = gameObject.AddComponent<MeshFilter>();
-        MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        meshRenderer.material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+        public List<Tile> tiles = new List<Tile>();
 
-        for (int x = 0; x < 20; x++)
+        public List<Chunk> chunks;
+        public List<GameObject> chunkObjects;
+
+        private void Awake()
         {
-            for (int z = 0; z < 20; z++)
+            if (Instance == null)
+                TileManager.Instance = this;
+        }
+
+        //void Start()
+        //{
+        //    //GameObject tile = new GameObject("testTile", typeof(Tile));
+
+        //    meshFilter = gameObject.AddComponent<MeshFilter>();
+        //    MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
+        //    meshRenderer.material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+
+        //    for (int x = 0; x < 20; x++)
+        //    {
+        //        for (int z = 0; z < 20; z++)
+        //        {
+        //            //GameObject tile = new GameObject($"Tile (x:{x}, z:{z})", typeof(Tile));
+        //            //tile.transform.parent = transform;
+        //            //tile.transform.localPosition = new Vector3(x, 0, z);
+
+        //            tiles.Add(new Tile(new Vector3(x, 0/*Random.Range(0f, 1f)*/, z)));
+        //        }
+        //    }
+
+        //    BuildMesh();
+        //}
+
+        void Start()
+        {
+            chunks = new List<Chunk>();
+            chunkObjects = new List<GameObject>();
+
+            chunks.Add(new Chunk(Vector2.zero, 8));
+            chunks.Add(new Chunk(new Vector2(-8, 0), 8));
+            chunks.Add(new Chunk(new Vector2(-8, -8), 8));
+            chunks.Add(new Chunk(new Vector2(0, -8), 8));
+
+            for (int i = 0; i < chunks.Count; i++)
             {
-                //GameObject tile = new GameObject($"Tile (x:{x}, z:{z})", typeof(Tile));
-                //tile.transform.parent = transform;
-                //tile.transform.localPosition = new Vector3(x, 0, z);
+                Chunk chunk = chunks[i];
+                chunk.GenerateMeshData();
                 
-                tiles.Add(new Tile(new Vector3(x, 0/*Random.Range(0f, 1f)*/, z)));
+                GameObject chunkObject = new GameObject($"Chunk (x:{chunk.position.x}, z:{chunk.position.y})", typeof(MeshFilter), typeof(MeshRenderer));
+                chunkObjects.Add(chunkObject);
+
+                chunkObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                
+                Mesh mesh = new Mesh();
+
+                mesh.SetVertices(chunk.vertices);
+                mesh.SetTriangles(chunk.triangles, 0);
+
+                mesh.RecalculateNormals();
+                mesh.RecalculateBounds();
+
+                chunkObject.GetComponent<MeshFilter>().sharedMesh = mesh;
             }
         }
 
-        BuildMesh();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
-
-    private void BuildMesh()
-    {
-        List<Vector3> vertices = new List<Vector3>();
-        List<int> triangles = new List<int>();
-
-        foreach (Tile tile in tiles)
+        // Update is called once per frame
+        void Update()
         {
-            int vertexOffset = vertices.Count;
 
-            vertices.AddRange(tile.vertices);
-
-            foreach (int index in tile.triangles)
-            {
-                triangles.Add(index + vertexOffset);
-            }
         }
 
-        Mesh mesh = new Mesh();
 
-        mesh.SetVertices(vertices);
-        mesh.SetTriangles(triangles, 0);
+        private void BuildMesh()
+        {
+            List<Vector3> vertices = new List<Vector3>();
+            List<int> triangles = new List<int>();
 
-        mesh.RecalculateNormals();
-        mesh.RecalculateBounds();
+            foreach (Tile tile in tiles)
+            {
+                int vertexOffset = vertices.Count;
 
-        meshFilter.sharedMesh = mesh;
+                vertices.AddRange(tile.vertices);
+
+                foreach (int index in tile.triangles)
+                {
+                    triangles.Add(index + vertexOffset);
+                }
+            }
+
+            Mesh mesh = new Mesh();
+
+            mesh.SetVertices(vertices);
+            mesh.SetTriangles(triangles, 0);
+
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+
+            meshFilter.sharedMesh = mesh;
+        }
+
+
+        //public Tile GetTile(float x, float z)
+        //{
+        //    foreach (Tile tile in tiles)
+        //    {
+        //        if (tile.transform.localPosition.x == x && tile.transform.position.z == z)
+        //            return tile;
+        //    }
+        //    return null;
+        //}
+        //public Tile GetTile(Vector2 posXZ)
+        //{
+        //    return GetTile(posXZ.x, posXZ.y);
+        //}
+        //public Tile GetTile(Vector3 pos)
+        //{
+        //    return GetTile(pos.x, pos.z);
+        //}
     }
-
-
-    //public Tile GetTile(float x, float z)
-    //{
-    //    foreach (Tile tile in tiles)
-    //    {
-    //        if (tile.transform.localPosition.x == x && tile.transform.position.z == z)
-    //            return tile;
-    //    }
-    //    return null;
-    //}
-    //public Tile GetTile(Vector2 posXZ)
-    //{
-    //    return GetTile(posXZ.x, posXZ.y);
-    //}
-    //public Tile GetTile(Vector3 pos)
-    //{
-    //    return GetTile(pos.x, pos.z);
-    //}
 }
+
