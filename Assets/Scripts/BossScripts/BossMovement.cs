@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class BossMovement : MonoBehaviour
 {
-    float movementSpeed;
-    [SerializeField] Tile targetTile;
+    [SerializeField] float movementSpeed;
+    [SerializeField, ReadOnly] Tile targetTile;
     Tile currentTile;
     Tile nextTile;
     Vector3 moveDirection; //used to check what direction we moved last frame, when selecting new target tile we dont want to go in the negative of this direction
 
     void Start()
     {
-        movementSpeed = 3;
+        movementSpeed = 2;
         targetTile = NewTargetTile();
 
         Vector3 direction = targetTile.transform.position - transform.position;
@@ -48,6 +48,20 @@ public class BossMovement : MonoBehaviour
             if (x == currentX && z != currentZ)
             {
                 possibleTiles.Add(tile);
+            }
+        }
+
+        //safeguard if only backtracking tiles are available
+        if(possibleTiles.Count <= 0)
+        {
+            foreach (Tile tile in TileManager.Instance.tiles)
+            {
+                Vector3 direction = tile.transform.position - transform.position;
+                direction.Normalize();
+                if(direction == moveDirection)
+                {
+                    possibleTiles.Add(tile);
+                }
             }
         }
 

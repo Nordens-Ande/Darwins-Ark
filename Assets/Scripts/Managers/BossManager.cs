@@ -2,8 +2,17 @@ using UnityEngine;
 
 public class BossManager : MonoBehaviour
 {
+    public static BossManager Instance = null;
+
     [SerializeField] GameObject bossPrefab;
     GameObject currentBoss;
+
+    private void Awake()
+    {
+        if(Instance == null)
+            BossManager.Instance = this;
+    }
+
     void Start()
     {
         SpawnBoss();
