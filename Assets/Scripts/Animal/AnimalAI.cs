@@ -19,6 +19,9 @@ public class AnimalAI : MonoBehaviour
     [SerializeField] private float maxIdleTime = 5f;
     [SerializeField] private float currentIdleTime = 0;
 
+    [SerializeField] private float maxAttackTime = 2;
+    [SerializeField] private float currentAttackTime = 0;
+
     [SerializeField] private float clockCycleTime = 10; //How long before points deteriate
     [SerializeField] private float clockCycleTimeCurrent;
 
@@ -36,6 +39,13 @@ public class AnimalAI : MonoBehaviour
 
     private bool isIdle = false;
 
+    //Properties
+    public float BossThreat
+    {
+        get { return bossThreat; }
+        set { bossThreat = value; }
+    }
+
 
     void Start()
     {
@@ -46,6 +56,8 @@ public class AnimalAI : MonoBehaviour
         DisplayHappiness();
         CheckBestAction();
         ClockCycleDeteriation();
+
+        currentAttackTime += Time.deltaTime;
     }
 
     //Simple deteriation of the utility points during game time
@@ -162,20 +174,31 @@ public class AnimalAI : MonoBehaviour
     //Prototype can only handle one enemy in the sceen, can be changed later
     void BossFigth() 
     {
-        //if (health > 25)
-        //{
-        //    //transform.LookAt(enemyinstansemanager.instance.transform.position)
-        //    //transform.position = Vector3.MoveTowards(transform.position, enemyinstancemanager.transform.position, runSpeed * time.deltatime)
-        //    if(Physics.Raycast(transform.position, Vector3.forward, out RaycastHit hit, attackDistance))
-        //    { 
-        //        //DMG enemy
-        //    }
-        //}
-        //if (allenemydead) 
-        //{ 
-        //    bossThreat = 0
-        //}
-    
+        if (health > 25)
+        {
+            Vector3 bossPosition = BossManager.Instance.CurrentBoss.transform.position;
+            transform.LookAt(bossPosition);
+            transform.position = Vector3.MoveTowards(transform.position, bossPosition, runSpeed * Time.deltaTime);
+            float distanceToBoss = Vector3.Distance(bossPosition, transform.position);
+
+            if(distanceToBoss < attackDistance)
+            {
+                if(currentAttackTime >= maxAttackTime)
+                {
+                    BossHealth bossHealth = BossManager.Instance.CurrentBoss.GetComponent<BossHealth>();
+                    if(bossHealth != null)
+                    {
+                        bossHealth.TakeDamage(damage);
+                        Debug.Log("damage dealt");
+                        currentAttackTime = 0;
+                    }
+                }
+            }
+            //if (Physics.Raycast(transform.position, Vector3.forward, out RaycastHit hit, attackDistance))
+            //{
+            //    //DMG enemy
+            //}
+        }
     }
 
     //Will spawn plantseeds

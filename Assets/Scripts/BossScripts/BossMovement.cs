@@ -25,6 +25,8 @@ public class BossMovement : MonoBehaviour
 
     Tile NewTargetTile()
     {
+        if (TileManager.Instance.tiles.Count == 0) return null;
+
         Debug.Log("choosing new target tile");
         int currentX = Mathf.RoundToInt(transform.position.x);
         int currentZ = Mathf.RoundToInt(transform.position.z);
@@ -74,12 +76,12 @@ public class BossMovement : MonoBehaviour
         Tile tile = TileManager.Instance.GetTile(transform.position + direction);
         if(tile != null)
         {
-            Debug.Log("returned next tile");
+            //Debug.Log("returned next tile");
             return tile;
         }
         else
         {
-            Debug.Log("didnt find next tile");
+            //Debug.Log("didnt find next tile");
             return null;
         }
     }
@@ -97,12 +99,12 @@ public class BossMovement : MonoBehaviour
         {
             if(CheckIfReachedTargetTile(nextTile))
             {
-                Debug.Log("reached target tile");
+                //Debug.Log("reached target tile");
                 return (true, true);
             }
             else
             {
-                Debug.Log("reached tile");
+                //Debug.Log("reached tile");
                 return (true, false);
             }
         }
@@ -129,11 +131,12 @@ public class BossMovement : MonoBehaviour
             
             if(reachedNextTile)
             {
-                //deal damage to plants on tile
-                //if tile.HasPlant
-                //{
-                //    PlantManager.KillPlant(nextTile);
-                //} etc
+                
+                if(nextTile.HasPlant)
+                {
+                    nextTile.CurrentPlant.DamagePlant(101.0f);
+                }
+ 
                 transform.position = nextTile.transform.position;
                 if (reachedTargetTile)
                 {
