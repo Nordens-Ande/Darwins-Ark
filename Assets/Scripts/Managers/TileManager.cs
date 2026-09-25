@@ -85,35 +85,6 @@ namespace Assets.Scripts.Environment
         }
 
 
-        private void BuildMesh()
-        {
-            List<Vector3> vertices = new List<Vector3>();
-            List<int> triangles = new List<int>();
-
-            foreach (Tile tile in tiles)
-            {
-                int vertexOffset = vertices.Count;
-
-                vertices.AddRange(tile.vertices);
-
-                foreach (int index in tile.triangles)
-                {
-                    triangles.Add(index + vertexOffset);
-                }
-            }
-
-            Mesh mesh = new Mesh();
-
-            mesh.SetVertices(vertices);
-            mesh.SetTriangles(triangles, 0);
-
-            mesh.RecalculateNormals();
-            mesh.RecalculateBounds();
-
-            meshFilter.sharedMesh = mesh;
-        }
-
-
         //public Tile GetTile(float x, float z)
         //{
         //    foreach (Tile tile in tiles)

@@ -42,26 +42,11 @@ namespace Assets.Scripts.Environment
                     Vector3 tilePos = tiles[x, z].pos + new Vector3(position.x, 0, position.y);
                     float[] neighbourHeights = new float[4] { GetTileHeight(x, z + 1), GetTileHeight(x - 1, z), GetTileHeight(x, z - 1), GetTileHeight(x + 1, z) }; //NWSE 
 
-                    //vertices.AddRange();
-
-                    //Vector3[] topPlane = new Vector3[4]
-                    //{
-                    //    new Vector3(-0.5f, 0, -0.5f) + tilePos, //Bottom left
-                    //    new Vector3(0.5f, 0, -0.5f) + tilePos,  //Bottom right
-                    //    new Vector3(-0.5f, 0, 0.5f) + tilePos,  //Top left
-                    //    new Vector3(0.5f, 0, 0.5f) + tilePos    //Top right
-                    //};
-                    //int[] topTriangle = new int[]
-                    //{
-                    //    (x + z) + 0, (x + z) + 2, (x + z) + 1,  //First triangle
-                    //    (x + z) + 1, (x + z) + 2, (x + z) + 3   //Second triangle
-                    //};
-
                     //Top face
                     AddFace(
                         new Vector3(-0.5f, 0, 0.5f) + tilePos,  //top-left
-                        new Vector3(+0.5f, 0, 0.5f) + tilePos,   //top-right
-                        new Vector3(+0.5f, 0, -0.5f) + tilePos,  //bottom-right
+                        new Vector3(+0.5f, 0, 0.5f) + tilePos,  //top-right
+                        new Vector3(+0.5f, 0, -0.5f) + tilePos, //bottom-right
                         new Vector3(-0.5f, 0, -0.5f) + tilePos  //bottom-left
                     );
 
@@ -73,9 +58,6 @@ namespace Assets.Scripts.Environment
 
                         if (neighbourHeight >= tileHeight)
                             continue;
-
-                        //float low = Mathf.Min(tileHeight, neighbourHeight);
-                        //float high = Mathf.Max(tileHeight, neighbourHeight);
 
                         float low = neighbourHeight;
                         float high = tileHeight;
