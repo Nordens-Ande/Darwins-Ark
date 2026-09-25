@@ -9,6 +9,13 @@ public class Tile : MonoBehaviour
     private MeshFilter meshFilter;
 
 
+    //plant varibles
+    [SerializeField] private Plant currentPlant = null; //this is the plant that is currently on this tile, if any
+    public Plant CurrentPlant => currentPlant;
+    public bool HasPlant => currentPlant != null;
+
+
+
     private void Start()
     {
         meshFilter = gameObject.AddComponent<MeshFilter>();
@@ -58,4 +65,21 @@ public class Tile : MonoBehaviour
     {
         return 0f;
     }
+
+
+    ///plant functions
+    public void SetPlant(Plant plant)
+    {
+        currentPlant = plant;
+    }
+
+    public void ClearPlant()
+    {
+        currentPlant = null;
+    }
+
+
+
+
+
 }
