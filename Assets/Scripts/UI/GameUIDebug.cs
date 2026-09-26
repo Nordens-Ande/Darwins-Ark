@@ -43,4 +43,9 @@ public class GameUIDebug : MonoBehaviour
     {
         Debug.Log("DeityButton_3 pressed!");
     }
+
+    public void BossButton()
+    {
+        Debug.Log("Boss button pressed!");
+    }
 }
