@@ -14,6 +14,9 @@ public class PlantManager : MonoBehaviour
     [SerializeField] private Plant plantPrefabToSpawn; //this is the plant that will be spawned
     [SerializeField] private Tile targetTileToSpawnOn; //this is the tile that the plant will be spawned on
     [SerializeField] bool spawnPlant = false; //this is used as a button to spawn a plant
+    [Space]
+    [SerializeField] bool spawnPlantAllTiles = false; //this is used as a button to spawn plants on all tiles
+    [SerializeField] float spawnPlantAllTilesChance = 20; //this is used as a button to spawn plants on all tiles
 
     [Header("List of all Plants")]
     [SerializeField] private List<Plant> plants = new List<Plant>();
@@ -67,6 +70,28 @@ public class PlantManager : MonoBehaviour
             }
             spawnPlant = false;
         }
+
+
+        //try to spawn plants on all tiles
+        if (spawnPlantAllTiles)
+        {
+            Tile[] allTiles = FindObjectsByType<Tile>();
+
+            foreach (Tile tile in allTiles)
+            {
+                if (tile.HasPlant) { continue; } //if the tile already has a plant skip it
+                float randomValue = Random.Range(0f, 100f);
+
+                if (randomValue <= spawnPlantAllTilesChance)
+                {
+                    SpawnPlantOnThisTile(plantPrefabToSpawn, tile);
+                }
+            }
+
+
+            spawnPlantAllTiles = false;
+        }
+
     }
 
 
