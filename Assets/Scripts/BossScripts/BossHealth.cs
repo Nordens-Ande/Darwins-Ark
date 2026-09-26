@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class BossHealth : MonoBehaviour
 {
-    int health;
+    float health;
     bool isAlive;
 
     public bool IsAlive 
@@ -17,7 +17,7 @@ public class BossHealth : MonoBehaviour
         isAlive = true;
     }
 
-    public void TakeDamage(int damage)
+    public void TakeDamage(float damage)
     {
         health -= damage;
         if(health < 0)

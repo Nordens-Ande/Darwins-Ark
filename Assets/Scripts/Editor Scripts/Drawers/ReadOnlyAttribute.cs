@@ -1,5 +1,7 @@
 #if UNITY_EDITOR
 using UnityEditor;
+#endif
+
 using UnityEngine;
 
 //This class (attribute) allows developers to convert either a SerializeField or public field into a readonly field inside of the Unity Editors inspector.
@@ -32,6 +34,7 @@ public class ReadOnlyAttribute : PropertyAttribute
 {
 }
 
+#if UNITY_EDITOR
 [CustomPropertyDrawer(typeof(ReadOnlyAttribute))]
 public class ReadOnlyDrawer : PropertyDrawer
 {

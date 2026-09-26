@@ -1,21 +1,22 @@
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
+using Assets.Scripts.Environment;
 
 public class BossMovement : MonoBehaviour
 {
-    float movementSpeed;
-    [SerializeField] Tile targetTile;
+    [SerializeField] float movementSpeed;
+    [SerializeField, ReadOnly] Tile targetTile;
     Tile currentTile;
     Tile nextTile;
     Vector3 moveDirection; //used to check what direction we moved last frame, when selecting new target tile we dont want to go in the negative of this direction
 
     void Start()
     {
-        movementSpeed = 3;
+        movementSpeed = 2;
         targetTile = NewTargetTile();
 
-        Vector3 direction = targetTile.transform.position - transform.position;
+        Vector3 direction = targetTile.position - transform.position;
         direction.y = 0;
         direction.Normalize();
 
@@ -23,31 +24,103 @@ public class BossMovement : MonoBehaviour
         moveDirection = Vector3.zero;
     }
 
+    List<Chunk> FindAvailableChunks(Chunk currentChunk)
+    {
+        List<Chunk> availableChunks = new List<Chunk>();
+
+        Vector3 pos = currentChunk.position;
+        int chunkSize = TileManager.Instance.ChunkSize;
+
+        Vector2Int[] directions = 
+        {
+            Vector2Int.right,
+            Vector2Int.left,
+            Vector2Int.up,
+            Vector2Int.down,
+        };
+
+        foreach(Vector2Int direction in directions)
+        {
+            for(int i = 0; i < 3; i++)
+            {
+                float x = pos.x + direction.x * i * chunkSize;
+                float z = pos.z + direction.y * i * chunkSize;
+
+                Chunk chunkToCheck = TileManager.Instance.GetChunk(x, z);
+                if(chunkToCheck == null)
+                {
+                    break;
+                }
+                availableChunks.Add(chunkToCheck);
+            }
+        }
+
+        return availableChunks;
+    }
+
     Tile NewTargetTile()
     {
+        if (TileManager.Instance.chunks.Count == 0) return null;
+
         Debug.Log("choosing new target tile");
         int currentX = Mathf.RoundToInt(transform.position.x);
         int currentZ = Mathf.RoundToInt(transform.position.z);
 
-        List<Tile> possibleTiles = new List<Tile>();
-
-        foreach (Tile tile in TileManager.Instance.tiles)
+        //find what chunk the boss is in now
+        Chunk currentChunk = TileManager.Instance.GetChunk(transform.position.x, transform.position.z);
+        if(currentChunk == null)
         {
-            int x = Mathf.RoundToInt(tile.transform.localPosition.x);
-            int z = Mathf.RoundToInt(tile.transform.localPosition.z);
+            Debug.Log("BossMovement: NewTargetTile(): currentChunk not set");
+            return null;
+        }
 
-            Vector3 direction = tile.transform.position - transform.position;
-            direction.Normalize();
-            if (direction == -moveDirection) continue; //dont move backwards
+        List<Chunk> availableChunks = FindAvailableChunks(currentChunk);
+        availableChunks.Add(currentChunk);
 
-            if (z == currentZ && x != currentX)
+        if(availableChunks.Count == 0)
+        {
+            Debug.Log("BossMovement: NewTargetTile(): no chunks available");
+            return null;
+        }
+
+        List<Tile> possibleTiles = new List<Tile>();
+        foreach (Chunk chunk in availableChunks)
+        {
+            foreach (Tile tile in chunk.Tiles)
             {
-                possibleTiles.Add(tile);
+                int x = Mathf.RoundToInt(tile.position.x);
+                int z = Mathf.RoundToInt(tile.position.z);
+
+                Vector3 direction = tile.position - transform.position;
+                direction.Normalize();
+                if (direction == -moveDirection) continue; //dont move backwards
+
+                if (z == currentZ && x != currentX)
+                {
+                    possibleTiles.Add(tile);
+                }
+
+                if (x == currentX && z != currentZ)
+                {
+                    possibleTiles.Add(tile);
+                }
             }
-
-            if (x == currentX && z != currentZ)
+        }
+       
+        //safeguard if only backtracking tiles are available
+        if (possibleTiles.Count <= 0)
+        {
+            foreach(Chunk chunk in availableChunks)
             {
-                possibleTiles.Add(tile);
+                foreach (Tile tile in chunk.Tiles)
+                {
+                    Vector3 direction = tile.position - transform.position;
+                    direction.Normalize();
+                    if (direction == moveDirection)
+                    {
+                        possibleTiles.Add(tile);
+                    }
+                }
             }
         }
 
@@ -60,12 +133,12 @@ public class BossMovement : MonoBehaviour
         Tile tile = TileManager.Instance.GetTile(transform.position + direction);
         if(tile != null)
         {
-            Debug.Log("returned next tile");
+            //Debug.Log("returned next tile");
             return tile;
         }
         else
         {
-            Debug.Log("didnt find next tile");
+            //Debug.Log("didnt find next tile");
             return null;
         }
     }
@@ -78,17 +151,17 @@ public class BossMovement : MonoBehaviour
 
     (bool, bool) ReachedNextTile()
     {
-        float distance = Vector3.Distance(nextTile.transform.position, transform.position);
-        if (distance < 0.1f)
+        float distance = Vector3.Distance(nextTile.position, transform.position);
+        if (distance < 0.01f)
         {
             if(CheckIfReachedTargetTile(nextTile))
             {
-                Debug.Log("reached target tile");
+                //Debug.Log("reached target tile");
                 return (true, true);
             }
             else
             {
-                Debug.Log("reached tile");
+                //Debug.Log("reached tile");
                 return (true, false);
             }
         }
@@ -108,19 +181,20 @@ public class BossMovement : MonoBehaviour
     {
         if(nextTile != null)
         {
-            moveDirection = targetTile.transform.position - transform.position;
+            moveDirection = targetTile.position - transform.position;
             moveDirection.Normalize();
 
             (bool reachedNextTile, bool reachedTargetTile) = ReachedNextTile();
             
             if(reachedNextTile)
             {
-                //deal damage to plants on tile
-                //if tile.HasPlant
-                //{
-                //    PlantManager.KillPlant(nextTile);
-                //} etc
-                transform.position = nextTile.transform.position;
+                
+                if(nextTile.HasPlant)
+                {
+                    nextTile.CurrentPlant.DamagePlant(101.0f);
+                }
+ 
+                transform.position = nextTile.position;
                 if (reachedTargetTile)
                 {
                     targetTile = NewTargetTile();
@@ -129,7 +203,7 @@ public class BossMovement : MonoBehaviour
                 nextTile = GetNextTile(moveDirection);
             }
             
-            transform.position = Vector3.MoveTowards(transform.position, nextTile.transform.position, movementSpeed * Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, nextTile.position, movementSpeed * Time.deltaTime);
             transform.position = new Vector3(transform.position.x, 0.0f, transform.position.z);
             Rotate(moveDirection);
         }
