@@ -21,4 +21,8 @@ public class UIButtonToggle : MonoBehaviour
     {
         uiStateManager.ExitTerraformMode();
     }
+    public void ToggleBoss()
+    {
+
+    }
 }

@@ -12,6 +12,8 @@ public class GameUIDebug : MonoBehaviour
     {
         Debug.Log("Entered terraform UI!");
     }
+   
+
 
     // Buttons
     public void TerraformButton()
