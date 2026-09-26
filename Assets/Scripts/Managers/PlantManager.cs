@@ -18,7 +18,7 @@ public class PlantManager : MonoBehaviour
     [SerializeField] bool spawnPlant = false; //this is used as a button to spawn a plant
     [Space]
     [SerializeField] bool spawnPlantAllTiles = false; //this is used as a button to spawn plants on all tiles
-    [SerializeField] float spawnPlantAllTilesChance = 20; //this is used as a button to spawn plants on all tiles
+    [SerializeField] float spawnPlantAllTilesChance = 20; //chance of a plant spawning on a tile when spawning on all tiles
 
     [Header("List of all Plants")]
     [SerializeField] private List<Plant> plants = new List<Plant>();
@@ -77,20 +77,31 @@ public class PlantManager : MonoBehaviour
         //try to spawn plants on all tiles
         if (spawnPlantAllTiles)
         {
-            Tile[] allTiles = FindObjectsByType<Tile>();
-
-            foreach (Tile tile in allTiles)
+            if (TileManager.Instance != null && TileManager.Instance.chunks != null)
             {
-                if (tile.HasPlant) { continue; } //if the tile already has a plant skip it
-                float randomValue = Random.Range(0f, 100f);
 
-                if (randomValue <= spawnPlantAllTilesChance)
+                foreach (Chunk chunk in TileManager.Instance.chunks) //we loop through all chunks
                 {
-                    SpawnPlantOnThisTile(plantPrefabToSpawn, tile);
+                    foreach (Tile tile in chunk.Tiles) //loop through all tiles in the chunk
+                    {
+                        if(tile == null || tile.isWater || tile.HasPlant) continue;
+
+                        float randomValue = Random.Range(0f, 100f);
+                        if (randomValue <= spawnPlantAllTilesChance)
+                        {
+                            SpawnPlantOnThisTile(plantPrefabToSpawn, tile);
+                        }
+
+                    }
+
                 }
+
+
             }
-
-
+            else
+            {
+                Debug.Log("didnt find tilemanager or chunks when trying to spawn plants");
+            }
             spawnPlantAllTiles = false;
         }
 

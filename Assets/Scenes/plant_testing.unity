@@ -148,7 +148,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cc539b4fedab2774287f702e3f7c58f2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileManager
-  tiles: []
+  chunkObjects: []
+  chunkSize: 8
+  chunkGridSize: {x: 2, y: 2}
 --- !u!4 &449703019
 Transform:
   m_ObjectHideFlags: 0
