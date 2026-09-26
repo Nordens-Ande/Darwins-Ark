@@ -1,20 +1,27 @@
+using Assets.Scripts.Environment;
 using Unity.IO.LowLevel.Unsafe;
 using UnityEditor.Rendering;
 using UnityEngine;
 
 public class AnimalAI : MonoBehaviour
 {
+    [Header("Utility points")]
+    [Space]
     //Utility points
     [SerializeField] private float hunger = 0; //0-100
     [SerializeField] private float bossThreat = 0; //0-100
     [SerializeField] private float Happiness = 75; //0-100
 
+    [Header("Animal Stats")]
+    [Space]
     //Animal stats
     [SerializeField] private float walkSpeed = 0.1f;
     [SerializeField] private float runSpeed = 2;
     [SerializeField] private float damage = 10;
     [SerializeField] private float health = 100; //0-100
 
+    [Header("Timers")]
+    [Space]
     //InternalTimer
     [SerializeField] private float maxIdleTime = 5f;
     [SerializeField] private float currentIdleTime = 0;
@@ -31,13 +38,26 @@ public class AnimalAI : MonoBehaviour
     private int minIslandSize = 0;
     private int maxIslandSize = 20;
 
+    [Header("Boss")]
+    [Space]
     //bossFight
-    private float attackDistance = 3;
+    [SerializeField] private float attackDistance = 3;
 
+    
+    [Header("Happiness indicator")]
+    [Space]
     //DisplayHappiness
-    //[SerializeField] private GameObject happinessUI;
+    [SerializeField] private Color colorHappy;
+    [SerializeField] private Color colorIndiferent;
+    [SerializeField] private Color colorUnhappy;
+    private Transform happinessMeter;
+    private Renderer currentColor;
+    [Range(0f,1f)]
+    [SerializeField] private float colorTransparancy;
 
     private bool isIdle = false;
+
+    Plant choosenPlant = null;
 
     //Properties
     public float BossThreat
@@ -49,11 +69,16 @@ public class AnimalAI : MonoBehaviour
 
     void Start()
     {
+        happinessMeter = gameObject.transform.GetChild(0);
+        currentColor = happinessMeter.GetComponent<Renderer>();
+        DisplayHappiness();
+        colorHappy.a = colorTransparancy;
+        colorIndiferent.a = colorTransparancy;
+        colorUnhappy.a = colorTransparancy;
     }
 
     void Update()
     {
-        DisplayHappiness();
         CheckBestAction();
         ClockCycleDeteriation();
 
@@ -66,9 +91,12 @@ public class AnimalAI : MonoBehaviour
         clockCycleTimeCurrent += Time.deltaTime;
         if (clockCycleTimeCurrent > clockCycleTime) 
         {
-            hunger++;
+            //hunger++;
+            hunger ++;
             Happiness = Happiness - hunger;
+            DisplayHappiness();
             clockCycleTimeCurrent = 0;
+            DisplayHappiness();
             Debug.Log(Happiness);
         }
     }
@@ -93,8 +121,17 @@ public class AnimalAI : MonoBehaviour
         }
     }
 
+    //Will show animals happines dynamicly and change it during runtime. Will be called for optimazation in start and clockcycleDeteriation 
     void DisplayHappiness() 
-    { 
+    {
+        if(Happiness > 50) 
+        {
+            currentColor.material.color = Color.Lerp(colorIndiferent, colorHappy, Happiness/100);
+        }
+        else 
+        {
+            currentColor.material.color = Color.Lerp(colorIndiferent, colorUnhappy, Happiness / 100);
+        }
         
     }
     
@@ -136,29 +173,58 @@ public class AnimalAI : MonoBehaviour
     void SearchForFood() 
     {
         WalkAround();
-        Collider[] collliders = Physics.OverlapSphere(transform.position, 5);
-        foreach(Collider hit in collliders) 
-        { 
-            //gameobj = get component food
-            //if gameobj!=null then setfoodposition
+
+        if (choosenPlant = null)
+        {
+            Collider[] collliders = Physics.OverlapSphere(transform.position, 5);
+            foreach (Collider hit in collliders)
+            {
+                Plant plant = hit.gameObject.GetComponent<Plant>();
+                if (plant != null && plant.CanBeEaten)
+                {
+                    walkPoint = hit.transform.position;
+                    return;
+                }
+            }
+        }
+        else
+        {
+            float distance = Vector3.Distance(transform.position, walkPoint);
+            if(distance < 3) 
+            {
+                EatFood(choosenPlant);
+            }
         }
 
-        //Make raycast check here to see if plant is in reach
+    //Make raycast check here to see if plant is in reach
     }
 
     //eatplant 
-    void EatFood(GameObject plant) 
+    void EatFood(Plant plant) 
     {
         hunger = 0;
-        Destroy(plant);
+        Destroy(plant.gameObject);
     }
 
 
     //Basiclly set a random walkpoint
-    Vector3 FindWalkPoint() 
-    { 
-        Vector3 point = new Vector3 (Random.Range(minIslandSize, maxIslandSize), transform.localScale.y / 2, Random.Range(minIslandSize, maxIslandSize));
-        return point;
+    //Vector3 FindWalkPoint() 
+    //{ 
+    //    Vector3 point = new Vector3 (Random.Range(minIslandSize, maxIslandSize), transform.localScale.y / 2, Random.Range(minIslandSize, maxIslandSize));
+    //    return point;
+    //}
+
+    //Updated movement to chunk logic / will need modification if we want something other then square chunks so animals dont hoover between chunks 
+    Vector3 FindWalkPoint()
+    {
+        if(TileManager.Instance.chunks.Count > 0) 
+        {
+            Chunk choosenChunk = TileManager.Instance.chunks[Random.Range(0, TileManager.Instance.chunks.Count)];
+            Tile choosenTile = choosenChunk.Tiles[Random.Range(0, TileManager.Instance.ChunkSize), Random.Range(0,TileManager.Instance.ChunkSize)];
+            Vector3 point = new Vector3(choosenTile.position.x, choosenTile.position.y + transform.localScale.y / 2, choosenTile.position.z);
+            return point;
+        }
+        return new Vector3(0,0,0);
     }
 
     //Will walk to corner and die if unhappy
@@ -168,6 +234,7 @@ public class AnimalAI : MonoBehaviour
         AnimalWalkMoveTowards(leaveVec);
         if(Vector3.Distance(transform.position, leaveVec) < 3) 
         {
+            Debug.Log("Im out of here");
             Destroy(gameObject);
         }
     }
@@ -197,10 +264,6 @@ public class AnimalAI : MonoBehaviour
                     }
                 }
             }
-            //if (Physics.Raycast(transform.position, Vector3.forward, out RaycastHit hit, attackDistance))
-            //{
-            //    //DMG enemy
-            //}
         }
     }
 
