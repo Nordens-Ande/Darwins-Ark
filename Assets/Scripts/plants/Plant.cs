@@ -209,6 +209,7 @@ public class Plant : MonoBehaviour
 
 
 
+
     ///////////////////// <summary>
     ///////////////////// This is where getters are loctaed
     public float GrowthSpeed 
@@ -216,6 +217,10 @@ public class Plant : MonoBehaviour
         get 
         { 
             return growthSpeed; 
+        }
+        set 
+        { 
+            growthSpeed = value;
         }
     }
 
