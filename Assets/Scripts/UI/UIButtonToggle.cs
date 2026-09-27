@@ -7,12 +7,14 @@ public class UIButtonToggle : MonoBehaviour
 
     [SerializeField] private UIStateManager uiStateManager;
 
+
+
     public void ToggleInventory()
     {
         inventoryPanel.SetActive(!inventoryPanel.activeSelf);
     }
 
-    public void ToggleTerraform()
+    public void EnterTerraform()
     {
         uiStateManager.EnterTerraformMode();
     }
@@ -23,6 +25,6 @@ public class UIButtonToggle : MonoBehaviour
     }
     public void ToggleBoss()
     {
-
+        BossManager.Instance.SpawnBoss();
     }
 }
