@@ -47,8 +47,8 @@ MonoBehaviour:
   SecondsForPlantToGrow: 10
   plantPrefabToSpawn:
   - {fileID: 448273538846971165, guid: 190b530bc6dc849479de5ac385334b53, type: 3}
-  - {fileID: 4503989318615386568, guid: a7db1c59c01addb40b02cf2d8d146946, type: 3}
-  - {fileID: 7743188496201335518, guid: 7a0e776f0154cd04ebe721ddc225693d, type: 3}
+  - {fileID: 448273538846971165, guid: 190b530bc6dc849479de5ac385334b53, type: 3}
+  - {fileID: 448273538846971165, guid: 190b530bc6dc849479de5ac385334b53, type: 3}
   spawnPlantAllTiles: 0
   spawnPlantAllTilesChance: 20
   useRandomGrowthSpeed: 1
