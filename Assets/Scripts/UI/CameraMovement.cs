@@ -1,3 +1,4 @@
+using System.Threading;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,40 +8,42 @@ public class CameraMovement : MonoBehaviour
 
     private void Update()
     {
-        Vector3 input = Vector2.zero;
+        if (Keyboard.current == null)
+            return;
 
-        if (Keyboard.current != null)
-        {
-            if (Keyboard.current.wKey.isPressed)
-                input.z += 1;
+        float horizontal = 0f;
+        float vertical = 0f;
+        
+        if (Keyboard.current.wKey.isPressed)
+            vertical += 1;
 
-            if (Keyboard.current.sKey.isPressed)
-                input.z -= 1;
+        if (Keyboard.current.sKey.isPressed)
+            vertical -= 1;
 
-            if (Keyboard.current.dKey.isPressed)
-                input.x += 1;
+        if (Keyboard.current.dKey.isPressed)
+            horizontal += 1;
 
-            if (Keyboard.current.aKey.isPressed)
-                input.x -= 1;
-        }
-
-        Debug.Log("Input: " + input);
+        if (Keyboard.current.aKey.isPressed)
+            horizontal -= 1;
 
         Vector3 forward = transform.forward;
         Vector3 right = transform.right;
 
-        forward.y = 0f;
-        right.y = 0f;
-
-        forward.Normalize();
-        right.Normalize();
+        // Project camera directions onto the ground, so it doesnt move up and down
+        forward = Vector3.ProjectOnPlane(forward, Vector3.up).normalized;
+        right = Vector3.ProjectOnPlane(right, Vector3.up).normalized;
 
         Vector3 movement =
-            right * input.x +
-            forward * input.y;
+            forward * vertical +
+            right * horizontal;
 
-        Debug.Log("Movement: " + movement);
+        Vector3 position = transform.position;
 
-        transform.position += movement.normalized * moveSpeed * Time.deltaTime;
+        position += movement.normalized * moveSpeed * Time.deltaTime;
+
+        // Explicit keep the same height
+        position.y = transform.position.y;
+
+        transform.position = position;
     }
 }
