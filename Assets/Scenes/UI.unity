@@ -1394,6 +1394,7 @@ MonoBehaviour:
   chunkObjects: []
   chunkSize: 8
   chunkGridSize: {x: 1, y: 1}
+  gridLineMaterial: {fileID: 2100000, guid: b80584e216c4dde419af01432b02b4d0, type: 2}
 --- !u!4 &767341232
 Transform:
   m_ObjectHideFlags: 0
@@ -1421,7 +1422,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90cfbf2cc01e9a94c8508cf28252a5c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TerraformManager
-  mainCamera: {fileID: 577252115}
+  lineHeight: 0.02
+  lineWidth: 0.025
 --- !u!1 &868236380
 GameObject:
   m_ObjectHideFlags: 0
@@ -2831,9 +2833,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1939103903}
-        m_TargetAssemblyTypeName: UIButtonToggle, Assembly-CSharp
-        m_MethodName: ExitTerraform
+      - m_Target: {fileID: 1939103904}
+        m_TargetAssemblyTypeName: UIStateManager, Assembly-CSharp
+        m_MethodName: ExitTerraformMode
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -4408,7 +4410,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8128767507357021742, guid: 37b56ac2336b3384c949da79114debf1, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 8128767507357021742, guid: 37b56ac2336b3384c949da79114debf1, type: 3}
       propertyPath: m_LocalPosition.z

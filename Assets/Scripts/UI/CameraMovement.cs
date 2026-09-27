@@ -7,15 +7,15 @@ public class CameraMovement : MonoBehaviour
 
     private void Update()
     {
-        Vector2 input = Vector2.zero;
+        Vector3 input = Vector2.zero;
 
         if (Keyboard.current != null)
         {
             if (Keyboard.current.wKey.isPressed)
-                input.y += 1;
+                input.z += 1;
 
             if (Keyboard.current.sKey.isPressed)
-                input.y -= 1;
+                input.z -= 1;
 
             if (Keyboard.current.dKey.isPressed)
                 input.x += 1;

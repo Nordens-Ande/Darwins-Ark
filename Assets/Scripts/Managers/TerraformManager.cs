@@ -1,72 +1,61 @@
-using Assets.Scripts.Environment;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
-public enum TerraformTool
+public class TileGridOverlay : MonoBehaviour
 {
-    None,
-    River//,
-         //Mountain
-}
+    [SerializeField] private float lineHeight = 0.02f;
+    [SerializeField] private float lineWidth = 0.025f;
 
-public class TerraformManager : MonoBehaviour
-{
-    [SerializeField] private Camera mainCamera;
+    private Material lineMaterial;
 
-    private TerraformTool currentTool = TerraformTool.None;
-
-    private void Update()
+    public void Setup(int chunkSize, Material material)
     {
-        if (currentTool == TerraformTool.None)
-            return;
+        lineMaterial = material;
+        CreateGrid(chunkSize);
+    }
 
-        if (Mouse.current == null)
-            return;
-
-        if (Mouse.current.leftButton.wasPressedThisFrame)
+    private void CreateGrid(int size)
+    {
+        // Vertical lines
+        for (int x = 0; x <= size; x++)
         {
-            SelectTile();
+            CreateLine(
+                new Vector3(x, lineHeight, 0),
+                new Vector3(x, lineHeight, size)
+            );
+        }
+
+        // Horizontal lines
+        for (int z = 0; z <= size; z++)
+        {
+            CreateLine(
+                new Vector3(0, lineHeight, z),
+                new Vector3(size, lineHeight, z)
+            );
         }
     }
 
-    public void SelectRiverTool()
+    private void CreateLine(Vector3 start, Vector3 end)
     {
-        currentTool = TerraformTool.River;
-        Debug.Log("River tool selected");
-    }
+        GameObject lineObject = new GameObject("TileLine");
+        lineObject.transform.SetParent(transform, false);
 
-    //public void SelectMountainTool()
-    //{
-    //    currentTool = TerraformTool.Mountain;
-    //    Debug.Log("Mountain tool selected");
-    //}
+        LineRenderer line = lineObject.AddComponent<LineRenderer>();
 
-    public void ClearTool()
-    {
-        currentTool = TerraformTool.None;
-    }
+        line.positionCount = 2;
+        line.useWorldSpace = false;
 
-    private void SelectTile()
-    {
-        Vector2 mousePosition = Mouse.current.position.ReadValue();
+        line.SetPosition(0, start);
+        line.SetPosition(1, end);
 
-        Ray ray = mainCamera.ScreenPointToRay(mousePosition);
+        line.startWidth = lineWidth;
+        line.endWidth = lineWidth;
 
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        if (lineMaterial != null)
         {
-            Tile tile = TileManager.Instance.GetTile(hit.point);
-            Chunk chunk = TileManager.Instance.GetChunk(hit.point);
-
-            if (tile == null || chunk == null)
-                return;
-
-            if (currentTool == TerraformTool.River)
-            {
-                tile.position.y = -0.5f;
-
-            }
-
-            
+            line.material = lineMaterial;
         }
+
+        line.startColor = Color.white;
+        line.endColor = Color.white;
     }
 }
