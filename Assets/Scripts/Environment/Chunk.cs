@@ -41,7 +41,12 @@ namespace Assets.Scripts.Environment
                 }
             }
         }
-
+        // Using for ChunkGrid access -----------------
+        public int size_
+        {
+            get { return size; }
+        }
+        // ----------------------------------------------
 
         public void GenerateMeshData()
         {
@@ -196,5 +201,7 @@ namespace Assets.Scripts.Environment
         //{
 
         //}
+
+        
     }
 }

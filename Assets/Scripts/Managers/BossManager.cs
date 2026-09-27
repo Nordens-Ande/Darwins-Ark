@@ -21,7 +21,7 @@ public class BossManager : MonoBehaviour
 
     void Start()
     {
-        SpawnBoss();
+        //SpawnBoss();
     }
 
     Vector2 GetSpawnLocation() //only works for square maps
@@ -49,17 +49,18 @@ public class BossManager : MonoBehaviour
 
     public void SpawnBoss()
     {
+        if (currentBoss != null) return;
         Vector2 spawnLocation = GetSpawnLocation();
         Vector3 spawnLocation3D = new Vector3(spawnLocation.x, 0, spawnLocation.y);
         currentBoss = Instantiate(bossPrefab, spawnLocation3D, Quaternion.identity);
-        AnimalManager.Instance.BossSpawned();
+        if (AnimalManager.Instance != null)
+            AnimalManager.Instance.BossSpawned();
     }
     
     void BossDied()
     {
-        //trigger event
-        //tell animals to chill
-        AnimalManager.Instance.BossDied();
+        if(AnimalManager.Instance != null)
+            AnimalManager.Instance.BossDied();
         currentBoss.SetActive(false);
         Destroy(currentBoss);
         currentBoss = null;
@@ -67,9 +68,9 @@ public class BossManager : MonoBehaviour
 
     void Update()
     {
-        if(currentBoss != null)
+        if (currentBoss != null)
         {
-            if(currentBoss.GetComponent<BossHealth>())
+            if (currentBoss.GetComponent<BossHealth>())
             {
                 if (currentBoss.GetComponent<BossHealth>().IsAlive == false)
                 {

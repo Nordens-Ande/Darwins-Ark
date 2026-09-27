@@ -2,11 +2,22 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using Assets.Scripts.Environment;
+using static UnityEditor.PlayerSettings;
+using UnityEditor.Experimental.GraphView;
 
 public class BossMovement : MonoBehaviour
 {
+    Vector2Int[] directions =
+    {
+        Vector2Int.right,
+        Vector2Int.left,
+        Vector2Int.up,
+        Vector2Int.down,
+    };
+
     [SerializeField] float movementSpeed;
     [SerializeField, ReadOnly] Tile targetTile;
+    int maxDistanceToNewTile;
     Tile currentTile;
     Tile nextTile;
     Vector3 moveDirection; //used to check what direction we moved last frame, when selecting new target tile we dont want to go in the negative of this direction
@@ -14,6 +25,7 @@ public class BossMovement : MonoBehaviour
     void Start()
     {
         movementSpeed = 2;
+        maxDistanceToNewTile = 10;
         targetTile = NewTargetTile();
 
         Vector3 direction = targetTile.position - transform.position;
@@ -30,14 +42,6 @@ public class BossMovement : MonoBehaviour
 
         Vector3 pos = currentChunk.position;
         int chunkSize = TileManager.Instance.ChunkSize;
-
-        Vector2Int[] directions = 
-        {
-            Vector2Int.right,
-            Vector2Int.left,
-            Vector2Int.up,
-            Vector2Int.down,
-        };
 
         foreach(Vector2Int direction in directions)
         {
@@ -63,8 +67,6 @@ public class BossMovement : MonoBehaviour
         if (TileManager.Instance.chunks.Count == 0) return null;
 
         Debug.Log("choosing new target tile");
-        int currentX = Mathf.RoundToInt(transform.position.x);
-        int currentZ = Mathf.RoundToInt(transform.position.z);
 
         //find what chunk the boss is in now
         Chunk currentChunk = TileManager.Instance.GetChunk(transform.position.x, transform.position.z);
@@ -84,6 +86,8 @@ public class BossMovement : MonoBehaviour
         }
 
         List<Tile> possibleTiles = new List<Tile>();
+        int currentX = Mathf.RoundToInt(transform.position.x);
+        int currentZ = Mathf.RoundToInt(transform.position.z);
         foreach (Chunk chunk in availableChunks)
         {
             foreach (Tile tile in chunk.Tiles)
@@ -91,9 +95,9 @@ public class BossMovement : MonoBehaviour
                 int x = Mathf.RoundToInt(tile.position.x);
                 int z = Mathf.RoundToInt(tile.position.z);
 
-                Vector3 direction = tile.position - transform.position;
-                direction.Normalize();
-                if (direction == -moveDirection) continue; //dont move backwards
+                Vector3 tileDirection = tile.position - transform.position;
+                tileDirection.Normalize();
+                if (tileDirection == -moveDirection) continue; //dont move backwards
 
                 if (z == currentZ && x != currentX)
                 {
@@ -106,11 +110,11 @@ public class BossMovement : MonoBehaviour
                 }
             }
         }
-       
+
         //safeguard if only backtracking tiles are available
         if (possibleTiles.Count <= 0)
         {
-            foreach(Chunk chunk in availableChunks)
+            foreach (Chunk chunk in availableChunks)
             {
                 foreach (Tile tile in chunk.Tiles)
                 {
@@ -154,7 +158,7 @@ public class BossMovement : MonoBehaviour
         float distance = Vector3.Distance(nextTile.position, transform.position);
         if (distance < 0.01f)
         {
-            if(CheckIfReachedTargetTile(nextTile))
+            if (CheckIfReachedTargetTile(nextTile))
             {
                 //Debug.Log("reached target tile");
                 return (true, true);

@@ -12,6 +12,8 @@ public class GameUIDebug : MonoBehaviour
     {
         Debug.Log("Entered terraform UI!");
     }
+   
+
 
     // Buttons
     public void TerraformButton()
@@ -42,5 +44,10 @@ public class GameUIDebug : MonoBehaviour
     public void DeityButton_3()
     {
         Debug.Log("DeityButton_3 pressed!");
+    }
+
+    public void BossButton()
+    {
+        Debug.Log("Boss button pressed!");
     }
 }
