@@ -23,7 +23,7 @@ namespace Assets.Scripts.Environment
         public Tile[,] Tiles        //i added this bossMovement needs it :) //milton
         { get { return tiles; } }
 
-        public bool useNoise = true;
+        public bool useNoise = false;
 
         public Chunk(Vector2 position, int size)
         {

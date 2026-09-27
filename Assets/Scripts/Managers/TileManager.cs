@@ -40,9 +40,9 @@ namespace Assets.Scripts.Environment
             //chunks.Add(new Chunk(new Vector2(-8, -8), 8));
             //chunks.Add(new Chunk(new Vector2(0, -8), 8));
 
-            for (int x = -chunkGridSize.x / 2; x < chunkGridSize.x / 2; x++)
+            for (int x = -chunkGridSize.x / 2; x < Mathf.Ceil(chunkGridSize.x / 2f); x++)
             {
-                for (int z = -chunkGridSize.y / 2; z < chunkGridSize.y / 2; z++)
+                for (int z = -chunkGridSize.y / 2; z < Mathf.Ceil(chunkGridSize.y / 2f); z++)
                 {
                     chunks.Add(new Chunk(new Vector2(x * chunkSize, z * chunkSize), chunkSize));
                 }
