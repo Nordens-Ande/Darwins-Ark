@@ -15,10 +15,11 @@ public class AnimalAI : MonoBehaviour
     [Header("Animal Stats")]
     [Space]
     //Animal stats
-    [SerializeField] private float walkSpeed = 0.1f;
-    [SerializeField] private float runSpeed = 2;
+    [SerializeField] private float walkSpeed = 1f;
+    [SerializeField] private float runSpeed = 3;
     [SerializeField] private float damage = 10;
     [SerializeField] private float health = 100; //0-100
+    [SerializeField] private float hungerDeteration = 1;
 
     [Header("Timers")]
     [Space]
@@ -59,6 +60,11 @@ public class AnimalAI : MonoBehaviour
 
     Plant choosenPlant = null;
 
+    private bool hasMutated = false;
+
+    [Header("DebugMode")]
+    [SerializeField] private bool TestMutation = true;
+
     //Properties
     public float BossThreat
     {
@@ -66,10 +72,58 @@ public class AnimalAI : MonoBehaviour
         set { bossThreat = value; }
     }
 
+    public bool HasMutated 
+    { 
+        get {return hasMutated; }
+        set { hasMutated = value; }
+    }
+
+    //Needed for the mutations 
+    public float WalkSpeed 
+    {
+        get { return walkSpeed; }
+        set { walkSpeed = value; }
+    }
+
+    public float RunSpeed 
+    {
+        get {return runSpeed; }
+        set { runSpeed = value; }
+    }
+
+    public float DMG
+    {
+        get { return damage; }
+        set { damage = value; }
+    }
+
+    public float Health
+    {
+        get { return health; }
+        set { health = value; }
+    }
+    public float HungerDeteration
+    {
+        get {return hungerDeteration; }
+        set { hungerDeteration = value; }
+    }
+
+
 
     void Start()
     {
         happinessMeter = gameObject.transform.GetChild(0);
+
+        //Guard if gameobject dosent have sphere attacted then it will create one
+        if(happinessMeter == null) 
+        { 
+            GameObject happinessSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            happinessSphere.transform.position = new Vector3 (transform.position.x, transform.position.y + 1, transform.position.z);
+            happinessSphere.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+            happinessSphere.transform.SetParent(transform);
+            happinessMeter = happinessSphere.transform;
+        }
+
         currentColor = happinessMeter.GetComponent<Renderer>();
         DisplayHappiness();
         colorHappy.a = colorTransparancy;
@@ -92,12 +146,18 @@ public class AnimalAI : MonoBehaviour
         if (clockCycleTimeCurrent > clockCycleTime) 
         {
             //hunger++;
-            hunger ++;
+            hunger += hungerDeteration;
             Happiness = Happiness - hunger;
             DisplayHappiness();
             clockCycleTimeCurrent = 0;
             DisplayHappiness();
             Debug.Log(Happiness);
+
+            //Testing if the mutations work
+            if (TestMutation)
+            {
+                MutationManager.instance.MutateAnimal_RandomMutation(this);
+            }
         }
     }
 
@@ -126,11 +186,11 @@ public class AnimalAI : MonoBehaviour
     {
         if(Happiness > 50) 
         {
-            currentColor.material.color = Color.Lerp(colorIndiferent, colorHappy, Happiness/100);
+            currentColor.material.color = Color.Lerp(colorIndiferent, colorHappy, (Happiness-50) / 50);
         }
         else 
         {
-            currentColor.material.color = Color.Lerp(colorIndiferent, colorUnhappy, Happiness / 100);
+            currentColor.material.color = Color.Lerp(colorIndiferent, colorUnhappy, Happiness/100/0.5f);
         }
         
     }
