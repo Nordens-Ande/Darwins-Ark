@@ -1,5 +1,6 @@
-using UnityEngine;
 using Assets.Scripts.Environment;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class TerraformTileGridOverlay : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class TerraformTileGridOverlay : MonoBehaviour
     private Material lineMaterial;
     private Chunk chunk;
 
+    private Dictionary<Tile, LineRenderer> tileLines =
+        new Dictionary<Tile, LineRenderer>();
 
     public void Setup(Chunk chunkData, Material material)
     {
@@ -20,7 +23,8 @@ public class TerraformTileGridOverlay : MonoBehaviour
 
     public void RefreshGrid()
     {
-        // Remove old squares
+        tileLines.Clear();
+
         for (int i = transform.childCount - 1; i >= 0; i--)
         {
             Destroy(transform.GetChild(i).gameObject);
@@ -61,17 +65,13 @@ public class TerraformTileGridOverlay : MonoBehaviour
         LineRenderer line = lineObject.AddComponent<LineRenderer>();
 
         line.useWorldSpace = true;
-
-        // 4 corners
         line.positionCount = 4;
+        line.loop = true;
 
         line.SetPosition(0, topLeft);
         line.SetPosition(1, topRight);
         line.SetPosition(2, bottomRight);
         line.SetPosition(3, bottomLeft);
-
-        // Connect last point back to first
-        line.loop = true;
 
         line.startWidth = lineWidth;
         line.endWidth = lineWidth;
@@ -82,6 +82,38 @@ public class TerraformTileGridOverlay : MonoBehaviour
         line.startColor = Color.red;
         line.endColor = Color.red;
 
+        tileLines.Add(tile, line);
+    }
+
+    // For TileSlectionManager
+
+    public void SetTileSelected(Tile tile, bool selected)
+    {
+        if (!tileLines.TryGetValue(tile, out LineRenderer line))
+            return;
+
+        Color color = selected ? Color.yellow : Color.red;
+
+        line.startColor = color;
+        line.endColor = color;
+    }
+
+    public void ClearSelectionColors()
+    {
+        foreach (LineRenderer line in tileLines.Values)
+        {
+            line.startColor = Color.red;
+            line.endColor = Color.red;
+        }
+    }
+
+    public void SetTileColor(Tile tile, Color color)
+    {
+        if (!tileLines.TryGetValue(tile, out LineRenderer line))
+            return;
+
+        line.startColor = color;
+        line.endColor = color;
     }
 }
     

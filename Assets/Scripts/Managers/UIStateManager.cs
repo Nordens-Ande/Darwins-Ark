@@ -6,6 +6,7 @@ public class UIStateManager : MonoBehaviour
 {
     [SerializeField] private GameObject normalUI;
     [SerializeField] private GameObject terraformUI;
+    [SerializeField] private TileSelectionManager tileSelectionManager;
 
     private bool isTerraforming = false;
 
@@ -31,6 +32,9 @@ public class UIStateManager : MonoBehaviour
     public void ExitTerraformMode()
     {
         isTerraforming = false;
+
+        // TileSelectionManager-------------------
+        tileSelectionManager.ClearSelection();
 
         normalUI.SetActive(true);
         terraformUI.SetActive(false);
