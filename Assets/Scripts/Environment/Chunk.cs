@@ -34,7 +34,12 @@ namespace Assets.Scripts.Environment
             //vertices = new List<Vector3>();
             //triangles = new List<int>();
         }
-
+        // Using for ChunkGrid access -----------------
+        public int size_
+        {
+            get { return size; }
+        }
+        // ----------------------------------------------
 
         public void GenerateMeshData()
         {
@@ -177,5 +182,7 @@ namespace Assets.Scripts.Environment
         //{
 
         //}
+
+        
     }
 }

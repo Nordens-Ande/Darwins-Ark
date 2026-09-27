@@ -14,6 +14,10 @@ namespace Assets.Scripts.Environment
         [SerializeField] private int chunkSize = 8; 
         [SerializeField] private Vector2Int chunkGridSize = Vector2Int.one;
 
+        // -----------------------------------------------
+        [SerializeField] private Material gridLineMaterial;
+        // -----------------------------------------------
+
         public int ChunkSize
         { get { return chunkSize; } }
 
@@ -87,6 +91,28 @@ namespace Assets.Scripts.Environment
                 mesh.RecalculateBounds();
 
                 chunkObject.GetComponent<MeshFilter>().sharedMesh = mesh;
+
+                // Grid for chunk and tiles in TerraformUI -------------
+                //  Chunk Grid
+                GameObject chunkGridObject = new GameObject("ChunkGrid");
+                chunkGridObject.transform.SetParent(chunkObject.transform, false);
+
+                ChunkGridOverlay chunkGrid =
+                    chunkGridObject.AddComponent<ChunkGridOverlay>();
+
+                chunkGrid.Setup(chunkSize, gridLineMaterial);
+                chunkGridObject.SetActive(false);
+
+                //  Tile Grid
+                GameObject tileGridObject = new GameObject("TileGrid");
+                tileGridObject.transform.SetParent(chunkObject.transform, false);
+
+                TerraformTileGridOverlay tileGrid = 
+                    tileGridObject.AddComponent<TerraformTileGridOverlay>();
+
+                tileGrid.Setup(chunk, gridLineMaterial);
+                tileGridObject.SetActive(false);
+                //-------------------------------------------------------
             }
         }
 
@@ -158,6 +184,30 @@ namespace Assets.Scripts.Environment
         {
             return GetTile(pos.x, pos.z);
         }
+
+        // Booleans for when chunk/tile grids are visible
+        public void SetChunkGridVisible(bool visible)
+        {
+            foreach (GameObject chunkObject in chunkObjects)
+            {
+                Transform grid = chunkObject.transform.Find("ChunkGrid");
+
+                if (grid != null)
+                    grid.gameObject.SetActive(visible);
+            }
+        }
+
+        public void SetTileGridVisible(bool visible)
+        {
+            foreach (GameObject chunkObject in chunkObjects)
+            {
+                Transform grid = chunkObject.transform.Find("TileGrid");
+
+                if (grid != null)
+                    grid.gameObject.SetActive(visible);
+            }
+        }
     }
+
 }
 

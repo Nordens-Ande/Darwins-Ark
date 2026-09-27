@@ -1,5 +1,5 @@
 
-
+using Assets.Scripts.Environment;
 using UnityEngine;
 
 public class UIStateManager : MonoBehaviour
@@ -23,6 +23,9 @@ public class UIStateManager : MonoBehaviour
         terraformUI.SetActive(true);
 
         Debug.Log("Entered Terraform Mode");
+
+        TileManager.Instance.SetChunkGridVisible(true);
+        TileManager.Instance.SetTileGridVisible(true);
     }
 
     public void ExitTerraformMode()
@@ -31,6 +34,9 @@ public class UIStateManager : MonoBehaviour
 
         normalUI.SetActive(true);
         terraformUI.SetActive(false);
+
+        TileManager.Instance.SetChunkGridVisible(false);
+        TileManager.Instance.SetTileGridVisible(false);
 
         Debug.Log("Exited Terraform Mode");
     }
