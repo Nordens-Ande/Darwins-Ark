@@ -21,7 +21,7 @@ public class BossManager : MonoBehaviour
 
     void Start()
     {
-        SpawnBoss();
+        //SpawnBoss();
     }
 
     Vector2 GetSpawnLocation() //only works for square maps
