@@ -115,8 +115,7 @@ public class Plant : MonoBehaviour
         //Spawn the new model directly as a child of this object
         if (prefabToSpawn != null)
         {
-            //currentModelInstance = Instantiate(prefabToSpawn, transform.position, transform.rotation, transform);
-            currentModelInstance = Instantiate(prefabToSpawn, transform.position, prefabToSpawn.transform.rotation, transform);
+            currentModelInstance = Instantiate(prefabToSpawn, transform.position, transform.rotation, transform);
         }
     }
 
@@ -209,7 +208,6 @@ public class Plant : MonoBehaviour
 
 
 
-
     ///////////////////// <summary>
     ///////////////////// This is where getters are loctaed
     public float GrowthSpeed 
@@ -217,10 +215,6 @@ public class Plant : MonoBehaviour
         get 
         { 
             return growthSpeed; 
-        }
-        set 
-        { 
-            growthSpeed = value;
         }
     }
 
