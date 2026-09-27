@@ -14,6 +14,9 @@ namespace Assets.Scripts.Environment
         [SerializeField] private int chunkSize = 8; 
         [SerializeField] private Vector2Int chunkGridSize = Vector2Int.one;
 
+        //public Color sandColor = Color.softYellow;
+        //public Color grassColor = Color.lawnGreen;
+
         public int ChunkSize
         { get { return chunkSize; } }
 
@@ -26,29 +29,6 @@ namespace Assets.Scripts.Environment
                 TileManager.Instance = this;
         }
 
-        //void Start()
-        //{
-        //    //GameObject tile = new GameObject("testTile", typeof(Tile));
-
-        //    meshFilter = gameObject.AddComponent<MeshFilter>();
-        //    MeshRenderer meshRenderer = gameObject.AddComponent<MeshRenderer>();
-        //    meshRenderer.material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-
-        //    for (int x = 0; x < 20; x++)
-        //    {
-        //        for (int z = 0; z < 20; z++)
-        //        {
-        //            //GameObject tile = new GameObject($"Tile (x:{x}, z:{z})", typeof(Tile));
-        //            //tile.transform.parent = transform;
-        //            //tile.transform.localPosition = new Vector3(x, 0, z);
-
-        //            tiles.Add(new Tile(new Vector3(x, 0/*Random.Range(0f, 1f)*/, z)));
-        //        }
-        //    }
-
-        //    BuildMesh();
-        //}
-
         void Start()
         {
             chunks = new List<Chunk>();
@@ -59,9 +39,9 @@ namespace Assets.Scripts.Environment
             //chunks.Add(new Chunk(new Vector2(-8, -8), 8));
             //chunks.Add(new Chunk(new Vector2(0, -8), 8));
 
-            for (int x = 0; x < chunkGridSize.x; x++)
+            for (int x = -chunkGridSize.x / 2; x < chunkGridSize.x / 2; x++)
             {
-                for (int z = 0; z < chunkGridSize.y; z++)
+                for (int z = -chunkGridSize.y / 2; z < chunkGridSize.y / 2; z++)
                 {
                     chunks.Add(new Chunk(new Vector2(x * chunkSize, z * chunkSize), chunkSize));
                 }
@@ -76,12 +56,13 @@ namespace Assets.Scripts.Environment
                 chunkObject.transform.parent = transform;
                 chunkObjects.Add(chunkObject);
 
-                chunkObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+                chunkObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Shader Graphs/Lit Color"));
                 
                 Mesh mesh = new Mesh();
 
                 mesh.SetVertices(chunk.vertices);
                 mesh.SetTriangles(chunk.triangles, 0);
+                mesh.SetColors(chunk.colors);
 
                 mesh.RecalculateNormals();
                 mesh.RecalculateBounds();
@@ -118,6 +99,7 @@ namespace Assets.Scripts.Environment
 
                 mesh.SetVertices(chunks[i].vertices);
                 mesh.SetTriangles(chunks[i].triangles, 0);
+                mesh.SetColors(chunks[i].colors);
 
                 mesh.RecalculateNormals();
                 mesh.RecalculateBounds();
