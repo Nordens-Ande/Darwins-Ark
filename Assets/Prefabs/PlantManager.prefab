@@ -44,3 +44,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9ec3c0b88bfe8b4a98818505bf079c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlantManager
+  SecondsForPlantToGrow: 10
+  plantPrefabToSpawn:
+  - {fileID: 448273538846971165, guid: 190b530bc6dc849479de5ac385334b53, type: 3}
+  - {fileID: 4503989318615386568, guid: a7db1c59c01addb40b02cf2d8d146946, type: 3}
+  - {fileID: 7743188496201335518, guid: 7a0e776f0154cd04ebe721ddc225693d, type: 3}
+  spawnPlantAllTiles: 0
+  spawnPlantAllTilesChance: 20
+  useRandomGrowthSpeed: 1
+  useRandomPlants: 1
+  plants: []
