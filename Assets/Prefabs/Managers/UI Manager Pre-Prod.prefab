@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 1623426267153610148}
   - component: {fileID: 8448511128006339496}
   m_Layer: 0
-  m_Name: UI Manager
+  m_Name: UI Manager Pre-Prod
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
