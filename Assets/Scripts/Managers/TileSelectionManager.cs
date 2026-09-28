@@ -291,18 +291,18 @@ public class TileSelectionManager : MonoBehaviour
     }
 
     // Grid color
-    private void SetTileColor(Tile tile, Color color)
+    public void SetTileColor(Tile tile, Color color)
     {
         Chunk chunk =
-            TileManager.Instance.GetChunk(
-                tile.position.x,
-                tile.position.z
-            );
+       TileManager.Instance.GetChunk(
+           tile.position.x,
+           tile.position.z
+       );
 
-        if (chunk == null) 
+        if (chunk == null)
             return;
 
-        int chunkIndex = 
+        int chunkIndex =
             TileManager.Instance.chunks.IndexOf(chunk);
 
         if (chunkIndex < 0)

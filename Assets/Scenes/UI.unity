@@ -1727,7 +1727,7 @@ MonoBehaviour:
   chunkObjects: []
   chunkSize: 8
   chunkGridSize: {x: 1, y: 1}
-  gridLineMaterial: {fileID: 0}
+  gridLineMaterial: {fileID: 2100000, guid: bcc9cd91fc90fe04db0dcf1a03ca49de, type: 2}
 --- !u!1001 &779580123
 PrefabInstance:
   m_ObjectHideFlags: 0

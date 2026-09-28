@@ -59,10 +59,16 @@ public class TerraformTileGridOverlay : MonoBehaviour
         Vector3 bottomLeft =
             new Vector3(tilePos.x - 0.5f, y, tilePos.z - 0.5f);
 
-        GameObject lineObject = new GameObject("TileSquare");
-        lineObject.transform.SetParent(transform, false);
+        GameObject lineObject =
+            new GameObject("TileSquare");
 
-        LineRenderer line = lineObject.AddComponent<LineRenderer>();
+        lineObject.transform.SetParent(
+            transform,
+            false
+        );
+
+        LineRenderer line =
+            lineObject.AddComponent<LineRenderer>();
 
         line.useWorldSpace = true;
         line.positionCount = 4;
@@ -77,49 +83,21 @@ public class TerraformTileGridOverlay : MonoBehaviour
         line.endWidth = lineWidth;
 
         if (lineMaterial != null)
+        {
             line.material = lineMaterial;
-
-        line.startColor = Color.white;
-        line.endColor = Color.white;
+        }
 
         tileLines.Add(tile, line);
 
+        // Default grid color
         SetTileColor(tile, Color.red);
-    }
-
-    // For TileSlectionManager
-
-    public void SetTileSelected(Tile tile, Color color)
-    {
-        if (!tileLines.TryGetValue(tile, out LineRenderer line))
-        {
-            Debug.LogWarning("Could not find tile in tileLines!");
-            return;
-        }
-            
-
-        //Color color = selected ? Color.yellow : Color.red;
-
-        line.startColor = color;
-        line.endColor = color;
-
-        MaterialPropertyBlock propertyBlock =
-        new MaterialPropertyBlock();
-
-        line.GetPropertyBlock(propertyBlock);
-
-        propertyBlock.SetColor(
-            "_BaseColor",
-            color
-        );
     }
 
     public void ClearSelectionColors()
     {
-        foreach (LineRenderer line in tileLines.Values)
+        foreach (Tile tile in tileLines.Keys)
         {
-            line.startColor = Color.red;
-            line.endColor = Color.red;
+            SetTileColor(tile, Color.red);
         }
     }
 
@@ -128,8 +106,22 @@ public class TerraformTileGridOverlay : MonoBehaviour
         if (!tileLines.TryGetValue(tile, out LineRenderer line))
             return;
 
+        // LineRenderer vertex color
         line.startColor = color;
         line.endColor = color;
+
+        // Material color
+        Material material = line.material;
+
+        if (material.HasProperty("_BaseColor"))
+        {
+            material.SetColor("_BaseColor", color);
+        }
+
+        if (material.HasProperty("_Color"))
+        {
+            material.SetColor("_Color", color);
+        }
     }
 }
     
