@@ -17,7 +17,10 @@ public class TileSelectionManager : MonoBehaviour
     private HashSet<Tile> selectedTiles =
         new HashSet<Tile>();
 
-    private float lastCtrlPressTime = -1f;
+    // Select Button Settings-------------------
+    [SerializeField] private Key selectionKey = Key.LeftCtrl;
+    private float lastSelectKeyPressTime = -1f;
+    //------------------------------------------
 
     private bool wasTerraforming = false;
 
@@ -56,7 +59,7 @@ public class TileSelectionManager : MonoBehaviour
             return;
 
         HandleMovement();
-        HandleCtrl();
+        HandleSelectionKey();
     }
 
     // Initial highlight
@@ -166,13 +169,13 @@ public class TileSelectionManager : MonoBehaviour
         UpdateTileVisibility(oldHighlightedTile);
         UpdateTileVisibility(highlightedTile);
 
-        bool ctrlHeld =
-            Keyboard.current.leftCtrlKey.isPressed;
+        bool selectionKeyIsHeld =
+            SelectionKeyIsHeld();
 
 
         // CTRL + arrow:
         // select the tile we move onto
-        if (ctrlHeld)
+        if (selectionKeyIsHeld)
         {
             selectedTiles.Add(highlightedTile);
 
@@ -210,23 +213,39 @@ public class TileSelectionManager : MonoBehaviour
         );
     }
 
-    // CTRL selection
-    private void HandleCtrl()
+    // selection Key Helper ------------------------------------
+    private bool SelectionKeyPressedThisFrame()
     {
-        if (!Keyboard.current.leftCtrlKey.wasPressedThisFrame)
+        if (Keyboard.current == null)
+            return false;
+
+        return Keyboard.current[selectionKey].wasPressedThisFrame;
+    }
+    private bool SelectionKeyIsHeld()
+    {
+        if (Keyboard.current == null)
+            return false;
+
+        return Keyboard.current[selectionKey].isPressed;
+
+    }
+    //----------------------------------------------------------
+    private void HandleSelectionKey()
+    {
+        if (!SelectionKeyPressedThisFrame())
             return;
 
         float currentTime = Time.unscaledTime;
 
         // Double tap CTRL = clear all selected tiles
-        if (currentTime - lastCtrlPressTime <= doubleTapTime)
+        if (currentTime - lastSelectKeyPressTime <= doubleTapTime)
         {
             ClearSelection();
-            lastCtrlPressTime = -1f;
+            lastSelectKeyPressTime = -1f;
             return;
         }
 
-        lastCtrlPressTime = currentTime;
+        lastSelectKeyPressTime = currentTime;
 
         if (highlightedTile == null)
             return;
@@ -299,7 +318,7 @@ public class TileSelectionManager : MonoBehaviour
         }
 
         highlightedTile = null;
-        lastCtrlPressTime = -1f;
+        lastSelectKeyPressTime = -1f;
 
     }
 
