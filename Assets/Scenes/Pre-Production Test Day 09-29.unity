@@ -439,6 +439,10 @@ PrefabInstance:
       propertyPath: terraformUI
       value: 
       objectReference: {fileID: 1361903715}
+    - target: {fileID: 1623426267153610148, guid: c10ebdafd916ec546875c1b285015a12, type: 3}
+      propertyPath: tileSelectionManager
+      value: 
+      objectReference: {fileID: 695006195}
     - target: {fileID: 2004657513669401252, guid: c10ebdafd916ec546875c1b285015a12, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -496,6 +500,54 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c10ebdafd916ec546875c1b285015a12, type: 3}
+--- !u!1 &695006194
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 695006196}
+  - component: {fileID: 695006195}
+  m_Layer: 0
+  m_Name: Terraform Grid Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &695006195
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 695006194}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1933e722c4416ff49827fa2c4ef1aed7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TileSelectionManager
+  uiStateManager: {fileID: 1077366069}
+  doubleTapTime: 0.3
+  visibilityMode: 0
+  selectionKey: 55
+--- !u!4 &695006196
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 695006194}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.96515, y: -2.44874, z: -0.7968}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &696510951
 GameObject:
   m_ObjectHideFlags: 0
@@ -694,6 +746,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b9a4b2a32b13aa43b558a94a670222b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonToggle
+--- !u!114 &1077366069 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1623426267153610148, guid: c10ebdafd916ec546875c1b285015a12, type: 3}
+  m_PrefabInstance: {fileID: 631922138}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077366064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db741cbac62da8841975bb208ccd823b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIStateManager
 --- !u!1 &1205895019 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6453027670666206484, guid: c28093db3f3fc164c817751265095100, type: 3}
@@ -920,6 +983,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1585283368217137284, guid: c8d08dd725886c84eb7372d61821275b, type: 3}
+      propertyPath: gridLineMaterial
+      value: 
+      objectReference: {fileID: 2100000, guid: bcc9cd91fc90fe04db0dcf1a03ca49de, type: 2}
     - target: {fileID: 4831986897734357128, guid: c8d08dd725886c84eb7372d61821275b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1095,6 +1162,7 @@ SceneRoots:
   - {fileID: 203844589}
   - {fileID: 189979611}
   - {fileID: 631922138}
+  - {fileID: 695006196}
   - {fileID: 2085836182866419191}
   - {fileID: 5188674882806591944}
   - {fileID: 2376537313519821774}

@@ -17,10 +17,11 @@ public class TileSelectionManager : MonoBehaviour
     private HashSet<Tile> selectedTiles =
         new HashSet<Tile>();
 
-    // Select Button Settings-------------------
-    [SerializeField] private Key selectionKey = Key.LeftCtrl;
-    private float lastSelectKeyPressTime = -1f;
-    //------------------------------------------
+    //// Select Button Settings-------------------
+    //[SerializeField] private Key selectionKey = Key.LeftCtrl;
+    //private float lastSelectKeyPressTime = -1f;
+    ////------------------------------------------
+    private bool selectHeld;
 
     private bool wasTerraforming = false;
 
@@ -50,16 +51,6 @@ public class TileSelectionManager : MonoBehaviour
         }
 
         wasTerraforming = isTerraforming;
-
-        // Do nothing outside terraform mode 
-        if (!isTerraforming)
-            return;
-
-        if (Keyboard.current == null)
-            return;
-
-        HandleMovement();
-        HandleSelectionKey();
     }
 
     // Initial highlight
@@ -88,43 +79,12 @@ public class TileSelectionManager : MonoBehaviour
         }
     }
 
-    // Movement with arrow keys
-    private void HandleMovement()
-    {
-        int xDirection = 0;
-        int zDirection = 0;
-
-        // UP
-        if (Keyboard.current.upArrowKey.wasPressedThisFrame)
-            zDirection = 1;  
-
-        // DOWN
-        if (Keyboard.current.downArrowKey.wasPressedThisFrame)
-            zDirection = -1;
-
-        // RIGHT
-        if (Keyboard.current.rightArrowKey.wasPressedThisFrame)
-            xDirection = 1;
-
-        // LEFT
-        if (Keyboard.current.leftArrowKey.wasPressedThisFrame)
-            xDirection = -1;
-
-        // STILL
-        if (xDirection == 0 && zDirection == 0)
-            return;
-
-        Debug.Log("x: " + xDirection + ", z: " +  zDirection);
-
-        MoveHighlight(xDirection, zDirection);
-    }
-
     private void MoveHighlight(int xDirection, int zDirection)
     {
-        Tile oldHighlightedTile = highlightedTile; 
-
         if (highlightedTile == null)
             return;
+
+        Tile oldHighlightedTile = highlightedTile;
 
         int newX =
             Mathf.RoundToInt(highlightedTile.position.x)
@@ -140,58 +100,53 @@ public class TileSelectionManager : MonoBehaviour
                 newZ
             );
 
-        // Outside map
         if (newTile == null)
             return;
 
-        // OLD highlighted tile
-        // If it was selected, keep it yellow.
-        // Otherwise return it to normal red.
-        if (selectedTiles.Contains(highlightedTile))
+        // Restore old tile
+        if (selectedTiles.Contains(oldHighlightedTile))
         {
             SetTileColor(
-                highlightedTile,
+                oldHighlightedTile,
                 selectedColor
             );
         }
         else
         {
             SetTileColor(
-                highlightedTile,
+                oldHighlightedTile,
                 normalColor
             );
         }
 
-
-        // Move highlight to new tile
         highlightedTile = newTile;
 
-        UpdateTileVisibility(oldHighlightedTile);
-        UpdateTileVisibility(highlightedTile);
-
-        bool selectionKeyIsHeld =
-            SelectionKeyIsHeld();
-
-
-        // CTRL + arrow:
-        // select the tile we move onto
-        if (selectionKeyIsHeld)
+        // Holding select = toggle the tile we move onto
+        if (selectHeld)
         {
-            selectedTiles.Add(highlightedTile);
+            if (selectedTiles.Contains(highlightedTile))
+            {
+                selectedTiles.Remove(highlightedTile);
 
-            SetTileColor(
-                highlightedTile,
-                selectedColor
-            );
+                SetTileColor(
+                    highlightedTile,
+                    highlightColor
+                );
+            }
+            else
+            {
+                selectedTiles.Add(highlightedTile);
+
+                SetTileColor(
+                    highlightedTile,
+                    selectedColor
+                );
+            }
         }
         else
         {
-            // No CTRL:
-            // Do NOT select anything.
-
             if (selectedTiles.Contains(highlightedTile))
             {
-                // Already selected from earlier -> stay yellow
                 SetTileColor(
                     highlightedTile,
                     selectedColor
@@ -199,7 +154,6 @@ public class TileSelectionManager : MonoBehaviour
             }
             else
             {
-                // Not selected -> only highlighted
                 SetTileColor(
                     highlightedTile,
                     highlightColor
@@ -207,72 +161,10 @@ public class TileSelectionManager : MonoBehaviour
             }
         }
 
-        Debug.Log(
-            "Selected tiles: " +
-            selectedTiles.Count
-        );
-    }
-
-    // selection Key Helper ------------------------------------
-    private bool SelectionKeyPressedThisFrame()
-    {
-        if (Keyboard.current == null)
-            return false;
-
-        return Keyboard.current[selectionKey].wasPressedThisFrame;
-    }
-    private bool SelectionKeyIsHeld()
-    {
-        if (Keyboard.current == null)
-            return false;
-
-        return Keyboard.current[selectionKey].isPressed;
-
-    }
-    //----------------------------------------------------------
-    private void HandleSelectionKey()
-    {
-        if (!SelectionKeyPressedThisFrame())
-            return;
-
-        float currentTime = Time.unscaledTime;
-
-        // Double tap CTRL = clear all selected tiles
-        if (currentTime - lastSelectKeyPressTime <= doubleTapTime)
-        {
-            ClearSelection();
-            lastSelectKeyPressTime = -1f;
-            return;
-        }
-
-        lastSelectKeyPressTime = currentTime;
-
-        if (highlightedTile == null)
-            return;
-
-        // Toggle selection, like Ctrl in File Explorer
-        if (selectedTiles.Contains(highlightedTile))
-        {
-            selectedTiles.Remove(highlightedTile);
-
-            SetTileColor(
-                highlightedTile,
-                highlightColor
-            );
-        }
-        else
-        {
-            selectedTiles.Add(highlightedTile);
-
-            SetTileColor(
-                highlightedTile,
-                selectedColor
-            );
-        }
-
+        UpdateTileVisibility(oldHighlightedTile);
         UpdateTileVisibility(highlightedTile);
-    } 
-
+    }
+ 
     // Clear selection
     public void ClearSelection()
     {
@@ -318,8 +210,10 @@ public class TileSelectionManager : MonoBehaviour
         }
 
         highlightedTile = null;
-        lastSelectKeyPressTime = -1f;
 
+        selectHeld = false;
+
+        RefreshAllTileVisibility();
     }
 
     // Grid color and visibility
@@ -425,11 +319,74 @@ public class TileSelectionManager : MonoBehaviour
             }
         }
     }
-
-
-    // Selected tiles getter
+    // Selected tiles getter -----------------------
     public IEnumerable<Tile> GetSelectedTiles()
     {
         return selectedTiles;
     }
+    //----------------------------------------------
+
+    // Player Input Map
+    public void OnTileSelect(InputAction.CallbackContext context)
+    {
+        if (!uiStateManager.IsTerraforming())
+            return;
+
+        if (context.started)
+        {
+            selectHeld = true;
+            ToggleHighlightedTile();
+        }
+
+        if (context.canceled)
+        {
+            selectHeld = false;
+        }
+        
+    }
+    public void OnTileMove(InputAction.CallbackContext context)
+    {
+        if (!uiStateManager.IsTerraforming())
+            return;
+
+        if(!context.performed)
+            return;
+
+        Vector2 direction = context.ReadValue<Vector2>();
+
+        int xDirection = 
+            Mathf.RoundToInt(direction.x);
+        int zDirection = 
+            Mathf.RoundToInt(direction.y);
+
+        MoveHighlight(xDirection, zDirection);
+
+    }
+    private void ToggleHighlightedTile()
+    {
+        if (highlightedTile == null)
+            return;
+
+        if (selectedTiles.Contains(highlightedTile))
+        {
+            selectedTiles.Remove(highlightedTile);
+
+            SetTileColor(
+                highlightedTile,
+                highlightColor
+            );
+        }
+        else
+        {
+            selectedTiles.Add(highlightedTile);
+
+            SetTileColor(
+                highlightedTile,
+                selectedColor
+            );
+        }
+
+        UpdateTileVisibility(highlightedTile);
+    }
+    // --------------------------------------------------
 }
