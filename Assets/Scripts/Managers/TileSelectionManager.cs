@@ -110,20 +110,19 @@ public class TileSelectionManager : MonoBehaviour
 
         MoveHighlight(xDirection, zDirection);
     }
+
     private void MoveHighlight(int xDirection, int zDirection)
     {
         if (highlightedTile == null)
             return;
 
         int newX =
-            Mathf.RoundToInt(
-                highlightedTile.position.x) +
-                xDirection;
+            Mathf.RoundToInt(highlightedTile.position.x)
+            + xDirection;
 
         int newZ =
-            Mathf.RoundToInt(
-                highlightedTile.position.z) +
-                zDirection;
+            Mathf.RoundToInt(highlightedTile.position.z)
+            + zDirection;
 
         Tile newTile =
             TileManager.Instance.GetTile(
@@ -131,15 +130,19 @@ public class TileSelectionManager : MonoBehaviour
                 newZ
             );
 
-        // Check for null tiles
+        // Outside map
         if (newTile == null)
             return;
 
+
+        // OLD highlighted tile
+        // If it was selected, keep it yellow.
+        // Otherwise return it to normal red.
         if (selectedTiles.Contains(highlightedTile))
         {
             SetTileColor(
                 highlightedTile,
-                highlightColor
+                selectedColor
             );
         }
         else
@@ -150,13 +153,17 @@ public class TileSelectionManager : MonoBehaviour
             );
         }
 
+
+        // Move highlight to new tile
         highlightedTile = newTile;
 
-        // CTRL
+
         bool ctrlHeld =
             Keyboard.current.leftCtrlKey.isPressed;
 
-        // Holding CTRL while moving select tiles
+
+        // CTRL + arrow:
+        // select the tile we move onto
         if (ctrlHeld)
         {
             selectedTiles.Add(highlightedTile);
@@ -168,14 +175,31 @@ public class TileSelectionManager : MonoBehaviour
         }
         else
         {
-            // If the new highlighted tile was already selected, stays yellow
-            SetTileColor(
-                highlightedTile,
-                selectedColor
-            );
-        }
-        Debug.Log("Selected tiles: " + selectedTiles.Count);
+            // No CTRL:
+            // Do NOT select anything.
 
+            if (selectedTiles.Contains(highlightedTile))
+            {
+                // Already selected from earlier -> stay yellow
+                SetTileColor(
+                    highlightedTile,
+                    selectedColor
+                );
+            }
+            else
+            {
+                // Not selected -> only highlighted
+                SetTileColor(
+                    highlightedTile,
+                    highlightColor
+                );
+            }
+        }
+
+        Debug.Log(
+            "Selected tiles: " +
+            selectedTiles.Count
+        );
     }
 
     // CTRL selection
