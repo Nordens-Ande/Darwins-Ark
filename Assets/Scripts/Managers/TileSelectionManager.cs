@@ -7,6 +7,10 @@ public class TileSelectionManager : MonoBehaviour
 {
     [SerializeField] private UIStateManager uiStateManager;
     [SerializeField] private float doubleTapTime = 0.3f;
+    [SerializeField]
+
+    private TileGridVisibilityMode visibilityMode =
+        TileGridVisibilityMode.AllTiles;
 
     private Tile highlightedTile;
 
@@ -33,6 +37,7 @@ public class TileSelectionManager : MonoBehaviour
         if (isTerraforming && !wasTerraforming)
         {
             SetMiddleTile();
+            RefreshAllTileVisibility();
         }
         
         // Just existed terraform mode
@@ -113,6 +118,8 @@ public class TileSelectionManager : MonoBehaviour
 
     private void MoveHighlight(int xDirection, int zDirection)
     {
+        Tile oldHighlightedTile = highlightedTile; 
+
         if (highlightedTile == null)
             return;
 
@@ -133,7 +140,6 @@ public class TileSelectionManager : MonoBehaviour
         // Outside map
         if (newTile == null)
             return;
-
 
         // OLD highlighted tile
         // If it was selected, keep it yellow.
@@ -157,6 +163,8 @@ public class TileSelectionManager : MonoBehaviour
         // Move highlight to new tile
         highlightedTile = newTile;
 
+        UpdateTileVisibility(oldHighlightedTile);
+        UpdateTileVisibility(highlightedTile);
 
         bool ctrlHeld =
             Keyboard.current.leftCtrlKey.isPressed;
@@ -242,7 +250,9 @@ public class TileSelectionManager : MonoBehaviour
                 selectedColor
             );
         }
-    }
+
+        UpdateTileVisibility(highlightedTile);
+    } 
 
     // Clear selection
     public void ClearSelection()
@@ -265,6 +275,8 @@ public class TileSelectionManager : MonoBehaviour
                 highlightColor
             );
         }
+
+        RefreshAllTileVisibility();
     }
     private void ClearEverything()
     {
@@ -288,9 +300,10 @@ public class TileSelectionManager : MonoBehaviour
 
         highlightedTile = null;
         lastCtrlPressTime = -1f;
+
     }
 
-    // Grid color
+    // Grid color and visibility
     public void SetTileColor(Tile tile, Color color)
     {
         Chunk chunk =
@@ -323,6 +336,77 @@ public class TileSelectionManager : MonoBehaviour
             overlay.SetTileColor(tile, color);
         }
     }
+    private TerraformTileGridOverlay GetOverlay(Tile tile)
+    {
+        Chunk chunk =
+            TileManager.Instance.GetChunk(
+                tile.position.x,
+                tile.position.z
+            );
+
+        if (chunk == null)
+            return null;
+
+        int chunkIndex =
+            TileManager.Instance.chunks.IndexOf(chunk);
+
+        if (chunkIndex < 0)
+            return null;
+
+        Transform tileGrid =
+            TileManager.Instance.chunkObjects[chunkIndex]
+            .transform.Find("TileGrid");
+
+        if (tileGrid == null)
+            return null;
+
+        return tileGrid.GetComponent<TerraformTileGridOverlay>();
+    }
+    private void UpdateTileVisibility(Tile tile)
+    {
+        TerraformTileGridOverlay overlay =
+        GetOverlay(tile);
+
+        if (overlay == null)
+            return;
+
+        switch (visibilityMode)
+        {
+            case TileGridVisibilityMode.AllTiles:
+
+                overlay.SetTileVisible(
+                    tile,
+                    true
+                );
+
+                break;
+
+
+            case TileGridVisibilityMode.HighlightedAndSelected:
+
+                bool shouldBeVisible =
+                    tile == highlightedTile ||
+                    selectedTiles.Contains(tile);
+
+                overlay.SetTileVisible(
+                    tile,
+                    shouldBeVisible
+                );
+
+                break;
+        }
+    }
+    private void RefreshAllTileVisibility()
+    {
+        foreach (Chunk chunk in TileManager.Instance.chunks)
+        {
+            foreach (Tile tile in chunk.Tiles)
+            {
+                UpdateTileVisibility(tile);
+            }
+        }
+    }
+
 
     // Selected tiles getter
     public IEnumerable<Tile> GetSelectedTiles()

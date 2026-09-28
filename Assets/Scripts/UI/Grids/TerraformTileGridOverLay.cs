@@ -2,8 +2,19 @@ using Assets.Scripts.Environment;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum TileGridVisibilityMode
+{
+    AllTiles,
+    HighlightedAndSelected
+}
 public class TerraformTileGridOverlay : MonoBehaviour
 {
+    //[SerializeField]
+    //private TileGridVisibilityMode visibilityMode =
+    //    TileGridVisibilityMode.AllTiles;
+
+    //public TileGridVisibilityMode VisibilityMode;
+
     [SerializeField] private float heightOffset = 0.02f;
     [SerializeField] private float lineWidth = 0.025f;
 
@@ -101,6 +112,14 @@ public class TerraformTileGridOverlay : MonoBehaviour
         }
     }
 
+    public void SetTileVisible(Tile tile, bool visible)
+    {
+        if (!tileLines.TryGetValue(tile, out LineRenderer line))
+            return;
+
+        line.enabled = visible;
+    }
+
     public void SetTileColor(Tile tile, Color color)
     {
         if (!tileLines.TryGetValue(tile, out LineRenderer line))
@@ -122,6 +141,6 @@ public class TerraformTileGridOverlay : MonoBehaviour
         {
             material.SetColor("_Color", color);
         }
-    }
+    }  
 }
     
