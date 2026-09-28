@@ -15,10 +15,15 @@ namespace Assets.Scripts.Environment
         private Tile[,] tiles;
 
         public List<Vector3> vertices;
+        public List<Color> colors;
         public List<int> triangles;
+
+        public int Size => size;
 
         public Tile[,] Tiles        //i added this bossMovement needs it :) //milton
         { get { return tiles; } }
+
+        public bool useNoise = false;
 
         public Chunk(Vector2 position, int size)
         {
@@ -28,11 +33,13 @@ namespace Assets.Scripts.Environment
 
             tiles = new Tile[size, size];
             for (int x = 0; x < size; x++)
+            {
                 for (int z = 0; z < size; z++)
-                    tiles[x, z] = new Tile(new Vector3(x + position.x, 0f, z + position.y), new Vector3(x, 0f, z));
-
-            //vertices = new List<Vector3>();
-            //triangles = new List<int>();
+                {
+                    float y = useNoise ? IslandNoise.Instance.GetHeight(x + position.x, z + position.y) : 0f;
+                    tiles[x, z] = new Tile(new Vector3(x + position.x, y, z + position.y), new Vector3(x, y, z));
+                }
+            }
         }
         // Using for ChunkGrid access -----------------
         public int size_
@@ -44,6 +51,7 @@ namespace Assets.Scripts.Environment
         public void GenerateMeshData()
         {
             vertices = new List<Vector3>();
+            colors = new List<Color>();
             triangles = new List<int>();
 
             isDirty = false;
@@ -54,13 +62,15 @@ namespace Assets.Scripts.Environment
                 {
                     Vector3 tilePos = tiles[x, z].position/* + new Vector3(position.x, 0, position.y)*/;
                     float[] neighbourHeights = new float[4] { GetTileHeight(x, z + 1), GetTileHeight(x - 1, z), GetTileHeight(x, z - 1), GetTileHeight(x + 1, z) }; //NWSE 
+                    Color tileColor = useNoise ? IslandNoise.Instance.GetColor(new Vector2(tilePos.x, tilePos.z)) : Color.white;
 
                     //Top face
                     AddFace(
                         new Vector3(-0.5f, 0, 0.5f) + tilePos,  //top-left
                         new Vector3(+0.5f, 0, 0.5f) + tilePos,  //top-right
                         new Vector3(+0.5f, 0, -0.5f) + tilePos, //bottom-right
-                        new Vector3(-0.5f, 0, -0.5f) + tilePos  //bottom-left
+                        new Vector3(-0.5f, 0, -0.5f) + tilePos,  //bottom-left
+                        tileColor
                     );
 
                     float tileHeight = tilePos.y;
@@ -82,7 +92,8 @@ namespace Assets.Scripts.Environment
                                     new Vector3(tilePos.x - 0.5f, low, tilePos.z + 0.5f),
                                     new Vector3(tilePos.x + 0.5f, low, tilePos.z + 0.5f),
                                     new Vector3(tilePos.x + 0.5f, high, tilePos.z + 0.5f),
-                                    new Vector3(tilePos.x - 0.5f, high, tilePos.z + 0.5f)
+                                    new Vector3(tilePos.x - 0.5f, high, tilePos.z + 0.5f),
+                                    tileColor
                                 );
                                 break;
 
@@ -91,7 +102,8 @@ namespace Assets.Scripts.Environment
                                     new Vector3(tilePos.x - 0.5f, low, tilePos.z - 0.5f),
                                     new Vector3(tilePos.x - 0.5f, low, tilePos.z + 0.5f),
                                     new Vector3(tilePos.x - 0.5f, high, tilePos.z + 0.5f),
-                                    new Vector3(tilePos.x - 0.5f, high, tilePos.z - 0.5f)
+                                    new Vector3(tilePos.x - 0.5f, high, tilePos.z - 0.5f),
+                                    tileColor
                                 );
                                 break;
 
@@ -100,7 +112,8 @@ namespace Assets.Scripts.Environment
                                     new Vector3(tilePos.x + 0.5f, low, tilePos.z - 0.5f),
                                     new Vector3(tilePos.x - 0.5f, low, tilePos.z - 0.5f),
                                     new Vector3(tilePos.x - 0.5f, high, tilePos.z - 0.5f),
-                                    new Vector3(tilePos.x + 0.5f, high, tilePos.z - 0.5f)
+                                    new Vector3(tilePos.x + 0.5f, high, tilePos.z - 0.5f),
+                                    tileColor
                                 );
                                 break;
 
@@ -109,7 +122,8 @@ namespace Assets.Scripts.Environment
                                     new Vector3(tilePos.x + 0.5f, low, tilePos.z + 0.5f),
                                     new Vector3(tilePos.x + 0.5f, low, tilePos.z - 0.5f),
                                     new Vector3(tilePos.x + 0.5f, high, tilePos.z - 0.5f),
-                                    new Vector3(tilePos.x + 0.5f, high, tilePos.z + 0.5f)
+                                    new Vector3(tilePos.x + 0.5f, high, tilePos.z + 0.5f),
+                                    tileColor
                                 );
                                 break;
                         }
@@ -143,7 +157,7 @@ namespace Assets.Scripts.Environment
         }
 
         //Ideally we would not like to use abcd variables, but I cannot think of any other names that would work in this context
-        private void AddFace(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+        private void AddFace(Vector3 a, Vector3 b, Vector3 c, Vector3 d, Color color)
         {
             int index = vertices.Count;
 
@@ -151,6 +165,11 @@ namespace Assets.Scripts.Environment
             vertices.Add(b);
             vertices.Add(c);
             vertices.Add(d);
+
+            colors.Add(color);
+            colors.Add(color);
+            colors.Add(color);
+            colors.Add(color);
 
             triangles.Add(index + 0);
             triangles.Add(index + 1);
