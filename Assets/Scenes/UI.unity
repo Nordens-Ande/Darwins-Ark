@@ -1727,7 +1727,7 @@ MonoBehaviour:
   chunkObjects: []
   chunkSize: 8
   chunkGridSize: {x: 1, y: 1}
-  gridLineMaterial: {fileID: 0}
+  gridLineMaterial: {fileID: 2100000, guid: bcc9cd91fc90fe04db0dcf1a03ca49de, type: 2}
 --- !u!1001 &779580123
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4315,12 +4315,19 @@ MonoBehaviour:
   runSpeed: 5
   damage: 10
   health: 100
+  hungerDeteration: 1
   maxIdleTime: 5
   currentIdleTime: 0
   maxAttackTime: 2
   currentAttackTime: 0
   clockCycleTime: 30
   clockCycleTimeCurrent: 0
+  attackDistance: 3
+  colorHappy: {r: 0, g: 0, b: 0, a: 0}
+  colorIndiferent: {r: 0, g: 0, b: 0, a: 0}
+  colorUnhappy: {r: 0, g: 0, b: 0, a: 0}
+  colorTransparancy: 0
+  TestMutation: 1
 --- !u!135 &2065867227
 SphereCollider:
   m_ObjectHideFlags: 0
