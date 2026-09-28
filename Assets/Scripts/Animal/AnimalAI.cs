@@ -45,16 +45,16 @@ public class AnimalAI : MonoBehaviour
     [SerializeField] private float attackDistance = 3;
 
     
-    [Header("Happiness indicator")]
-    [Space]
-    //DisplayHappiness
-    [SerializeField] private Color colorHappy;
-    [SerializeField] private Color colorIndiferent;
-    [SerializeField] private Color colorUnhappy;
-    private Transform happinessMeter;
-    private Renderer currentColor;
-    [Range(0f,1f)]
-    [SerializeField] private float colorTransparancy;
+    //[Header("Happiness indicator")]
+    //[Space]
+    ////DisplayHappiness
+    //[SerializeField] private Color colorHappy;
+    //[SerializeField] private Color colorIndiferent;
+    //[SerializeField] private Color colorUnhappy;
+    //private Transform happinessMeter;
+    //private Renderer currentColor;
+    //[Range(0f,1f)]
+    //[SerializeField] private float colorTransparancy;
 
     private bool isIdle = false;
 
@@ -113,23 +113,23 @@ public class AnimalAI : MonoBehaviour
     void Start()
     {
         maxAttackTime = 2;
-        happinessMeter = gameObject.transform.GetChild(0);
+        //happinessMeter = gameObject.transform.GetChild(0);
 
-        //Guard if gameobject dosent have sphere attacted then it will create one
-        if(happinessMeter == null) 
-        { 
-            GameObject happinessSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            happinessSphere.transform.position = new Vector3 (transform.position.x, transform.position.y + 1, transform.position.z);
-            happinessSphere.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-            happinessSphere.transform.SetParent(transform);
-            happinessMeter = happinessSphere.transform;
-        }
+        ////Guard if gameobject dosent have sphere attacted then it will create one
+        //if(happinessMeter == null) 
+        //{ 
+        //    GameObject happinessSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        //    happinessSphere.transform.position = new Vector3 (transform.position.x, transform.position.y + 1, transform.position.z);
+        //    happinessSphere.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+        //    happinessSphere.transform.SetParent(transform);
+        //    happinessMeter = happinessSphere.transform;
+        //}
 
-        currentColor = happinessMeter.GetComponent<Renderer>();
-        DisplayHappiness();
-        colorHappy.a = colorTransparancy;
-        colorIndiferent.a = colorTransparancy;
-        colorUnhappy.a = colorTransparancy;
+        //currentColor = happinessMeter.GetComponent<Renderer>();
+        //DisplayHappiness();
+        //colorHappy.a = colorTransparancy;
+        //colorIndiferent.a = colorTransparancy;
+        //colorUnhappy.a = colorTransparancy;
     }
 
     void Update()
@@ -149,10 +149,8 @@ public class AnimalAI : MonoBehaviour
             //hunger++;
             hunger += hungerDeteration;
             Happiness = Happiness - hunger;
-            DisplayHappiness();
             clockCycleTimeCurrent = 0;
-            DisplayHappiness();
-            Debug.Log(Happiness);
+            //DisplayHappiness();
 
             //Testing if the mutations work
             if (TestMutation)
@@ -183,18 +181,18 @@ public class AnimalAI : MonoBehaviour
     }
 
     //Will show animals happines dynamicly and change it during runtime. Will be called for optimazation in start and clockcycleDeteriation 
-    void DisplayHappiness() 
-    {
-        if(Happiness > 50) 
-        {
-            currentColor.material.color = Color.Lerp(colorIndiferent, colorHappy, (Happiness-50) / 50);
-        }
-        else 
-        {
-            currentColor.material.color = Color.Lerp(colorIndiferent, colorUnhappy, Happiness/100/0.5f);
-        }
+    //void DisplayHappiness() 
+    //{
+    //    if(Happiness > 50) 
+    //    {
+    //        currentColor.material.color = Color.Lerp(colorIndiferent, colorHappy, (Happiness-50) / 50);
+    //    }
+    //    else 
+    //    {
+    //        currentColor.material.color = Color.Lerp(colorIndiferent, colorUnhappy, Happiness/100/0.5f);
+    //    }
         
-    }
+    //}
     
     //Action methods
     void Idle() 
@@ -221,7 +219,7 @@ public class AnimalAI : MonoBehaviour
 
             AnimalWalkMoveTowards(walkPoint);
 
-            if (Vector3.Distance(transform.position, walkPoint) < 3f)
+            if (Vector3.Distance(transform.position, walkPoint) < 2f)
             {
                 hasSetPath = false;
                 isIdle = true;
@@ -244,16 +242,22 @@ public class AnimalAI : MonoBehaviour
                 if (plant != null && plant.CanBeEaten)
                 {
                     walkPoint = hit.transform.position;
+                    choosenPlant = plant;
+                    hasSetPath = true;
                     return;
                 }
             }
         }
         else
         {
-            float distance = Vector3.Distance(transform.position, walkPoint);
-            if(distance < 3) 
+            if (choosenPlant != null)
             {
-                EatFood(choosenPlant);
+                float distance = Vector3.Distance(transform.position, choosenPlant.transform.position);
+                if (distance < 3)
+                {
+                    EatFood(choosenPlant);
+                    hasSetPath = false;
+                }
             }
         }
 
@@ -263,8 +267,9 @@ public class AnimalAI : MonoBehaviour
     //eatplant 
     void EatFood(Plant plant) 
     {
+        plant.EatPlant();
         hunger = 0;
-        Destroy(plant.gameObject);
+        //Destroy(plant.gameObject);
     }
 
 
