@@ -26,20 +26,23 @@ public class BossManager : MonoBehaviour
 
     Vector2 GetSpawnLocation() //only works for square maps
     {
-        int maxSpawn = TileManager.Instance.ChunkGridSize.x * TileManager.Instance.ChunkSize;
+        int maxSpawn = TileManager.Instance.ChunkGridSize.x * TileManager.Instance.ChunkSize / 2;
+        maxSpawn = Mathf.RoundToInt(maxSpawn);
+        int minSpawn = -maxSpawn;
         maxSpawn--;
-        int x = Random.Range(0, maxSpawn);
+
+        int x = Random.Range(minSpawn, maxSpawn);
         int side = Random.Range(1, 5);
         switch(side)
         {
             case 1:
-                return new Vector2(x, 0);
+                return new Vector2(x, minSpawn);
                 
             case 2:
                 return new Vector2(x, maxSpawn);
                 
             case 3:
-                return new Vector2(0, x);
+                return new Vector2(minSpawn, x);
                 
             case 4:
                 return new Vector2(maxSpawn, x);
