@@ -79,23 +79,39 @@ public class TerraformTileGridOverlay : MonoBehaviour
         if (lineMaterial != null)
             line.material = lineMaterial;
 
-        line.startColor = Color.red;
-        line.endColor = Color.red;
+        line.startColor = Color.white;
+        line.endColor = Color.white;
 
         tileLines.Add(tile, line);
+
+        SetTileColor(tile, Color.red);
     }
 
     // For TileSlectionManager
 
-    public void SetTileSelected(Tile tile, bool selected)
+    public void SetTileSelected(Tile tile, Color color)
     {
         if (!tileLines.TryGetValue(tile, out LineRenderer line))
+        {
+            Debug.LogWarning("Could not find tile in tileLines!");
             return;
+        }
+            
 
-        Color color = selected ? Color.yellow : Color.red;
+        //Color color = selected ? Color.yellow : Color.red;
 
         line.startColor = color;
         line.endColor = color;
+
+        MaterialPropertyBlock propertyBlock =
+        new MaterialPropertyBlock();
+
+        line.GetPropertyBlock(propertyBlock);
+
+        propertyBlock.SetColor(
+            "_BaseColor",
+            color
+        );
     }
 
     public void ClearSelectionColors()
