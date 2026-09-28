@@ -11,10 +11,15 @@ public class BossHealth : MonoBehaviour
         set { isAlive = value; } 
     }
 
-    void Start()
+    private void Awake()
     {
         health = 100;
         isAlive = true;
+    }
+
+    void Start()
+    {
+        
     }
 
     public void TakeDamage(float damage)

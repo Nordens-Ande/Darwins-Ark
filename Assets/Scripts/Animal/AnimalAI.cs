@@ -362,4 +362,10 @@ public class AnimalAI : MonoBehaviour
         minIslandSize = min;
         maxIslandSize = max;
     }
+
+    // Makes happiness public for AnimalMoodIndicator.cs
+    public float GetHappiness()
+    {
+        return Happiness;
+    }
 }
