@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6610535007613461231}
   - component: {fileID: 6953545118476116933}
   m_Layer: 0
-  m_Name: PlantManager
+  m_Name: Plant Manager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
