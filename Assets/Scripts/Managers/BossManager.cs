@@ -31,6 +31,18 @@ public class BossManager : MonoBehaviour
         int minSpawn = -maxSpawn;
         maxSpawn--;
 
+        if (TileManager.Instance.ChunkGridSize.x % 2 != 0) // ojämnt med chunks
+        {
+            maxSpawn += TileManager.Instance.ChunkSize / 2;
+            minSpawn += TileManager.Instance.ChunkSize / 2;
+            if (TileManager.Instance.ChunkSize % 2 != 0) // ojämnt med antal tiles i chunk
+            {
+                maxSpawn++;
+            }
+        }
+        
+
+
         int x = Random.Range(minSpawn, maxSpawn);
         int side = Random.Range(1, 5);
         switch(side)

@@ -112,6 +112,7 @@ public class AnimalAI : MonoBehaviour
 
     void Start()
     {
+        maxAttackTime = 2;
         happinessMeter = gameObject.transform.GetChild(0);
 
         //Guard if gameobject dosent have sphere attacted then it will create one
@@ -319,7 +320,6 @@ public class AnimalAI : MonoBehaviour
                     if(bossHealth != null)
                     {
                         bossHealth.TakeDamage(damage);
-                        Debug.Log("damage dealt");
                         currentAttackTime = 0;
                     }
                 }
