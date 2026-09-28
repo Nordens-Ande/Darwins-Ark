@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2587710377770882406}
   - component: {fileID: 8273554201922037955}
   - component: {fileID: 5451121601342173440}
+  - component: {fileID: -6405640087756652402}
   m_Layer: 0
   m_Name: AnimalTest
   m_TagString: Untagged
@@ -128,8 +129,8 @@ MonoBehaviour:
   hunger: 0
   bossThreat: 0
   Happiness: 75
-  walkSpeed: 0.5
-  runSpeed: 0.75
+  walkSpeed: 0.75
+  runSpeed: 1.3
   damage: 10
   health: 100
   hungerDeteration: 1
@@ -141,3 +142,17 @@ MonoBehaviour:
   clockCycleTimeCurrent: 0
   attackDistance: 3
   TestMutation: 0
+--- !u!114 &-6405640087756652402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2488961226690007087}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10fa157f4ddfe95489060c81ca57795c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::AnimalMoodIndicator
+  animalAI: {fileID: 5451121601342173440}
+  moodIndicator: {fileID: 8368161162473836699, guid: 37b56ac2336b3384c949da79114debf1, type: 3}
