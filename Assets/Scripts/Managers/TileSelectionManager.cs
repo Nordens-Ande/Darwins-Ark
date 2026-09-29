@@ -24,6 +24,9 @@ public class TileSelectionManager : MonoBehaviour
 
     private bool wasTerraforming = false;
 
+    //Flag used to activate/deactive keyboard/mouse inputs
+    private bool usingMouse = true;
+
     private Color normalColor = Color.red;
     private Color highlightColor = Color.cyan;
     private Color selectedColor = Color.yellow;

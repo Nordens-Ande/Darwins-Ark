@@ -53,7 +53,7 @@ namespace Assets.Scripts.Environment
                 Chunk chunk = chunks[i];
                 chunk.GenerateMeshData();
                 
-                GameObject chunkObject = new GameObject($"Chunk (x:{chunk.position.x}, z:{chunk.position.y})", typeof(MeshFilter), typeof(MeshRenderer));
+                GameObject chunkObject = new GameObject($"Chunk (x:{chunk.position.x}, z:{chunk.position.y})", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider));
                 chunkObject.transform.parent = transform;
                 chunkObjects.Add(chunkObject);
 
@@ -69,6 +69,7 @@ namespace Assets.Scripts.Environment
                 mesh.RecalculateBounds();
 
                 chunkObject.GetComponent<MeshFilter>().sharedMesh = mesh;
+                chunkObject.GetComponent<MeshCollider>().sharedMesh = mesh;
 
                 // Grid for chunk and tiles in TerraformUI -------------
                 //  Chunk Grid
