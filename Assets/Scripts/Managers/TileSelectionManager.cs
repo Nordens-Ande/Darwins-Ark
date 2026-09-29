@@ -6,11 +6,10 @@ using UnityEngine.InputSystem;
 public class TileSelectionManager : MonoBehaviour
 {
     [SerializeField] private UIStateManager uiStateManager;
-    [SerializeField] private float doubleTapTime = 0.3f;
+    //[SerializeField] private float doubleTapTime = 0.3f;
     [SerializeField]
-
-    private TileGridVisibilityMode visibilityMode =
-        TileGridVisibilityMode.AllTiles;
+        private TileGridVisibilityMode visibilityMode =
+                TileGridVisibilityMode.AllTiles;
 
     private Tile highlightedTile;
 
@@ -219,35 +218,13 @@ public class TileSelectionManager : MonoBehaviour
     // Grid color and visibility
     public void SetTileColor(Tile tile, Color color)
     {
-        Chunk chunk =
-       TileManager.Instance.GetChunk(
-           tile.position.x,
-           tile.position.z
-       );
-
-        if (chunk == null)
-            return;
-
-        int chunkIndex =
-            TileManager.Instance.chunks.IndexOf(chunk);
-
-        if (chunkIndex < 0)
-            return;
-
-        Transform grid =
-            TileManager.Instance.chunkObjects[chunkIndex]
-            .transform.Find("TileGrid");
-
-        if (grid == null)
-            return;
-
         TerraformTileGridOverlay overlay =
-            grid.GetComponent<TerraformTileGridOverlay>();
+        GetOverlay(tile);
 
-        if (overlay != null)
-        {
-            overlay.SetTileColor(tile, color);
-        }
+        if (overlay == null)
+            return;
+
+        overlay.SetTileColor(tile, color);
     }
     private TerraformTileGridOverlay GetOverlay(Tile tile)
     {
@@ -346,6 +323,9 @@ public class TileSelectionManager : MonoBehaviour
     }
     public void OnTileMove(InputAction.CallbackContext context)
     {
+        // Debug
+        Debug.Log("TIleMove event: " + context.phase);
+
         if (!uiStateManager.IsTerraforming())
             return;
 
@@ -353,6 +333,9 @@ public class TileSelectionManager : MonoBehaviour
             return;
 
         Vector2 direction = context.ReadValue<Vector2>();
+
+        // Debug
+        Debug.Log("Direction: " + direction);
 
         int xDirection = 
             Mathf.RoundToInt(direction.x);
