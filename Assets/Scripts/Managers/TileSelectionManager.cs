@@ -21,7 +21,8 @@ public class TileSelectionManager : MonoBehaviour
     //[SerializeField] private Key selectionKey = Key.LeftCtrl;
     //private float lastSelectKeyPressTime = -1f;
     ////------------------------------------------
-    private bool selectHeld;
+    [SerializeField, ReadOnly] private bool selectHeld;
+    [SerializeField, ReadOnly] private bool isAddingTiles;
 
     private bool wasTerraforming = false;
 
@@ -193,7 +194,7 @@ public class TileSelectionManager : MonoBehaviour
 
         if (selectHeld)
         {
-            if (selectedTiles.Contains(highlightedTile.Value))
+            if (!isAddingTiles)
             {
                 selectedTiles.Remove(highlightedTile.Value);
 
@@ -445,6 +446,7 @@ public class TileSelectionManager : MonoBehaviour
         if (context.started)
         {
             selectHeld = true;
+            isAddingTiles = !selectedTiles.Contains(highlightedTile.Value);
             ToggleHighlightedTile();
         }
 
