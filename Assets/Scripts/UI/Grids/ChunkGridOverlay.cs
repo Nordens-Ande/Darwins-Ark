@@ -1,4 +1,5 @@
 using UnityEngine;
+using Assets.Scripts.Environment;
 
 public class ChunkGridOverlay : MonoBehaviour
 {
@@ -7,37 +8,41 @@ public class ChunkGridOverlay : MonoBehaviour
 
     private Material lineMaterial;
 
-    public void Setup(int chunkSize, Material material)
+    public void Setup(Chunk chunk, int chunkSize, Material material)
     {
         lineMaterial = material;
-        CreateBorder(chunkSize);
+        CreateBorder(
+            chunk.position,
+            chunkSize);
     }
 
-    private void CreateBorder(int size)
+    private void CreateBorder(Vector2 chunkPosition, int size)
     {
-        // Bottom
+        float minX = chunkPosition.x - 0.5f;
+        float maxX = chunkPosition.x + size - 0.5f;
+
+        float minZ = chunkPosition.y - 0.5f;
+        float maxZ = chunkPosition.y + size - 0.5f;
+
         CreateLine(
-            new Vector3(0, lineHeight, 0),
-            new Vector3(size, lineHeight, 0)
+            new Vector3(minX, lineHeight, minZ),
+            new Vector3(maxX, lineHeight, minZ)
         );
 
-        // Right
         CreateLine(
-            new Vector3(size, lineHeight, 0),
-            new Vector3(size, lineHeight, size)
+            new Vector3(maxX, lineHeight, minZ),
+            new Vector3(maxX, lineHeight, maxZ)
         );
 
-        // Top
         CreateLine(
-            new Vector3(size, lineHeight, size),
-            new Vector3(0, lineHeight, size)
+            new Vector3(maxX, lineHeight, maxZ),
+            new Vector3(minX, lineHeight, maxZ)
         );
 
-        // Left
         CreateLine(
-            new Vector3(0, lineHeight, size),
-            new Vector3(0, lineHeight, 0)
-        );
+            new Vector3(minX, lineHeight, maxZ),
+            new Vector3(minX, lineHeight, minZ)
+        ); ;
     }
 
     private void CreateLine(Vector3 start, Vector3 end)
@@ -48,7 +53,7 @@ public class ChunkGridOverlay : MonoBehaviour
         LineRenderer line = lineObject.AddComponent<LineRenderer>();
 
         line.positionCount = 2;
-        line.useWorldSpace = false;
+        line.useWorldSpace = true;
 
         line.SetPosition(0, start);
         line.SetPosition(1, end);

@@ -74,13 +74,23 @@ namespace Assets.Scripts.Environment
 
                 // Grid for chunk and tiles in TerraformUI -------------
                 //  Chunk Grid
-                GameObject chunkGridObject = new GameObject("ChunkGrid");
-                chunkGridObject.transform.SetParent(chunkObject.transform, false);
+                GameObject chunkGridObject = 
+                    new GameObject("ChunkGrid"
+                    );
+
+                chunkGridObject.transform.SetParent(
+                    chunkObject.transform, false
+                    );
 
                 ChunkGridOverlay chunkGrid =
                     chunkGridObject.AddComponent<ChunkGridOverlay>();
 
-                chunkGrid.Setup(chunkSize, gridLineMaterial);
+                chunkGrid.Setup(
+                    chunk,
+                    chunkSize, 
+                    gridLineMaterial
+                    );
+
                 chunkGridObject.SetActive(false);
 
                 //  Tile Grid

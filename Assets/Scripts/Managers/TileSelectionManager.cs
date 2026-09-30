@@ -17,17 +17,17 @@ public class TileSelectionManager : MonoBehaviour
     private HashSet<Vector2Int> selectedTiles =
         new HashSet<Vector2Int>();
 
-    //// Select Button Settings-------------------
-    //[SerializeField] private Key selectionKey = Key.LeftCtrl;
-    //private float lastSelectKeyPressTime = -1f;
-    ////------------------------------------------
+    //Mouse input
+    [SerializeField] private float mouseMoveThreshold = 20f;
+    private Vector2 mouseAccumulator;
+    //---------------------------------------
+
     [SerializeField, ReadOnly] private bool selectHeld;
     [SerializeField, ReadOnly] private bool isAddingTiles;
 
     private bool wasTerraforming = false;
 
     //Flag used to activate/deactive keyboard/mouse inputs
-    private bool usingMouse = true;
 
     private Color normalColor = Color.red;
     private Color highlightColor = Color.cyan;
@@ -176,8 +176,25 @@ public class TileSelectionManager : MonoBehaviour
     private void SetHighlight(int x, int z)
     {
         Tile newTile = TileManager.Instance.GetTile(x, z);
+
         if (newTile == null)
             return;
+
+        if (!highlightedTile.HasValue)
+        {
+            highlightedTile = newTile.GridPosition;
+
+            SetTileColor(
+                highlightedTile.Value,
+                highlightColor
+            );
+
+            UpdateTileVisibility(
+                highlightedTile.Value
+            );
+
+            return;
+        }
 
         Vector2Int oldHighlightedTile = highlightedTile.Value;
 
@@ -349,40 +366,6 @@ public class TileSelectionManager : MonoBehaviour
         return tileGrid.GetComponent<TerraformTileGridOverlay>();
     }
 
-    //private void UpdateTileVisibility(Tile tile)
-    //{
-    //    TerraformTileGridOverlay overlay =
-    //    GetOverlay(tile);
-
-    //    if (overlay == null)
-    //        return;
-
-    //    switch (visibilityMode)
-    //    {
-    //        case TileGridVisibilityMode.AllTiles:
-
-    //            overlay.SetTileVisible(
-    //                tile,
-    //                true
-    //            );
-
-    //            break;
-
-
-    //        case TileGridVisibilityMode.HighlightedAndSelected:
-
-    //            bool shouldBeVisible =
-    //                tile == highlightedTile ||
-    //                selectedTiles.Contains(tile);
-
-    //            overlay.SetTileVisible(
-    //                tile,
-    //                shouldBeVisible
-    //            );
-
-    //            break;
-    //    }
-    //}
     private void UpdateTileVisibility(Vector2Int tilePos)
     {
         TerraformTileGridOverlay overlay =
@@ -443,10 +426,16 @@ public class TileSelectionManager : MonoBehaviour
         if (!uiStateManager.IsTerraforming())
             return;
 
+        if (!highlightedTile.HasValue)
+            return;
+
         if (context.started)
         {
             selectHeld = true;
-            isAddingTiles = !selectedTiles.Contains(highlightedTile.Value);
+
+            isAddingTiles =
+                !selectedTiles.Contains(highlightedTile.Value);
+
             ToggleHighlightedTile();
         }
 
@@ -515,7 +504,4 @@ public class TileSelectionManager : MonoBehaviour
 
         UpdateTileVisibility(highlightedTile.Value);
     }
-
-
-    // --------------------------------------------------
 }
