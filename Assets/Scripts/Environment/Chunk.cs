@@ -7,6 +7,12 @@ namespace Assets.Scripts.Environment
 {
     public class Chunk
     {
+        HashSet<Vector2Int> oceanTiles;
+        HashSet<Vector2Int> beachTiles;
+        HashSet<Vector2Int> grassTiles;
+        HashSet<Vector2Int> riverTiles;
+        HashSet<Vector2Int> concreteTiles;
+
         public bool isDirty = false;
 
         public Vector2 position;
@@ -19,14 +25,18 @@ namespace Assets.Scripts.Environment
         public List<int> triangles;
 
         public int Size => size;
+        public Tile[,] Tiles => tiles;
+        public HashSet<Vector2Int> OceanTiles => oceanTiles;
+        public HashSet<Vector2Int> BeachTiles => beachTiles;
+        public HashSet<Vector2Int> GrassTiles => grassTiles;
+        public HashSet<Vector2Int> RiverTiles => riverTiles;
+        public HashSet<Vector2Int> ConcreteTiles => concreteTiles;
 
-        public Tile[,] Tiles        //i added this bossMovement needs it :) //milton
-        { get { return tiles; } }
-
-        public bool useNoise = false;
+        public bool useNoise = true;
 
         public Chunk(Vector2 position, int size)
         {
+            InstantiateHashsets();
             this.position = position;
 
             this.size = size;
@@ -36,8 +46,32 @@ namespace Assets.Scripts.Environment
             {
                 for (int z = 0; z < size; z++)
                 {
-                    float y = useNoise ? IslandNoise.Instance.GetHeight(x + position.x, z + position.y) : 0f;
-                    tiles[x, z] = new Tile(new Vector3(x + position.x, y, z + position.y), new Vector3(x, y, z));
+                    TileType type = TileType.Ocean;
+                    float y = useNoise ? IslandNoise.Instance.GetHeight(x + position.x, z + position.y, out type) : 0f;
+                    tiles[x, z] = new Tile(new Vector3(x + position.x, y, z + position.y), new Vector3(x, y, z), type);
+
+                    Debug.Log("hello!");
+
+                    if(type is TileType.Ocean)
+                    {
+                        oceanTiles.Add(new Vector2Int((int)tiles[x, z].position.x, (int)tiles[x, z].position.z));
+                    }
+                    else if (type is TileType.Beach)
+                    {
+                        beachTiles.Add(new Vector2Int((int)tiles[x, z].position.x, (int)tiles[x, z].position.z));
+                    }
+                    else if (type is TileType.Grass)
+                    {
+                        grassTiles.Add(new Vector2Int((int)tiles[x, z].position.x, (int)tiles[x, z].position.z));
+                    }
+                    else if (type is TileType.River)
+                    {
+                        riverTiles.Add(new Vector2Int((int)tiles[x, z].position.x, (int)tiles[x, z].position.z));
+                    }
+                    else if (type is TileType.Concrete)
+                    {
+                        concreteTiles.Add(new Vector2Int((int)tiles[x, z].position.x, (int)tiles[x, z].position.z));
+                    }
                 }
             }
         }
@@ -47,6 +81,15 @@ namespace Assets.Scripts.Environment
             get { return size; }
         }
         // ----------------------------------------------
+
+        public void InstantiateHashsets()
+        {
+            oceanTiles = new HashSet<Vector2Int>();
+            beachTiles = new HashSet<Vector2Int>();
+            grassTiles = new HashSet<Vector2Int>();
+            riverTiles = new HashSet<Vector2Int>();
+            concreteTiles = new HashSet<Vector2Int>();
+        }
 
         public void GenerateMeshData()
         {
