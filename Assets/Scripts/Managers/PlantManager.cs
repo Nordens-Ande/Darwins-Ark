@@ -173,4 +173,10 @@ public class PlantManager : MonoBehaviour
             plants.Add(newPlant);
         }
     }
+
+    // Needed for wind Deity
+    public IEnumerable<Plant> GetPlants()
+    {
+        return plants;
+    }
 }

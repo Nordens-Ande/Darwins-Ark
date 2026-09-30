@@ -206,6 +206,60 @@ public class Plant : MonoBehaviour
         }
     }
 
+    // Smell strength from the tile plant is on (needed for wind deity)
+    public float GetSmellStrengthAtTile(Tile targetTile)
+    {
+        if (targetTile == null || currentTile == null)
+            return 0f;
+
+        Vector2Int plantPos = currentTile.GridPosition;
+        Vector2Int targetPos = targetTile.GridPosition;
+
+        // Normal smell around the plant
+        float distance =
+            Vector2Int.Distance(plantPos, targetPos);
+
+        float normalStrength = 0f;
+
+        if (distance <= PlantSmellRadius)
+        {
+            normalStrength = 
+                1f - (distance / PlantSmellRadius);
+        }
+
+        // No wind
+        if (WindDeityManager.Instance == null)
+            return normalStrength;
+
+        Vector2Int windDirection =
+            WindDeityManager.Instance.GetWindDirection();
+
+        int windLength =
+            WindDeityManager.Instance.WindLength;
+
+        float windStrength = 0f;
+
+        // Check every tile along the wind path
+
+        for (int i = 1; i <= windLength; i++)
+        {
+            Vector2Int windTile =
+                plantPos + windDirection * i;
+
+            if (targetPos == windTile)
+            {
+                windStrength =
+                    1f - ((float)i / (windLength + 1));
+
+                break;
+            }
+        }
+
+        return Mathf.Max(
+            normalStrength,
+            windStrength
+            );
+    }
 
 
 
@@ -256,11 +310,4 @@ public class Plant : MonoBehaviour
             PlantSmellRadius = value;
         }
     }
-
-
-
-
-
-
-
 }
