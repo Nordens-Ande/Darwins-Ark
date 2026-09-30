@@ -1,6 +1,7 @@
 using NUnit.Framework.Internal;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Environment
 {
@@ -142,6 +143,9 @@ namespace Assets.Scripts.Environment
             return null;
         }
 
+        public Chunk GetChunk(Vector2 positionXZ)
+            => GetChunk(positionXZ.x, positionXZ.y);
+
         public Chunk GetChunk(Vector3 position)
         {
             return GetChunk(position.x, position.y);
@@ -160,9 +164,9 @@ namespace Assets.Scripts.Environment
         {
             return GetTile(posXZ.x, posXZ.y);
         }
-        public Tile GetTile(Vector3 pos)
+        public Tile GetTile(Vector3 posXZ)
         {
-            return GetTile(pos.x, pos.z);
+            return GetTile(posXZ.x, posXZ.z);
         }
 
         // Booleans for when chunk/tile grids are visible

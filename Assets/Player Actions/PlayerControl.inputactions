@@ -83,6 +83,17 @@
                 },
                 {
                     "name": "",
+                    "id": "a2ac59f9-def9-468b-9919-d3d68ef81c6b",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TileMove",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "208e34a4-7932-49d6-a433-491d36d3808d",
                     "path": "<Keyboard>/leftCtrl",
                     "interactions": "",
