@@ -15,14 +15,14 @@ public class PlantManager : MonoBehaviour
 
     [Header("Plant Spawning")]
     [SerializeField] private List<Plant> plantPrefabToSpawn = new List<Plant>(); //this is the plant that will be spawned
-    //[SerializeField] private Tile targetTileToSpawnOn; //this is the tile that the plant will be spawned on
-    //[SerializeField] bool spawnPlant = false; //this is used as a button to spawn a plant
     [Space]
     [SerializeField] bool spawnPlantAllTiles = false; //this is used as a button to spawn plants on all tiles
     [SerializeField] float spawnPlantAllTilesChance = 20; //chance of a plant spawning on a tile when spawning on all tiles
     [Space]
     [SerializeField] bool useRandomGrowthSpeed = true;
     [SerializeField] bool useRandomPlants = true;
+    [SerializeField] bool useRandomPlantRotation = true;
+    [SerializeField] bool useRandomPlantScale = true;
 
     [Header("List of all Plants")]
     [SerializeField] private List<Plant> plants = new List<Plant>();
@@ -45,7 +45,7 @@ public class PlantManager : MonoBehaviour
 
     void Update()
     {
-        //lopp all plants
+        //loop all plants
         for (int i = plants.Count - 1; i >= 0; i--)
         {
             //if the plant is null, remove it from the list
@@ -63,65 +63,61 @@ public class PlantManager : MonoBehaviour
         }
 
 
-        ////spawn in a plant
-        //if (spawnPlant)
-        //{
-        //    if (targetTileToSpawnOn != null)
-        //    {
-        //        SpawnPlantOnThisTile(plantPrefabToSpawn, targetTileToSpawnOn);
-        //    }
-        //    else
-        //    {
-        //        Debug.LogWarning("Ingen Target Tile vald i PlantManager!");
-        //    }
-        //    spawnPlant = false;
-        //}
-
 
         //try to spawn plants on all tiles
         if (spawnPlantAllTiles)
         {
-            if (TileManager.Instance != null && TileManager.Instance.chunks != null)
+            MassPlantPlants();
+            spawnPlantAllTiles = false;
+        }
+
+    }
+
+
+
+    public void MassPlantPlants()
+    {
+        if (TileManager.Instance != null && TileManager.Instance.chunks != null)
+        {
+
+            foreach (Chunk chunk in TileManager.Instance.chunks) //we loop through all chunks
             {
-
-                foreach (Chunk chunk in TileManager.Instance.chunks) //we loop through all chunks
+                foreach (Tile tile in chunk.Tiles) //loop through all tiles in the chunk
                 {
-                    foreach (Tile tile in chunk.Tiles) //loop through all tiles in the chunk
+                    ///todo
+                    ///kolla här så tilen inte är strand  
+                    
+                    if (tile == null || tile.isWater || tile.HasPlant || tile.isWater) continue;
+
+                    float randomValue = Random.Range(0f, 100f);
+                    if (randomValue <= spawnPlantAllTilesChance)
                     {
-                        if (tile == null || tile.isWater || tile.HasPlant) continue;
 
-                        float randomValue = Random.Range(0f, 100f);
-                        if (randomValue <= spawnPlantAllTilesChance)
+                        float randomGrowthSpeed = 1.0f;
+                        Plant plant = plantPrefabToSpawn.First();
+
+                        if (useRandomGrowthSpeed)
                         {
-
-                            float randomGrowthSpeed = 1.0f;
-                            Plant plant = plantPrefabToSpawn.First();
-
-                            if (useRandomGrowthSpeed)
-                            {
-                                randomGrowthSpeed = Random.Range(0.5f, 2.0f);
-                            }
-                            if (useRandomPlants)
-                            {
-                                plant = plantPrefabToSpawn[Random.Range(0, plantPrefabToSpawn.Count)];
-                            }
-
-                            SpawnPlantOnThisTile(plant, tile, randomGrowthSpeed);
+                            randomGrowthSpeed = Random.Range(0.5f, 2.0f);
+                        }
+                        if (useRandomPlants)
+                        {
+                            plant = plantPrefabToSpawn[Random.Range(0, plantPrefabToSpawn.Count)];
                         }
 
+                        SpawnPlantOnThisTile(plant, tile, randomGrowthSpeed);
                     }
 
                 }
 
+            }
 
-            }
-            else
-            {
-                Debug.Log("didnt find tilemanager or chunks when trying to spawn plants");
-            }
-            spawnPlantAllTiles = false;
+
         }
-
+        else
+        {
+            Debug.Log("didnt find tilemanager or chunks when trying to spawn plants");
+        }
     }
 
 
@@ -138,7 +134,23 @@ public class PlantManager : MonoBehaviour
         }
 
         //create a new plant on the tile
-        Plant newPlant = Instantiate(prefab, tile.position, Quaternion.identity);
+        Plant newPlant = Instantiate(prefab, tile.position, Quaternion.identity, transform);
+
+
+        //if we want to randomize y rotation so the plants dont all look the same
+        if (useRandomPlantRotation)
+        {
+            float randomYAngle = Random.Range(0f, 360f);
+            newPlant.transform.localRotation = Quaternion.Euler(0f, randomYAngle, 0f);
+        }
+        
+        //if we want to random scale all the plants so they aren't all the same0
+        if (useRandomPlantScale)
+        {
+            float randomScale = Random.Range(0.75f, 1.35f);
+            newPlant.transform.localScale = new Vector3(randomScale, randomScale, randomScale);
+        }
+        
 
         //set the growth speed of the plant
         newPlant.GrowthSpeed = CustomGrowSpeed;

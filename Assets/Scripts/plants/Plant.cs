@@ -16,6 +16,7 @@ public class Plant : MonoBehaviour
     [SerializeField] float health = 100.0f;
     [SerializeField, ReadOnly] float timeSinceLastGrowth = 0.0f;
     [SerializeField, ReadOnly] bool canBeEaten = false;
+    [SerializeField] float PlantSmellRadius = 5.0f; //the radius of where animals can smell the plant
     [SerializeField, ReadOnly] Tile currentTile; //The tile that the plant is currently on
     [Space]
 
@@ -115,8 +116,11 @@ public class Plant : MonoBehaviour
         //Spawn the new model directly as a child of this object
         if (prefabToSpawn != null)
         {
-            //currentModelInstance = Instantiate(prefabToSpawn, transform.position, transform.rotation, transform);
-            currentModelInstance = Instantiate(prefabToSpawn, transform.position, prefabToSpawn.transform.rotation, transform);
+            currentModelInstance = Instantiate(prefabToSpawn, transform);
+            currentModelInstance.transform.localPosition = Vector3.zero;
+
+            //we keep the local y x z rotation of the prefab so x/z rot is right and y rot i kept from random rot in the manager
+            currentModelInstance.transform.localRotation = prefabToSpawn.transform.localRotation;
         }
     }
 
@@ -238,6 +242,18 @@ public class Plant : MonoBehaviour
         {
             //returns true if the plant can be eaten or if it is fully grown
             return canBeEaten || currentStage == GrowthStage.grown;
+        }
+    }
+
+    public float PlantSmellRadiusValue
+    {
+        get
+        {
+            return PlantSmellRadius;
+        }
+        set
+        {
+            PlantSmellRadius = value;
         }
     }
 

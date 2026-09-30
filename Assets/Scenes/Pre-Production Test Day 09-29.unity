@@ -530,9 +530,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileSelectionManager
   uiStateManager: {fileID: 1077366069}
-  doubleTapTime: 0.3
-  visibilityMode: 0
-  selectionKey: 55
+  visibilityMode: 1
 --- !u!4 &695006196
 Transform:
   m_ObjectHideFlags: 0
@@ -944,6 +942,100 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2095791015
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2095791016}
+  - component: {fileID: 2095791017}
+  m_Layer: 0
+  m_Name: PlayerInput
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2095791016
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2095791015}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.96515, y: -2.44874, z: -0.7968}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2095791017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2095791015}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
+  m_Actions: {fileID: -944628639613478452, guid: 5e85ea705d4f7a9418425642b2bf6270, type: 3}
+  m_NotificationBehavior: 2
+  m_UIInputModule: {fileID: 0}
+  m_DeviceLostEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_DeviceRegainedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ControlsChangedEvent:
+    m_PersistentCalls:
+      m_Calls: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 695006195}
+        m_TargetAssemblyTypeName: TileSelectionManager, Assembly-CSharp
+        m_MethodName: OnTileMove
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: b3b3c389-fbd6-46de-9656-9a31a83c3e4c
+    m_ActionName: 'Terraform/TileMove[/Keyboard/upArrow,/Keyboard/downArrow,/Keyboard/leftArrow,/Keyboard/rightArrow]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 695006195}
+        m_TargetAssemblyTypeName: TileSelectionManager, Assembly-CSharp
+        m_MethodName: OnTileSelect
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 87b0775d-5b78-4d7e-acbd-8653b3a2b5b4
+    m_ActionName: 'Terraform/TileSelect[/Keyboard/leftCtrl,/Keyboard/ctrl]'
+  m_NeverAutoSwitchControlSchemes: 0
+  m_DefaultControlScheme: 
+  m_DefaultActionMap: Terraform
+  m_SplitScreenIndex: -1
+  m_Camera: {fileID: 961739752}
 --- !u!1 &2144296028
 GameObject:
   m_ObjectHideFlags: 0
@@ -954,7 +1046,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2144296029}
   m_Layer: 0
-  m_Name: ========== OBJECTS ==========
+  m_Name: ========== ACTIONS ==========
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -983,6 +1075,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1585283368217137284, guid: c8d08dd725886c84eb7372d61821275b, type: 3}
+      propertyPath: chunkGridSize.x
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1585283368217137284, guid: c8d08dd725886c84eb7372d61821275b, type: 3}
+      propertyPath: chunkGridSize.y
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1585283368217137284, guid: c8d08dd725886c84eb7372d61821275b, type: 3}
       propertyPath: gridLineMaterial
       value: 
@@ -1034,8 +1134,30 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 8073856895723802328, guid: c8d08dd725886c84eb7372d61821275b, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2085836182866419193}
   m_SourcePrefab: {fileID: 100100000, guid: c8d08dd725886c84eb7372d61821275b, type: 3}
+--- !u!1 &2085836182866419192 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8073856895723802328, guid: c8d08dd725886c84eb7372d61821275b, type: 3}
+  m_PrefabInstance: {fileID: 2085836182866419191}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2085836182866419193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2085836182866419192}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c35f7983d6490e04892dbb279c267ce1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TerraformTileGridOverlay
+  heightOffset: 0.02
+  lineWidth: 0.025
 --- !u!1001 &2376537313519821774
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1168,3 +1290,4 @@ SceneRoots:
   - {fileID: 2376537313519821774}
   - {fileID: 1785858073}
   - {fileID: 2144296029}
+  - {fileID: 2095791016}
