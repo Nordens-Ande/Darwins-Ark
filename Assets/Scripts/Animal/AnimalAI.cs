@@ -1,4 +1,7 @@
 using Assets.Scripts.Environment;
+using NUnit.Framework;
+using System.Collections.Generic;
+using System.Security.Cryptography;
 using Unity.IO.LowLevel.Unsafe;
 using UnityEditor.Rendering;
 using UnityEngine;
@@ -11,6 +14,8 @@ public class AnimalAI : MonoBehaviour
     [SerializeField] private float hunger = 0; //0-100
     [SerializeField] private float bossThreat = 0; //0-100
     [SerializeField] private float Happiness = 75; //0-100
+    [SerializeField] private float matingSeason = 0;
+    [SerializeField] private float tired = 0;
 
     [Header("Animal Stats")]
     [Space]
@@ -20,50 +25,58 @@ public class AnimalAI : MonoBehaviour
     [SerializeField] private float damage = 10;
     [SerializeField] private float health = 100; //0-100
     [SerializeField] private float hungerDeteration = 1;
+    [SerializeField] private float MutationRate = 1;
+    [SerializeField, ReadOnly] private float currentMutationValue = 0;
+    [SerializeField] private float MutationMax = 100;
+    [SerializeField] private float Defence = 1; //Do nothing at the moment
+
 
     [Header("Timers")]
     [Space]
     //InternalTimer
     [SerializeField] private float maxIdleTime = 5f;
-    [SerializeField] private float currentIdleTime = 0;
+    [SerializeField, ReadOnly] private float currentIdleTime = 0;
 
     [SerializeField] private float maxAttackTime = 2;
-    [SerializeField] private float currentAttackTime = 0;
+    [SerializeField, ReadOnly] private float currentAttackTime = 0;
 
     [SerializeField] private float clockCycleTime = 10; //How long before points deteriate
-    [SerializeField] private float clockCycleTimeCurrent;
-
-    //Traversing
-    private Vector3 walkPoint;
-    private bool hasSetPath = false;
-    private int minIslandSize = 0;
-    private int maxIslandSize = 20;
+    [SerializeField,ReadOnly] private float clockCycleTimeCurrent;
 
     [Header("Boss")]
     [Space]
     //bossFight
     [SerializeField] private float attackDistance = 3;
 
-    
-    //[Header("Happiness indicator")]
-    //[Space]
-    ////DisplayHappiness
-    //[SerializeField] private Color colorHappy;
-    //[SerializeField] private Color colorIndiferent;
-    //[SerializeField] private Color colorUnhappy;
-    //private Transform happinessMeter;
-    //private Renderer currentColor;
-    //[Range(0f,1f)]
-    //[SerializeField] private float colorTransparancy;
-
-    private bool isIdle = false;
-
-    Plant choosenPlant = null;
-
-    private bool hasMutated = false;
+    //Seeds that animal can spawn
+    [Header("Seeds that can spawn")]
+    [SerializeField] private List<GameObject> poop;
 
     [Header("DebugMode")]
-    [SerializeField] private bool TestMutation = true;
+    [SerializeField] private bool TestMutation = false;
+
+
+    //Traversing
+    private Vector3 walkPoint;
+    private bool hasSetPath = false;
+
+    //Find plant
+    private int tileCheckSize = 2; //How many tiles animal should see plant
+    private List<Tile> tileList;
+    private Tile currentTile;
+    private Plant choosenPlant = null;
+
+    //Idle
+    private bool isIdle = false;
+
+    //Mutations
+    private bool hasMutated = false;
+    private bool isMutated = false;
+
+    //MatingSeason
+    private bool HasMate = false;
+    private bool HasProcreated = false;
+    private bool AwaitMate = false;
 
     //Properties
     public float BossThreat
@@ -108,28 +121,20 @@ public class AnimalAI : MonoBehaviour
         set { hungerDeteration = value; }
     }
 
+    public float MatingSeason
+    {
+        get { return matingSeason; }
+        set {  matingSeason = value; }
+    }
+
 
 
     void Start()
     {
         maxAttackTime = 2;
-        //happinessMeter = gameObject.transform.GetChild(0);
-
-        ////Guard if gameobject dosent have sphere attacted then it will create one
-        //if(happinessMeter == null) 
-        //{ 
-        //    GameObject happinessSphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        //    happinessSphere.transform.position = new Vector3 (transform.position.x, transform.position.y + 1, transform.position.z);
-        //    happinessSphere.transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
-        //    happinessSphere.transform.SetParent(transform);
-        //    happinessMeter = happinessSphere.transform;
-        //}
-
-        //currentColor = happinessMeter.GetComponent<Renderer>();
-        //DisplayHappiness();
-        //colorHappy.a = colorTransparancy;
-        //colorIndiferent.a = colorTransparancy;
-        //colorUnhappy.a = colorTransparancy;
+        tileCheckSize = 1;
+        BossThreat = 0;
+        matingSeason = 0;
     }
 
     void Update()
@@ -146,17 +151,34 @@ public class AnimalAI : MonoBehaviour
         clockCycleTimeCurrent += Time.deltaTime;
         if (clockCycleTimeCurrent > clockCycleTime) 
         {
-            //hunger++;
             hunger += hungerDeteration;
-            Happiness = Happiness - hunger;
+            tired++;
+
+            Happiness = Happiness - hunger / 2;
+
             clockCycleTimeCurrent = 0;
-            //DisplayHappiness();
 
             //Testing if the mutations work
             if (TestMutation)
             {
                 MutationManager.instance.MutateAnimal_RandomMutation(this);
             }
+        }
+
+        if (hasMutated && !isMutated) 
+        { 
+            CheckMutationRate();
+        }
+    }
+
+    //Now animals mutation dosent happen instantly, this method checks if the timer is done and then mutates after the MutationRate hits the MutationMax
+    void CheckMutationRate() 
+    {
+        currentMutationValue += MutationRate;
+        if(currentMutationValue > MutationMax) 
+        { 
+            isMutated = true;
+            MutationManager.instance.MutateAnimal_RandomMutation(this);
         }
     }
 
@@ -166,33 +188,27 @@ public class AnimalAI : MonoBehaviour
         {
             BossFigth();
         }
-        else if(Happiness < 0) 
-        { 
+        else if (matingSeason == 1) 
+        {
+            Procreate();
+        }
+        else if (Happiness < 0)
+        {
             LeaveIsland();
         }
         else if (hunger > 50)
         {
             SearchForFood();
         }
-        else 
+        else if (tired > 75) 
+        { 
+            
+        }
+        else
         {
             WalkAround();
         }
     }
-
-    //Will show animals happines dynamicly and change it during runtime. Will be called for optimazation in start and clockcycleDeteriation 
-    //void DisplayHappiness() 
-    //{
-    //    if(Happiness > 50) 
-    //    {
-    //        currentColor.material.color = Color.Lerp(colorIndiferent, colorHappy, (Happiness-50) / 50);
-    //    }
-    //    else 
-    //    {
-    //        currentColor.material.color = Color.Lerp(colorIndiferent, colorUnhappy, Happiness/100/0.5f);
-    //    }
-        
-    //}
     
     //Action methods
     void Idle() 
@@ -204,6 +220,19 @@ public class AnimalAI : MonoBehaviour
             isIdle = false;
             WalkAround();
         }
+    }
+
+    //Updated movement to chunk logic / will need modification if we want something other then square chunks so animals dont hoover between chunks 
+    Vector3 FindWalkPoint()
+    {
+        if (TileManager.Instance.chunks.Count > 0)
+        {
+            Chunk choosenChunk = TileManager.Instance.chunks[Random.Range(0, TileManager.Instance.chunks.Count)];
+            Tile choosenTile = choosenChunk.Tiles[Random.Range(0, TileManager.Instance.ChunkSize), Random.Range(0, TileManager.Instance.ChunkSize)];
+            Vector3 point = new Vector3(choosenTile.position.x, choosenTile.position.y + transform.localScale.y / 2, choosenTile.position.z);
+            return point;
+        }
+        return new Vector3(0, 0, 0);
     }
 
     void WalkAround() 
@@ -228,28 +257,111 @@ public class AnimalAI : MonoBehaviour
         }
     }
 
-    //Check surroundings for food, makes sure the animals still moves if it dosent find any
-    void SearchForFood() 
-    {
-        WalkAround();
+    /// <summary>
+    /// ////////////////////////////////////////////////////////////////////////////////////////////////////////////// SEARCHING FOOD METHODS
+    /// </summary>
+    /// <returns></returns>
 
-        if (choosenPlant = null)
+    //Checks if animal has changed tile
+    bool HasAnimalMovedTile() 
+    { 
+        if(currentTile == TileManager.Instance.GetTile(transform.position)) 
         {
-            Collider[] collliders = Physics.OverlapSphere(transform.position, 5);
-            foreach (Collider hit in collliders)
+            return false;
+        }
+        else 
+        {
+            return true;
+        }
+    }
+
+    //Getting the surronding tiles around the animal
+    List<Tile> GetSurroundingTiles() 
+    {
+        List<Tile> tileList = new List<Tile>();
+        for(int i = -tileCheckSize; i < tileCheckSize; i++) 
+        {
+            for (int y = -tileCheckSize; y < tileCheckSize; y++) 
             {
-                Plant plant = hit.gameObject.GetComponent<Plant>();
-                if (plant != null && plant.CanBeEaten)
+                Vector2 position = new Vector2(transform.position.x + i, transform.position.z + y);
+                Tile tile = TileManager.Instance.GetTile(position);
+                if(tile != null) 
                 {
-                    walkPoint = hit.transform.position;
-                    choosenPlant = plant;
-                    hasSetPath = true;
-                    return;
+                    tileList.Add(tile);
                 }
             }
         }
-        else
+        return tileList;
+    }
+
+    //Checks if surrounding tiles have plants and then sends them to be evaluated
+    void SurroundingPlants() 
+    {
+        if (GetSurroundingTiles().Count == 0) return;
+
+        List<Plant> currentPlantChoices = new List<Plant>();
+
+        foreach(Tile tile in GetSurroundingTiles()) 
         {
+            if (!tile.HasPlant) continue;
+
+            if(!tile.CurrentPlant.CanBeEaten) continue;
+
+            Plant plant = tile.CurrentPlant;
+
+            float distance = Vector3.Distance(transform.position, plant.transform.position);
+
+            if (plant.PlantSmellRadiusValue > distance)
+            {
+                currentPlantChoices.Add(plant);
+            }
+        }
+        if(currentPlantChoices.Count != 0) 
+        {
+            NearestPlantInList(currentPlantChoices);
+        }
+    }
+
+    //Gets the plant that is closest to the animal
+    void NearestPlantInList(List<Plant> currentPlantChoices) 
+    {
+        Plant optimalPlant = currentPlantChoices[0];
+        float optimalDistance = Vector3.Distance(transform.position, optimalPlant.transform.position);
+
+        foreach (Plant plant in currentPlantChoices)
+        {
+            float plantDistance = Vector3.Distance(transform.position, plant.transform.position);
+            if (optimalDistance > plantDistance)
+            {
+                optimalPlant = plant;
+                optimalDistance = plantDistance;
+            }
+        }
+
+        SetPlantWalkPoint(optimalPlant);
+    }
+
+    //Sets the animal walkpoint to the plant and sets the current plant to be consumed
+    void SetPlantWalkPoint(Plant plant) 
+    {
+        choosenPlant = plant;
+        walkPoint = plant.transform.position;
+        hasSetPath = true;
+    }
+
+    //Check surroundings for food, makes sure the animals still moves if it dosent find any
+    void SearchForFood() 
+    {
+        //checks if animal have moved and sets this tile to the current
+        if (choosenPlant == null && HasAnimalMovedTile())
+        {
+            SurroundingPlants();
+            currentTile = TileManager.Instance.GetTile(transform.position);
+        }
+        else 
+        {
+            //If plant is already set then just walk towards it and check if its in eating range
+            WalkAround();
             if (choosenPlant != null)
             {
                 float distance = Vector3.Distance(transform.position, choosenPlant.transform.position);
@@ -260,47 +372,38 @@ public class AnimalAI : MonoBehaviour
                 }
             }
         }
-
-    //Make raycast check here to see if plant is in reach
     }
 
     //eatplant 
     void EatFood(Plant plant) 
     {
+        Debug.LogWarning("Has eaten", gameObject);
+        choosenPlant = null;
         plant.EatPlant();
         hunger = 0;
-        //Destroy(plant.gameObject);
+        Poop();
     }
 
-
-    //Basiclly set a random walkpoint
-    //Vector3 FindWalkPoint() 
-    //{ 
-    //    Vector3 point = new Vector3 (Random.Range(minIslandSize, maxIslandSize), transform.localScale.y / 2, Random.Range(minIslandSize, maxIslandSize));
-    //    return point;
-    //}
-
-    //Updated movement to chunk logic / will need modification if we want something other then square chunks so animals dont hoover between chunks 
-    Vector3 FindWalkPoint()
+    //Will spawn plantseeds
+    void Poop()
     {
-        if(TileManager.Instance.chunks.Count > 0) 
+        if (poop.Count > 0)
         {
-            Chunk choosenChunk = TileManager.Instance.chunks[Random.Range(0, TileManager.Instance.chunks.Count)];
-            Tile choosenTile = choosenChunk.Tiles[Random.Range(0, TileManager.Instance.ChunkSize), Random.Range(0,TileManager.Instance.ChunkSize)];
-            Vector3 point = new Vector3(choosenTile.position.x, choosenTile.position.y + transform.localScale.y / 2, choosenTile.position.z);
-            return point;
+            int choosenPoop = Random.Range(0, poop.Count);
+            GameObject waste = Instantiate(poop[choosenPoop], transform.position, Quaternion.identity);
         }
-        return new Vector3(0,0,0);
     }
+
 
     //Will walk to corner and die if unhappy
     void LeaveIsland() 
     {
         Vector3 leaveVec = new Vector3(0, 0, 0);
+
         AnimalWalkMoveTowards(leaveVec);
         if(Vector3.Distance(transform.position, leaveVec) < 3) 
         {
-            Debug.Log("Im out of here");
+            Debug.LogWarning("Im out of here");
             Destroy(gameObject);
         }
     }
@@ -332,10 +435,21 @@ public class AnimalAI : MonoBehaviour
         }
     }
 
-    //Will spawn plantseeds
-    void Poop() 
-    { 
-        //Instantiateseed
+    //Method for making the animal stand in place
+    void StandStill()
+    {
+        //Await the mate
+        //Sleep
+    }
+
+
+    //Future method for offspring and procreation
+    void Procreate() 
+    {
+        //Need the list from animalManager to get which animals that can procreate
+        if (HasMate) WalkAround();
+        if(HasProcreated) matingSeason = 0;
+        if (AwaitMate) StandStill();
     }
 
     //Can be called to invoke bossfight
@@ -361,16 +475,14 @@ public class AnimalAI : MonoBehaviour
         }
     }
 
-    //If the map changes the animalmovment will registrer it
-    public void MapChange_SetNewMinMax(int min, int max) 
-    {
-        minIslandSize = min;
-        maxIslandSize = max;
-    }
-
     // Makes happiness public for AnimalMoodIndicator.cs
     public float GetHappiness()
     {
         return Happiness;
+    }
+
+    public void InvokeStandStill() 
+    {
+        StandStill();
     }
 }
