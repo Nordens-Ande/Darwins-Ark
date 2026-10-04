@@ -4,15 +4,6 @@ using UnityEngine;
 
 namespace Assets.Scripts.Environment
 {
-    public enum TileType
-    {
-        Ocean,
-        Beach,
-        Grass,
-        River,
-        Concrete
-    }
-
     public class Tile
     {
         public Vector3 position;
