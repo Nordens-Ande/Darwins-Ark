@@ -9,7 +9,8 @@ public class BoatManager : MonoBehaviour
     [SerializeField] GameObject BoatPrefab;
 
     List<Boat> boats;
-    bool spawnedBoat;
+
+    float spawnDistanceFromCenter;
 
     private void Awake()
     {
@@ -21,38 +22,75 @@ public class BoatManager : MonoBehaviour
 
     void Start()
     {
-        spawnedBoat = false;
         boats = new List<Boat>();
-        
     }
 
-    Tile GetSpawnTile(Tile targetTilePos)
+    Tile GetSpawnTile()
     {
-        //tileManager.get water y level
-        return TileManager.Instance.GetTile(40, 0);
+        spawnDistanceFromCenter = IslandNoise.Instance.MaxIslandRadius * 2;
+        float angle = Random.Range(0, Mathf.PI * 2);
+        Vector3 direction = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
+        Tile spawnTile = TileManager.Instance.GetTile(direction * spawnDistanceFromCenter);
+        return spawnTile;
     }
 
-    public void SpawnBoat(GameObject objectOnBoat, Tile targetTilePos)
+    Tile GetBeachTile()
     {
-        Tile spawnTile = GetSpawnTile(targetTilePos);
+        Vector3Int[] directions =
+        {
+            new Vector3Int(1, 0, 0),
+            new Vector3Int(0, 0, 1),
+            new Vector3Int(-1, 0, 0),
+            new Vector3Int(0, 0, -1),
+        };
+
+        List<Tile> possibleTiles = new List<Tile>();
+
+        foreach (Chunk chunk in TileManager.Instance.chunks)
+        {
+            foreach (Vector2Int tilePos in chunk.BeachTiles)
+            {
+                foreach(Vector3Int direction in directions)
+                {
+                    Tile tile = TileManager.Instance.GetTile(tilePos.x + direction.x, tilePos.y + direction.z);
+                    if(tile != null)
+                    {
+                        if(tile.Type is TileType.Ocean)
+                        {
+                            possibleTiles.Add(TileManager.Instance.GetTile(tilePos.x, tilePos.y));
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if(possibleTiles.Count > 0)
+        {
+            return possibleTiles[Random.Range(0, possibleTiles.Count)];
+        }
+        return TileManager.Instance.GetTile(-10, -40);
+    }
+
+    public GameObject SpawnBoat()
+    {
+        Tile spawnTile = GetSpawnTile();
+        Tile beachTile = GetBeachTile();
         GameObject boat = Instantiate(BoatPrefab, spawnTile.position, Quaternion.identity);
         if(boat != null)
         {
             Boat boatScript = boat.GetComponent<Boat>();
             if(boatScript != null)
             {
-                boatScript.Initialize(targetTilePos, spawnTile);
+                boatScript.Initialize(beachTile, spawnTile);
                 boats.Add(boatScript);
             }
         }
+        return boat;
     }
 
     void Update()
     {
-        if (!spawnedBoat)
-        {
-            SpawnBoat(BoatPrefab, TileManager.Instance.GetTile(0, 30));
-            spawnedBoat = true;
-        }
+
     }
 }

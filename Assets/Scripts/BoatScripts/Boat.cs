@@ -2,6 +2,14 @@ using System.Collections.Generic;
 using Assets.Scripts.Environment;
 using UnityEngine;
 
+public interface IBoatSpawning
+{
+    public Transform Transform
+    {  get; }
+
+    public bool Unload(Tile beachTile);
+}
+
 public class Boat : MonoBehaviour
 {
     enum BoatSequence // what step of the journey we are at
@@ -30,14 +38,31 @@ public class Boat : MonoBehaviour
     int pathStage = 0;
 
     float maxMovementSpeed = 5;
-    float minMovementSpeed = 0.5f;
+    float minMovementSpeed = 1f;
+
+    float distanceFromCoast = 5f; // make not hardcoded if weird later
+
+    [SerializeField] GameObject loadPos;
+    IBoatSpawning loadObject; //object on boat, animal or boss
+
+    public GameObject LoadPos
+    { get { return loadPos; } }
+
+    public IBoatSpawning LoadObject
+    { 
+        get { return loadObject; }
+        set { loadObject = value; }
+    }
+
 
     public void Initialize(Tile beachTile, Tile startTile) // constructor called from BoatManager after a boat is instantiated
     {
         path = new List<Tile>();
         pathStage = 0;
+        Debug.Log(IslandNoise.Instance.MaxIslandRadius);
 
         this.beachTile = beachTile;
+        Debug.Log("beach tile: " + beachTile.position);
         this.startTile = startTile;
         currentTile = startTile;
         targetTile = SetTargetTile();
@@ -45,6 +70,7 @@ public class Boat : MonoBehaviour
 
         CreatePath();
         SetNextTile(path[pathStage]);
+        transform.rotation = Quaternion.LookRotation(nextTile.position - currentTile.position);
     }
 
     void SetNextTile(Tile nextTile)
@@ -52,19 +78,101 @@ public class Boat : MonoBehaviour
         this.nextTile = nextTile;
     }
 
+    bool IsBoatTraversable(Tile tile)
+    {
+        if (tile.Type != TileType.Ocean)
+        {
+            return false;
+        }
+
+        float minimumDistanceFromCenter = IslandNoise.Instance.MaxIslandRadius + distanceFromCoast;
+        float distanceFromCenter = Vector3.Distance(tile.position, Vector3.zero);
+        if (distanceFromCenter < minimumDistanceFromCenter)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     Tile SetTargetTile()
     {
-        return TileManager.Instance.GetTile(beachTile.position.x + 1, beachTile.position.z);
+        //Tile targetTile = TileManager.Instance.GetTile(beachTile.position.x + 1, beachTile.position.z);
+        //Debug.Log("target tile pos: " + targetTile.position);
+        //return targetTile;
+
+        Tile targetTile;
+        Vector3 bPos = beachTile.position;
+        float x = Mathf.Abs(bPos.x);
+        float z = Mathf.Abs(bPos.z);
+
+        if (x > z)
+        {
+            if(bPos.x < 0)
+            {
+                targetTile = TileManager.Instance.GetTile(bPos.x - 1, bPos.z);
+            }
+            else
+            {
+                targetTile = TileManager.Instance.GetTile(bPos.x + 1, bPos.z);
+            }
+            
+        }
+        else
+        {
+            if (bPos.z < 0)
+            {
+                targetTile = TileManager.Instance.GetTile(bPos.x, bPos.z - 1);
+            }
+            else
+            {
+                targetTile = TileManager.Instance.GetTile(bPos.x, bPos.z + 1);
+            }
+        }
+
+        return targetTile;
     }
 
     Tile SetRotationTile()
     {
-        return TileManager.Instance.GetTile(targetTile.position.x + 5, targetTile.position.z);
+        Vector3 tPos = targetTile.position;
+        float x = Mathf.Abs(tPos.x);
+        float z = Mathf.Abs(tPos.z);
+
+        Vector3 direction;
+        if(x > z)
+        {
+            //rotationTile = TileManager.Instance.GetTile(tPos.x + (((Mathf.Abs(tPos.x) / tPos.x) * distanceFromCoast) + 2), tPos.z);
+            direction = new Vector3((Mathf.Abs(tPos.x) / tPos.x), 0, 0);
+        }
+        else
+        {
+            //rotationTile = TileManager.Instance.GetTile(tPos.x, tPos.z + (((Mathf.Abs(tPos.z) / tPos.z) * distanceFromCoast) + 2));
+            direction = new Vector3(0, 0, (Mathf.Abs(tPos.z) / tPos.z));
+        }
+
+        Tile tile = null;
+        for(int i = 1; i < 20; i++)
+        {
+            tile = TileManager.Instance.GetTile(tPos + direction * i);
+            if(tile == null)
+            {
+                continue;
+            }
+            if(!IsBoatTraversable(tile))
+            {
+                continue;
+            }
+
+            return tile;
+        }
+        return tile;
     }
 
     List<Tile> CalculatePath()
     {
         List<Tile> path = new List<Tile>();
+        HashSet<Tile> visited = new HashSet<Tile>();
 
         Vector3Int[] directions =
         {
@@ -75,6 +183,7 @@ public class Boat : MonoBehaviour
         };
 
         Tile currentTile = rotationTile;
+        visited.Add(currentTile);
 
         int iterationCount = 0;
         int maxIterations = TileManager.Instance.ChunkGridSize.x * TileManager.Instance.ChunkSize * 20;
@@ -92,11 +201,23 @@ public class Boat : MonoBehaviour
             foreach(Vector3 direction in directions)
             {
                 Tile tile = TileManager.Instance.GetTile(currentTile.position.x + direction.x, currentTile.position.z + direction.z);
-                if (tile.Type != TileType.Ocean)
+                if (tile == null)
+                {
                     continue;
+                }
+
+                if (visited.Contains(tile))
+                {
+                    continue;
+                }
+
+                if(!IsBoatTraversable(tile))
+                {
+                    continue;
+                }
 
                 float distance = Vector3.Distance(tile.position, startTile.position);
-                if(distance < closestDistance || closestDistance == -1)
+                if (distance < closestDistance || closestDistance == -1)
                 {
                     closestDistance = distance;
                     nextTile = tile;
@@ -111,11 +232,11 @@ public class Boat : MonoBehaviour
 
             if (nextTile == startTile)//path finished
             {
-                Debug.Log("Found start tile when building path for boat");
                 break;
             }
             
             path.Add(nextTile);
+            visited.Add(nextTile);
             currentTile = nextTile;
         }
 
@@ -125,7 +246,7 @@ public class Boat : MonoBehaviour
                 path.RemoveAt(i);
             if(i != 0)
             {
-                if(i % 5 != 0)
+                if(i % 10 != 0)
                 {
                     path.RemoveAt(i);
                 }
@@ -174,6 +295,7 @@ public class Boat : MonoBehaviour
         }
         else if (currentTile == targetTile && step == BoatSequence.MoveTowardsTargetTile)
         {
+            loadObject.Transform.SetParent(null);
             step = BoatSequence.AtTargetTile;
         }
         else if (currentTile == rotationTile && step == BoatSequence.LeavingTowardsRotationTile)
@@ -199,14 +321,15 @@ public class Boat : MonoBehaviour
         step = BoatSequence.LeavingTowardsRotationTile;
     }
 
-    bool CheckIfReachedNextTile()
+    bool CheckIfReachedNextTile(bool goingBackwards)
     {
-        float distance = Vector3.Distance(nextTile.position, transform.position);
-        if (distance < 0.01f)
+        Vector3 toTarget = nextTile.position - transform.position;
+
+        if (goingBackwards)
         {
-            return true;
+            return Vector3.Dot(transform.forward, toTarget) >= 0f;
         }
-        return false;
+        return Vector3.Dot(transform.forward, toTarget) <= 0f;
     }
 
     float DecideSpeed()
@@ -224,11 +347,11 @@ public class Boat : MonoBehaviour
         {
             if (d >= 0.5f)
             {
-                return Mathf.Lerp(minMovementSpeed, maxMovementSpeed, (1f - d) * 2f) / 2;
+                return Mathf.Lerp(minMovementSpeed, maxMovementSpeed, (1f - d) * 2f);
             }
             else
             {
-                return Mathf.Lerp(minMovementSpeed, maxMovementSpeed, d * 2f) / 2;
+                return Mathf.Lerp(minMovementSpeed, maxMovementSpeed, d * 2f);
             }
         }
         else if(currentTile == rotationTile && step == BoatSequence.Leave) // accelerate for 3 tiles
@@ -244,27 +367,44 @@ public class Boat : MonoBehaviour
 
     void BoatMove()
     {
+        bool goingBackwards = false;
+
         //decide speed
         float movementSpeed = DecideSpeed();
 
         //move and rotate
-        transform.position = Vector3.MoveTowards(transform.position, nextTile.position, movementSpeed * Time.deltaTime);
-
         Vector3 direction = nextTile.position - transform.position;
         direction.Normalize();
+
+        Vector3 moveDirection = transform.forward;
+
         if (step == BoatSequence.LeavingTowardsRotationTile)
         {
+            goingBackwards = true;
             direction = -direction;
+            moveDirection = -moveDirection;
         }
-        transform.rotation = Quaternion.LookRotation(direction);
+        if(direction != Vector3.zero)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 15f * Time.deltaTime);
+        }
+
+        transform.position = Vector3.MoveTowards(transform.position, transform.position + moveDirection, movementSpeed * Time.deltaTime);
 
         //check if reached tile
-        if(CheckIfReachedNextTile())
+        if(CheckIfReachedNextTile(goingBackwards))
         {
+            //transform.position = nextTile.position;
+
             currentTile = nextTile;
             pathStage++;
-            if (pathStage < path.Count - 1)
+
+            if (pathStage < path.Count)
+            {
                 SetNextTile(path[pathStage]);
+            }
+                
             UpdateStepFromMove();
         }
     }
@@ -293,7 +433,11 @@ public class Boat : MonoBehaviour
 
     void BoatUnload()
     {
-        UpdateStepFromUnload();
+        bool unloadComplete = loadObject.Unload(beachTile);
+        if(unloadComplete)
+        {
+            UpdateStepFromUnload();
+        }
     }
 
     void Update()

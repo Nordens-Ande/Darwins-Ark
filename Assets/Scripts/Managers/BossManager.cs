@@ -13,6 +13,8 @@ public class BossManager : MonoBehaviour
         get { return currentBoss; }
     }
 
+    bool spawnedBoss = false;
+
     private void Awake()
     {
         if(Instance == null)
@@ -21,61 +23,24 @@ public class BossManager : MonoBehaviour
 
     void Start()
     {
-        //SpawnBoss();
-    }
-
-    Vector2 GetSpawnLocation() //only works for square maps
-    {
-        int maxSpawn = TileManager.Instance.ChunkGridSize.x * TileManager.Instance.ChunkSize / 2;
-        maxSpawn = Mathf.RoundToInt(maxSpawn);
-        int minSpawn = -maxSpawn;
-        maxSpawn--;
-
-        if (TileManager.Instance.ChunkGridSize.x % 2 != 0) // ojämnt med chunks
-        {
-            maxSpawn += TileManager.Instance.ChunkSize / 2;
-            minSpawn += TileManager.Instance.ChunkSize / 2;
-            if (TileManager.Instance.ChunkSize % 2 != 0) // ojämnt med antal tiles i chunk
-            {
-                maxSpawn++;
-            }
-        }
         
-
-
-        int x = Random.Range(minSpawn, maxSpawn);
-        int side = Random.Range(1, 5);
-        switch(side)
-        {
-            case 1:
-                return new Vector2(x, minSpawn);
-                
-            case 2:
-                return new Vector2(x, maxSpawn);
-                
-            case 3:
-                return new Vector2(minSpawn, x);
-                
-            case 4:
-                return new Vector2(maxSpawn, x);
-        }
-        return new Vector2(0, 0);
     }
 
     public void SpawnBoss()
     {
         if (currentBoss != null) return;
-        Vector2 spawnLocation = GetSpawnLocation();
-        Vector3 spawnLocation3D = new Vector3(spawnLocation.x, 0, spawnLocation.y);
-        currentBoss = Instantiate(bossPrefab, spawnLocation3D, Quaternion.identity);
-        if (AnimalManager.Instance != null)
-            AnimalManager.Instance.BossSpawned();
+
+        //get boat
+        GameObject boat = BoatManager.Instance.SpawnBoat();
+        
+        Boat boatScript = boat.GetComponent<Boat>();
+        currentBoss = Instantiate(bossPrefab, new Vector3(0, 0, 0), Quaternion.identity, boatScript.LoadPos.transform);
+        boatScript.LoadObject = currentBoss.GetComponent<Boss>();
+        
     }
     
     void BossDied()
     {
-        if(AnimalManager.Instance != null)
-            AnimalManager.Instance.BossDied();
         currentBoss.SetActive(false);
         Destroy(currentBoss);
         currentBoss = null;
@@ -83,6 +48,12 @@ public class BossManager : MonoBehaviour
 
     void Update()
     {
+        if (!spawnedBoss)
+        {
+            SpawnBoss();
+            spawnedBoss = true;
+        }
+
         if (currentBoss != null)
         {
             if (currentBoss.GetComponent<BossHealth>())

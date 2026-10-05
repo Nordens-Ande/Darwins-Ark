@@ -50,8 +50,6 @@ namespace Assets.Scripts.Environment
                     float y = useNoise ? IslandNoise.Instance.GetHeight(x + position.x, z + position.y, out type) : 0f;
                     tiles[x, z] = new Tile(new Vector3(x + position.x, y, z + position.y), new Vector3(x, y, z), type);
 
-                    Debug.Log("hello!");
-
                     if(type is TileType.Ocean)
                     {
                         oceanTiles.Add(new Vector2Int((int)tiles[x, z].position.x, (int)tiles[x, z].position.z));

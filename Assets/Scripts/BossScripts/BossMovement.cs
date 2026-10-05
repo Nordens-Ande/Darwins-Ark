@@ -22,6 +22,8 @@ public class BossMovement : MonoBehaviour
     Tile nextTile;
     Vector3 moveDirection; //used to check what direction we moved last frame, when selecting new target tile we dont want to go in the negative of this direction
 
+    bool onBoat;
+
     void Start()
     {
         movementSpeed = 2;
@@ -34,6 +36,7 @@ public class BossMovement : MonoBehaviour
 
         nextTile = GetNextTile(direction);
         moveDirection = Vector3.zero;
+        onBoat = true;
     }
 
     List<Chunk> FindAvailableChunks(Chunk currentChunk)

@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Assets.Scripts.Environment;
 
 public class SpawnManager : MonoBehaviour
 {
     public static SpawnManager Instance;
+    
 
     void Awake()
     {
@@ -13,33 +15,25 @@ public class SpawnManager : MonoBehaviour
             Destroy(this);
     }
 
-    List<Vector3> GetSpawnPoint(int amount) // need to know beach tiles that is next to ocean
-    {
-        return null;
-    }
+    
 
-    Vector3 GetSpawnPoint()
-    {
-        List<Vector3> spawnPoints = GetSpawnPoint(1);
-        return spawnPoints[0];
-    }
+    //public List<GameObject> Spawn(List<GameObject> objectsToSpawn, GameObject parent)
+    //{
+    //    List<Vector3> spawnPoints = GetSpawnPoint(objectsToSpawn.Count);
 
-    public void SpawnSingle(GameObject objectToSpawn)
-    {
-        Vector3 spawnPoint = GetSpawnPoint();
-        //spawn boat with objectToSpawn at with target spawnPoint
-    }
+    //    if (spawnPoints.Count <= objectsToSpawn.Count)
+    //    {
+    //        Debug.Log("SpawnManager: could not find spawnpos for each object");
+    //    }
 
-    public void SpawnMultiple(List<GameObject> objectsToSpawn)
-    {
-        List<Vector3> spawnPoints = GetSpawnPoint(objectsToSpawn.Count);
-        int iterationCount = 0;
-        foreach(GameObject obj in objectsToSpawn)
-        {
-            //spawn object on boat
-            iterationCount++;
-        }
-    }
+    //    List<GameObject> instantiatedObjects = new List<GameObject>();
+    //    for (int i = 0; i < spawnPoints.Count; i++)
+    //    {
+            
+    //        BoatManager.Instance.SpawnBoat(objectsToSpawn[i], spawnPoints[i]);
+    //        GameObject go = Instantiate
+    //    }
+    //}
     
     void Update()
     {

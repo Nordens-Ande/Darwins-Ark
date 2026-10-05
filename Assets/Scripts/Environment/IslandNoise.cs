@@ -64,6 +64,7 @@ namespace Assets.Scripts.Environment
         [Header("Terrain")]
         [SerializeField] private NoiseDetailLevels terrainNoiseLevels = new NoiseDetailLevels(0.01f, 0, 0.03f, 100f, 0.08f, 200f);
 
+        public float MaxIslandRadius => islandRadius * (1 + coastlineVariation);
 
         private void Awake()
         {
