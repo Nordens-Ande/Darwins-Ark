@@ -24,6 +24,12 @@ namespace Assets.Scripts.Environment
         public int Size => size; 
         public Tile[,] Tiles => tiles;
 
+        [Obsolete] public HashSet<Vector2Int> OceanTiles => GetTiles(TileType.Ocean);
+        [Obsolete] public HashSet<Vector2Int> BeachTiles => GetTiles(TileType.Beach);
+        [Obsolete] public HashSet<Vector2Int> GrassTiles => GetTiles(TileType.Grass);
+        [Obsolete] public HashSet<Vector2Int> RiverTiles => GetTiles(TileType.River);
+        [Obsolete] public HashSet<Vector2Int> ConcreteTiles => GetTiles(TileType.Concrete);
+
         private bool useNoise => noise != null;
 
         public Chunk(Vector2 position, int size)
