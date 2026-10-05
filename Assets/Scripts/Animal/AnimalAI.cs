@@ -1,5 +1,6 @@
 using Assets.Scripts.Environment;
 using NUnit.Framework;
+//using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using Unity.IO.LowLevel.Unsafe;
@@ -14,8 +15,8 @@ public class AnimalAI : MonoBehaviour
     [SerializeField] private float hunger = 0; //0-100
     [SerializeField] private float bossThreat = 0; //0-100
     [SerializeField] private float Happiness = 75; //0-100
-    [SerializeField] private float matingSeason = 0;
-    [SerializeField] private float tired = 0;
+    [SerializeField] private float matingSeason = 0; // 0-100
+    [SerializeField] private float tired = 0; // 0-100
 
     [Header("Animal Stats")]
     [Space]
@@ -78,6 +79,13 @@ public class AnimalAI : MonoBehaviour
     private bool HasProcreated = false;
     private bool AwaitMate = false;
 
+    //Actions for utility AI
+    //System.Action bossFightAction;
+    //System.Action procreateAction;
+    //System.Action leaveIslandAction;
+    //System.Action searchForFoodAction;
+    //System.Action walkAroundAction;
+
     //Properties
     public float BossThreat
     {
@@ -127,6 +135,18 @@ public class AnimalAI : MonoBehaviour
         set {  matingSeason = value; }
     }
 
+    public float Tired 
+    {
+        get { return tired; }
+        set {  tired = value; }
+    }
+
+    public float Hunger 
+    { 
+        get {return hunger; }
+        set {hunger = value; }
+    }
+
 
 
     void Start()
@@ -135,6 +155,13 @@ public class AnimalAI : MonoBehaviour
         tileCheckSize = 1;
         BossThreat = 0;
         matingSeason = 0;
+
+        //Utility action defined
+        //bossFightAction = () => { BossFigth(); };
+        //procreateAction = () => { Procreate(); };
+        //leaveIslandAction = () => { LeaveIsland(); };
+        //searchForFoodAction = () => { SearchForFood(); };
+        //walkAroundAction = () => { WalkAround(); };
     }
 
     void Update()
@@ -377,7 +404,7 @@ public class AnimalAI : MonoBehaviour
     //eatplant 
     void EatFood(Plant plant) 
     {
-        Debug.LogWarning("Has eaten", gameObject);
+        //Debug.LogWarning("Has eaten", gameObject);
         choosenPlant = null;
         plant.EatPlant();
         hunger = 0;
