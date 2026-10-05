@@ -27,4 +27,12 @@ public class Boss : MonoBehaviour, IBoatSpawning
     {
         
     }
+
+
+    //behaviours
+
+    //move from beach to playable area
+    //seek
+    //move
+    //destroy tile
 }

@@ -22,8 +22,6 @@ public class BossMovement : MonoBehaviour
     Tile nextTile;
     Vector3 moveDirection; //used to check what direction we moved last frame, when selecting new target tile we dont want to go in the negative of this direction
 
-    bool onBoat;
-
     void Start()
     {
         movementSpeed = 2;
@@ -36,7 +34,6 @@ public class BossMovement : MonoBehaviour
 
         nextTile = GetNextTile(direction);
         moveDirection = Vector3.zero;
-        onBoat = true;
     }
 
     List<Chunk> FindAvailableChunks(Chunk currentChunk)
@@ -69,7 +66,7 @@ public class BossMovement : MonoBehaviour
     {
         if (TileManager.Instance.chunks.Count == 0) return null;
 
-        Debug.Log("choosing new target tile");
+        
 
         //find what chunk the boss is in now
         Chunk currentChunk = TileManager.Instance.GetChunk(transform.position.x, transform.position.z);

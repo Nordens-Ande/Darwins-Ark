@@ -45,10 +45,10 @@ public class BoatManager : MonoBehaviour
         };
 
         List<Tile> possibleTiles = new List<Tile>();
-
+        
         foreach (Chunk chunk in TileManager.Instance.chunks)
         {
-            foreach (Vector2Int tilePos in chunk.BeachTiles)
+            foreach (Vector2Int tilePos in chunk.GetTiles(TileType.Beach))
             {
                 foreach(Vector3Int direction in directions)
                 {

@@ -45,24 +45,19 @@ public class Boat : MonoBehaviour
     [SerializeField] GameObject loadPos;
     IBoatSpawning loadObject; //object on boat, animal or boss
 
-    public GameObject LoadPos
-    { get { return loadPos; } }
-
+    public GameObject LoadPos => loadPos;
     public IBoatSpawning LoadObject
-    { 
-        get { return loadObject; }
-        set { loadObject = value; }
+    {
+        get => loadObject;
+        set => loadObject = value;
     }
-
-
+    
     public void Initialize(Tile beachTile, Tile startTile) // constructor called from BoatManager after a boat is instantiated
     {
         path = new List<Tile>();
         pathStage = 0;
-        Debug.Log(IslandNoise.Instance.MaxIslandRadius);
 
         this.beachTile = beachTile;
-        Debug.Log("beach tile: " + beachTile.position);
         this.startTile = startTile;
         currentTile = startTile;
         targetTile = SetTargetTile();
@@ -97,11 +92,6 @@ public class Boat : MonoBehaviour
 
     Tile SetTargetTile()
     {
-        //Tile targetTile = TileManager.Instance.GetTile(beachTile.position.x + 1, beachTile.position.z);
-        //Debug.Log("target tile pos: " + targetTile.position);
-        //return targetTile;
-
-        Tile targetTile;
         Vector3 bPos = beachTile.position;
         float x = Mathf.Abs(bPos.x);
         float z = Mathf.Abs(bPos.z);
@@ -110,11 +100,11 @@ public class Boat : MonoBehaviour
         {
             if(bPos.x < 0)
             {
-                targetTile = TileManager.Instance.GetTile(bPos.x - 1, bPos.z);
+                return TileManager.Instance.GetTile(bPos.x - 1, bPos.z);
             }
             else
             {
-                targetTile = TileManager.Instance.GetTile(bPos.x + 1, bPos.z);
+                return TileManager.Instance.GetTile(bPos.x + 1, bPos.z);
             }
             
         }
@@ -122,15 +112,13 @@ public class Boat : MonoBehaviour
         {
             if (bPos.z < 0)
             {
-                targetTile = TileManager.Instance.GetTile(bPos.x, bPos.z - 1);
+                return TileManager.Instance.GetTile(bPos.x, bPos.z - 1);
             }
             else
             {
-                targetTile = TileManager.Instance.GetTile(bPos.x, bPos.z + 1);
+                return TileManager.Instance.GetTile(bPos.x, bPos.z + 1);
             }
         }
-
-        return targetTile;
     }
 
     Tile SetRotationTile()
@@ -387,7 +375,7 @@ public class Boat : MonoBehaviour
         if(direction != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 15f * Time.deltaTime);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 30f * Time.deltaTime);
         }
 
         transform.position = Vector3.MoveTowards(transform.position, transform.position + moveDirection, movementSpeed * Time.deltaTime);
@@ -395,8 +383,6 @@ public class Boat : MonoBehaviour
         //check if reached tile
         if(CheckIfReachedNextTile(goingBackwards))
         {
-            //transform.position = nextTile.position;
-
             currentTile = nextTile;
             pathStage++;
 
@@ -411,11 +397,7 @@ public class Boat : MonoBehaviour
 
     bool CheckIfReachedRotation(Quaternion rotation)
     {
-        if(Quaternion.Angle(transform.rotation, rotation) < 1f)
-        {
-            return true;
-        }
-        return false;
+        return Quaternion.Angle(transform.rotation, rotation) < 1f;
     }
 
     void BoatRotate()
@@ -433,8 +415,7 @@ public class Boat : MonoBehaviour
 
     void BoatUnload()
     {
-        bool unloadComplete = loadObject.Unload(beachTile);
-        if(unloadComplete)
+        if(loadObject.Unload(beachTile))
         {
             UpdateStepFromUnload();
         }
