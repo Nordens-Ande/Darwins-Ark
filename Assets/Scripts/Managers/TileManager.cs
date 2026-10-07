@@ -1,6 +1,8 @@
 using NUnit.Framework.Internal;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
+using static UnityEditor.PlayerSettings;
 
 namespace Assets.Scripts.Environment
 {
@@ -18,11 +20,9 @@ namespace Assets.Scripts.Environment
         [SerializeField] private Material gridLineMaterial;
         // -----------------------------------------------
 
-        public int ChunkSize
-        { get { return chunkSize; } }
+        public int ChunkSize => chunkSize;
 
-        public Vector2Int ChunkGridSize
-        { get { return chunkGridSize; } }
+        public Vector2Int ChunkGridSize => chunkGridSize;
 
         private void Awake()
         {
@@ -142,11 +142,8 @@ namespace Assets.Scripts.Environment
             }
             return null;
         }
-
-        public Chunk GetChunk(Vector3 position)
-        {
-            return GetChunk(position.x, position.y);
-        }
+        public Chunk GetChunk(Vector2 positionXZ) => GetChunk(positionXZ.x, positionXZ.y);
+        public Chunk GetChunk(Vector3 positionXZ) => GetChunk(positionXZ.x, positionXZ.z);
 
         public Tile GetTile(float x, float z)
         {
@@ -157,14 +154,9 @@ namespace Assets.Scripts.Environment
             }
             return null;
         }
-        public Tile GetTile(Vector2 posXZ)
-        {
-            return GetTile(posXZ.x, posXZ.y);
-        }
-        public Tile GetTile(Vector3 pos)
-        {
-            return GetTile(pos.x, pos.z);
-        }
+        public Tile GetTile(Vector2 positionXZ) => GetTile(positionXZ.x, positionXZ.y);
+        public Tile GetTile(Vector3 positionXZ) => GetTile(positionXZ.x, positionXZ.z);
+
 
         // Booleans for when chunk/tile grids are visible
         public void SetChunkGridVisible(bool visible)

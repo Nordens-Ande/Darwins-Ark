@@ -31,6 +31,7 @@ namespace Assets.Scripts.Environment
         [Obsolete] public HashSet<Vector2Int> ConcreteTiles => GetTiles(TileType.Concrete);
 
         private bool useNoise => noise != null;
+        private bool useSlops = true;
 
         public Chunk(Vector2 position, int size)
         {
@@ -98,7 +99,7 @@ namespace Assets.Scripts.Environment
 
             return tiles[x, z];
         }
-        private Tile GetTile(Vector2Int positionXZ, Space space = Space.World) => GetTile(positionXZ.x, positionXZ.y, space);
+        public Tile GetTile(Vector2Int positionXZ, Space space = Space.World) => GetTile(positionXZ.x, positionXZ.y, space);
 
 
         public void InitializeTileHashsets()
@@ -130,16 +131,23 @@ namespace Assets.Scripts.Environment
                         GetTileHeight(x, z - 1, Space.Self), // South
                         GetTileHeight(x + 1, z, Space.Self)  // East
                     };
-                    Color tileColor = useNoise ? IslandNoise.Instance.GetColor(new Vector2(tilePos.x, tilePos.z)) : Color.white;
+                    Color tileColor = useNoise ? noise.GetColor(new Vector2(tilePos.x, tilePos.z)) : Color.white;
 
                     //Top face
-                    AddFace(
-                        new Vector3(-0.5f, 0, 0.5f) + tilePos,      // top-left
-                        new Vector3(+0.5f, 0, 0.5f) + tilePos,      // top-right
-                        new Vector3(+0.5f, 0, -0.5f) + tilePos,     // bottom-right
-                        new Vector3(-0.5f, 0, -0.5f) + tilePos,     // bottom-left
-                        tileColor
-                    );
+                    if (useSlops)
+                    {
+                        AddFace(
+                            new Vector3(-0.5f, 0, 0.5f) + tilePos,      // top-left
+                            new Vector3(+0.5f, 0, 0.5f) + tilePos,      // top-right
+                            new Vector3(+0.5f, 0, -0.5f) + tilePos,     // bottom-right
+                            new Vector3(-0.5f, 0, -0.5f) + tilePos,     // bottom-left
+                            tileColor
+                        );
+                    }
+                    else
+                    {
+
+                    }
 
                     float tileHeight = tilePos.y;
 
