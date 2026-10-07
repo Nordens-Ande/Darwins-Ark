@@ -12,7 +12,7 @@ public class PlantManager : MonoBehaviour
 
 
     [Header("Varibles")]
-    [SerializeField] float SecondsForPlantToGrow = 10.0f;
+    [SerializeField] float secondsForPlantToGrow = 10.0f;
     [Space]
 
     [Header("Plant Spawning")]
@@ -27,6 +27,8 @@ public class PlantManager : MonoBehaviour
     [SerializeField] bool useRandomPlantScale = true;
     [SerializeField] bool useRandomOffsetsFromTile = true;
     [SerializeField] float maxTileOffset = 0.25f;
+    [Space]
+    [SerializeField] bool massPlantPlantsAsGrown = true;
 
     [Header("List of all Plants")]
     [SerializeField] private List<Plant> plants = new List<Plant>();
@@ -70,7 +72,7 @@ public class PlantManager : MonoBehaviour
             }
 
             //check if the plant is ready to grow, depnding on growth speed and time since last growth
-            if (plants[i].TimeSinceLastGrowth / plants[i].GrowthSpeed >= SecondsForPlantToGrow)
+            if (plants[i].TimeSinceLastGrowth / plants[i].GrowthSpeed >= secondsForPlantToGrow)
             {
                 plants[i].GrowPlant();
             }
@@ -122,6 +124,8 @@ public class PlantManager : MonoBehaviour
                         {
                             plant = plantPrefabToSpawn[Random.Range(0, plantPrefabToSpawn.Count)];
                         }
+
+                       // plant.SetGrowthStage(plant.grow);
 
                         SpawnPlantOnThisTile(plant, chunk.GetTile(tilePos.x, tilePos.y), randomGrowthSpeed);
                     }

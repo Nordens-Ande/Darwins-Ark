@@ -210,6 +210,19 @@ public class Plant : MonoBehaviour
         }
     }
 
+    public void SetGrowthStage(GrowthStage newStage)
+    {
+        currentStage = newStage;
+        ResetGrowthTimer();
+        updateVisulas();
+
+        // Uppdatera om plantan kan ätas baserat på stadiet
+        if (currentStage == GrowthStage.grown)
+        {
+            canBeEaten = true;
+        }
+    }
+
 
 
 
@@ -232,13 +245,7 @@ public class Plant : MonoBehaviour
         }
     }
 
-    public float TimeSinceLastGrowth
-    {
-        get
-        {
-            return timeSinceLastGrowth;
-        }
-    }
+    public float TimeSinceLastGrowth => timeSinceLastGrowth;
 
     public bool CanBeEaten
     {
@@ -260,11 +267,5 @@ public class Plant : MonoBehaviour
             PlantSmellRadius = value;
         }
     }
-
-
-
-
-
-
-
+    
 }
