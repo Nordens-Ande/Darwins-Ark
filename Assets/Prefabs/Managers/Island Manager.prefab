@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8073856895723802328
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4831986897734357128}
+  - component: {fileID: 1585283368217137284}
+  - component: {fileID: 3712244531883561027}
+  - component: {fileID: 5928225880126638516}
+  m_Layer: 0
+  m_Name: Island Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4831986897734357128
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8073856895723802328}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1585283368217137284
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8073856895723802328}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc539b4fedab2774287f702e3f7c58f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Environment.TileManager
+  chunkObjects: []
+  chunkSize: 8
+  chunkGridSize: {x: 8, y: 8}
+  gridLineMaterial: {fileID: 0}
+--- !u!114 &3712244531883561027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8073856895723802328}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c35f7983d6490e04892dbb279c267ce1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::TerraformTileGridOverlay
+  heightOffset: 0.02
+  lineWidth: 0.025
+--- !u!114 &5928225880126638516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8073856895723802328}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d034b744dd7260f42a7b29f8594e5d7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Environment.IslandNoise
+  seed: -1
+  islandRadius: 18
+  coastlineFrequency: 1
+  coastlineVariation: 0.15
+  coastlineNoiseLevels:
+    largeScaler: 2
+    largeOffset: 0
+    mediumScaler: 4
+    mediumOffset: 100
+    smallScaler: 12
+    smallOffset: 200
+  beachWidth: 4
+  beachMinHeight: 0.5
+  terrainNoiseLevels:
+    largeScaler: 0.01
+    largeOffset: 0
+    mediumScaler: 0.03
+    mediumOffset: 100
+    smallScaler: 0.08
+    smallOffset: 200

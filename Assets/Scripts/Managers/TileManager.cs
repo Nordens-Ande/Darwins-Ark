@@ -44,6 +44,7 @@ namespace Assets.Scripts.Environment
             {
                 for (int z = -chunkGridSize.y / 2; z < Mathf.Ceil(chunkGridSize.y / 2f); z++)
                 {
+                    Debug.Log(chunks.Count);
                     chunks.Add(new Chunk(new Vector2(x * chunkSize, z * chunkSize), chunkSize));
                 }
             }
