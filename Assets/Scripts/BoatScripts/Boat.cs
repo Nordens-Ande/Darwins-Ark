@@ -12,6 +12,8 @@ public interface IBoatSpawning
 
 public class Boat : MonoBehaviour
 {
+    PathFinding pathFinder;
+
     enum BoatSequence // what step of the journey we are at
     {
         MoveTowardsRotationTile,
@@ -40,7 +42,7 @@ public class Boat : MonoBehaviour
     float maxMovementSpeed = 5;
     float minMovementSpeed = 1f;
 
-    float distanceFromCoast = 5f; // make not hardcoded if weird later
+    float distanceFromCoast = 3f; // make not hardcoded if weird later
 
     [SerializeField] GameObject loadPos;
     IBoatSpawning loadObject; //object on boat, animal or boss
@@ -54,6 +56,7 @@ public class Boat : MonoBehaviour
     
     public void Initialize(Tile beachTile, Tile startTile) // constructor called from BoatManager after a boat is instantiated
     {
+        pathFinder = new PathFinding();
         path = new List<Tile>();
         pathStage = 0;
 
@@ -160,75 +163,79 @@ public class Boat : MonoBehaviour
     List<Tile> CalculatePath()
     {
         List<Tile> path = new List<Tile>();
-        HashSet<Tile> visited = new HashSet<Tile>();
+        //HashSet<Tile> visited = new HashSet<Tile>();
 
-        Vector3Int[] directions =
-        {
-            new Vector3Int(1, 0, 0),
-            new Vector3Int(0, 0, 1),
-            new Vector3Int(-1, 0, 0),
-            new Vector3Int(0, 0, -1),
-        };
+        //Vector3Int[] directions =
+        //{
+        //    new Vector3Int(1, 0, 0),
+        //    new Vector3Int(0, 0, 1),
+        //    new Vector3Int(-1, 0, 0),
+        //    new Vector3Int(0, 0, -1),
+        //};
 
-        Tile currentTile = rotationTile;
-        visited.Add(currentTile);
+        //Tile currentTile = rotationTile;
+        //visited.Add(currentTile);
 
-        int iterationCount = 0;
-        int maxIterations = TileManager.Instance.ChunkGridSize.x * TileManager.Instance.ChunkSize * 20;
-        while (true)
-        {
-            iterationCount++;
-            if (iterationCount > maxIterations)
-            {
-                Debug.Log("max iterations reached when building path for boat");
-                break;
-            }
+        //int iterationCount = 0;
+        //int maxIterations = TileManager.Instance.ChunkGridSize.x * TileManager.Instance.ChunkSize * 20;
+        //while (true)
+        //{
+        //    iterationCount++;
+        //    if (iterationCount > maxIterations)
+        //    {
+        //        Debug.Log("max iterations reached when building path for boat");
+        //        break;
+        //    }
 
-            float closestDistance = -1;
-            Tile nextTile = null;
-            foreach(Vector3 direction in directions)
-            {
-                Tile tile = TileManager.Instance.GetTile(currentTile.position.x + direction.x, currentTile.position.z + direction.z);
-                if (tile == null)
-                {
-                    continue;
-                }
+        //    float closestDistance = -1;
+        //    Tile nextTile = null;
+        //    foreach(Vector3 direction in directions)
+        //    {
+        //        Tile tile = TileManager.Instance.GetTile(currentTile.position.x + direction.x, currentTile.position.z + direction.z);
+        //        if (tile == null)
+        //        {
+        //            continue;
+        //        }
 
-                if (visited.Contains(tile))
-                {
-                    continue;
-                }
+        //        if (visited.Contains(tile))
+        //        {
+        //            continue;
+        //        }
 
-                if(!IsBoatTraversable(tile))
-                {
-                    continue;
-                }
+        //        if(!IsBoatTraversable(tile))
+        //        {
+        //            continue;
+        //        }
 
-                float distance = Vector3.Distance(tile.position, startTile.position);
-                if (distance < closestDistance || closestDistance == -1)
-                {
-                    closestDistance = distance;
-                    nextTile = tile;
-                }
-            }
+        //        float distance = Vector3.Distance(tile.position, startTile.position);
+        //        if (distance < closestDistance || closestDistance == -1)
+        //        {
+        //            closestDistance = distance;
+        //            nextTile = tile;
+        //        }
+        //    }
 
-            if (nextTile == null)
-            {
-                Debug.Log("unable to find next tile when building path for boat");
-                break;
-            }
+        //    if (nextTile == null)
+        //    {
+        //        Debug.Log("unable to find next tile when building path for boat");
+        //        break;
+        //    }
 
-            if (nextTile == startTile)//path finished
-            {
-                break;
-            }
+        //    if (nextTile == startTile)//path finished
+        //    {
+        //        break;
+        //    }
             
-            path.Add(nextTile);
-            visited.Add(nextTile);
-            currentTile = nextTile;
-        }
+        //    path.Add(nextTile);
+        //    visited.Add(nextTile);
+        //    currentTile = nextTile;
+        //}
 
-        for(int i = path.Count - 1; i >= 0; i--) // remove all tiles except every 5th to make movement nicer!
+        List<TileType> traversableTiles = new List<TileType>();
+        traversableTiles.Add(TileType.Ocean);
+        path = pathFinder.GetPath(startTile, rotationTile, IsBoatTraversable, 1);
+
+        for(int i = path.Count - 1; i >= 0; i--) // remove all tiles except every 10th to make movement nicer!
         {
             if(i == 0)
                 path.RemoveAt(i);
@@ -241,7 +248,7 @@ public class Boat : MonoBehaviour
             }
         }
 
-        path.Reverse(); // since we start from rotation tile
+        //path.Reverse(); // since we start from rotation tile
         
         return path;
     }
@@ -375,7 +382,7 @@ public class Boat : MonoBehaviour
         if(direction != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 30f * Time.deltaTime);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 20f * Time.deltaTime);
         }
 
         transform.position = Vector3.MoveTowards(transform.position, transform.position + moveDirection, movementSpeed * Time.deltaTime);

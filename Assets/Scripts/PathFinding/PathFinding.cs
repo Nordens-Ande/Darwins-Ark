@@ -1,16 +1,24 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Environment;
 using Unity.VisualScripting;
 using System.Linq;
+using UnityEngine.Assemblies;
 
 public class PathFinding
 {
-
-    struct TileNode
+    class TileNode
     {
         public Vector2Int prevTile;
         public float f, g, h;
+        public TileNode()
+        {
+            prevTile = new Vector2Int();
+            f = float.MaxValue; //total cost, g+h
+            g = float.MaxValue; //cost to reach the tile from start
+            h = float.MaxValue; //cost to reach the target tile from this tile
+        }
     }
 
     TileManager tileManager = TileManager.Instance;
@@ -32,24 +40,23 @@ public class PathFinding
         return new Vector2Int((int)tile.position.x, (int)tile.position.z);
     }
 
-    HashSet<Vector2Int> GetTraversableTiles(List<TileType> traversableTileTypes)
+    List<Tile> BuildPath(Tile targetTile, Tile startTile, Dictionary<Vector2Int, TileNode> tileNodes)
     {
-        HashSet<Vector2Int> traversableTiles = new HashSet<Vector2Int>();
+        List<Tile> path = new List<Tile>();
 
-        foreach(Chunk chunk in tileManager.chunks)
+        Vector2Int current = TileToVector2Int(targetTile);
+        Vector2Int start = TileToVector2Int(startTile);
+        
+        while(current != start)
         {
-            foreach(TileType type in traversableTileTypes)
-            {
-                traversableTiles.AddRange(chunk.GetTiles(type));
-            }
+            path.Add(tileManager.GetTile(current));
+            current = tileNodes[current].prevTile;
         }
 
-        return traversableTiles;
-    }
-
-    List<Tile> BuildPath(Tile TargetTile)
-    {
-        return new List<Tile>();
+        path.Add(startTile);
+        path.Reverse();
+        Debug.Log("pathfinding: path length: " + path.Count);
+        return path;
     }
 
     List<Vector2Int> GetNeighbours(Vector2Int currentTile)
@@ -67,68 +74,85 @@ public class PathFinding
         return Vector2.Distance(currentTile, targetTile);
     }
 
-    public List<Tile> GetPath(Tile startTile, Tile targetTile, List<TileType> traversableTileTypes, float maxHeightDifference)
+    public List<Tile> GetPath(Tile startTile, Tile targetTile, Func<Tile, bool> traversable, float maxHeightDifference)
     {
-        HashSet<Vector2Int> traversableTiles = GetTraversableTiles(traversableTileTypes);
-
-        Queue<Vector2Int> queue = new Queue<Vector2Int>();
-        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
         Dictionary<Vector2Int, TileNode> tileNodes = new Dictionary<Vector2Int, TileNode>();
+        SortedSet<Vector2Int> openSet = new SortedSet<Vector2Int>(
+            Comparer<Vector2Int>.Create((a, b) =>
+            {
+                int comparison = tileNodes[a].f.CompareTo(tileNodes[b].f);
+                if (comparison == 0)
+                {
+                    comparison = a.x.CompareTo(b.x);
+
+                    if (comparison == 0)
+                        comparison = a.y.CompareTo(b.y);
+                }
+                return comparison;
+            })
+        );
+
+        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+        
+        foreach (Chunk chunk in tileManager.chunks)
+        {
+            foreach(Tile tile in chunk.Tiles)
+            {
+                tileNodes[TileToVector2Int(tile)] = new TileNode();
+            }
+        }
 
         TileNode startNode = tileNodes[TileToVector2Int(startTile)];
         startNode.g = 0;
         startNode.h = DistanceToTargetTile(TileToVector2Int(startTile), TileToVector2Int(targetTile));
+        startNode.f = startNode.g + startNode.h;
 
-        foreach(Vector2Int tile in traversableTiles)
+        openSet.Add(TileToVector2Int(startTile));
+
+        while(openSet.Count > 0)
         {
-            tileNodes[tile] = new TileNode();
-        }
+            Vector2Int currentTile = openSet.Min;
+            openSet.Remove(currentTile);
+            visited.Add(currentTile);
 
-        queue.Enqueue(TileToVector2Int(startTile));
+            if (currentTile == TileToVector2Int(targetTile))
+            {
+                break;
+            }
 
-        bool foundTarget = false;
-        while(queue.Count > 0)
-        {
-            queue.OrderBy(pos => tileNodes[pos].f);
-
-            Vector2Int currentTile = queue.Dequeue();
             List<Vector2Int> neighbourTiles = GetNeighbours(currentTile);
             foreach(Vector2Int tile in neighbourTiles)
             {
-                if(tile == TileToVector2Int(targetTile))
-                {
-                    TileNode targetNode = tileNodes[TileToVector2Int(targetTile)];
-                    targetNode.prevTile = currentTile;
-                    foundTarget = true;
-                    break;
-                }
                 if(visited.Contains(tile))
                 {
                     continue;
                 }
-                if(!traversableTiles.Contains(tile))
+                if(!traversable(tileManager.GetTile(tile)))
                 {
                     continue;
                 }
-                if(Mathf.Abs(tileManager.GetTile(currentTile).position.y) - Mathf.Abs(tileManager.GetTile(tile).position.y) > maxHeightDifference)
+                if(Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileManager.GetTile(tile).position.y) > maxHeightDifference)
                 {
                     continue;
                 }
 
                 TileNode node = tileNodes[tile];
-                node.g = tileNodes[currentTile].g + 1; // calculate for real 
-                node.h = DistanceToTargetTile(tile, TileToVector2Int(targetTile)); //incorrect for now, fix method
-                node.f = node.g + node.h;
-                node.prevTile = currentTile; // uhuh
-            }
-            visited.Add(currentTile);
-            if(foundTarget)
-            {
-                break;
+                float g = tileNodes[currentTile].g + 1;
+                float h = DistanceToTargetTile(tile, TileToVector2Int(targetTile));
+                float f = g + h;
+                if(g < node.g)
+                {
+                    openSet.Remove(tile);
+                    node.g = g;
+                    node.h = h;
+                    node.f = f;
+                    node.prevTile = currentTile;
+                    openSet.Add(tile);
+                }
             }
         }
 
-        return BuildPath(targetTile);
+        return BuildPath(targetTile, startTile, tileNodes);
     }
 
 }
