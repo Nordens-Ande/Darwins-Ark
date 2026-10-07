@@ -256,6 +256,87 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!1 &524695264
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 524695266}
+  - component: {fileID: 524695265}
+  - component: {fileID: 524695267}
+  m_Layer: 0
+  m_Name: TileManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &524695265
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 524695264}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc539b4fedab2774287f702e3f7c58f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Environment.TileManager
+  chunkObjects: []
+  chunkSize: 8
+  chunkGridSize: {x: 9, y: 9}
+  gridLineMaterial: {fileID: 0}
+--- !u!4 &524695266
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 524695264}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 2.07636, y: -0, z: 2.07636}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &524695267
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 524695264}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d034b744dd7260f42a7b29f8594e5d7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Environment.IslandNoise
+  seed: -1
+  islandRadius: 30
+  coastlineFrequency: 1
+  coastlineVariation: 0.15
+  coastlineNoiseLevels:
+    largeScaler: 2
+    largeOffset: 0
+    mediumScaler: 4
+    mediumOffset: 100
+    smallScaler: 12
+    smallOffset: 200
+  beachWidth: 4
+  beachMinHeight: 0.5
+  terrainNoiseLevels:
+    largeScaler: 0.01
+    largeOffset: 0
+    mediumScaler: 0.03
+    mediumOffset: 100
+    smallScaler: 0.08
+    smallOffset: 200
 --- !u!1 &2020131679
 GameObject:
   m_ObjectHideFlags: 0
@@ -509,3 +590,4 @@ SceneRoots:
   - {fileID: 2020131682}
   - {fileID: 3401888433326412988}
   - {fileID: 6087097975050052363}
+  - {fileID: 524695266}
