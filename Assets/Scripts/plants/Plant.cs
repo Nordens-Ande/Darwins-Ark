@@ -16,15 +16,15 @@ public class Plant : MonoBehaviour
     [SerializeField] float health = 100.0f;
     [SerializeField, ReadOnly] float timeSinceLastGrowth = 0.0f;
     [SerializeField, ReadOnly] bool canBeEaten = false;
-    [SerializeField] float PlantSmellRadius = 5.0f; //the radius of where animals can smell the plant
-    [SerializeField, ReadOnly] Tile currentTile; //The tile that the plant is currently on
+    [SerializeField] float PlantSmellRadius = 5.0f; // the radius of where animals can smell the plant
+    [SerializeField, ReadOnly] Tile currentTile; // the tile that the plant is currently on
     [Space]
 
     [Header("Plant Growth Stage")]
     [SerializeField] GrowthStage currentStage = GrowthStage.seed;
     [Space]
 
-    //this is the models for the different stages of the plant
+    // this is the models for the different stages of the plant
     [Header("Plant Models")]
     [SerializeField] GameObject seedPrefab;
     [SerializeField] GameObject sproutPrefab;
@@ -33,8 +33,12 @@ public class Plant : MonoBehaviour
     [Space]
 
 
-    private GameObject currentModelInstance; //this is the model currently used for the plant
-    public Tile CurrentTile => currentTile; //this is the tile that the plant is currently on
+
+
+
+
+    private GameObject currentModelInstance; // this is the model currently used for the plant
+    public Tile CurrentTile => currentTile; // this is the tile that the plant is currently on
 
     public enum GrowthStage
     {
@@ -52,17 +56,17 @@ public class Plant : MonoBehaviour
 
     private void Update()
     {
-        //Update the time since last growth
+        // Update the time since last growth
         timeSinceLastGrowth += Time.deltaTime;
 
     }
 
 
-    //unity calls this everytime something is changed in the inspector
+    // unity calls this everytime something is changed in the inspector
 #if UNITY_EDITOR
     private void OnValidate()
     {
-        //we only want to update the prefab if the game is not running and the object is in the scene
+        // we only want to update the prefab if the game is not running and the object is in the scene
         if (gameObject.scene.rootCount == 0)
         {
             return;

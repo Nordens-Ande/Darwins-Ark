@@ -6,7 +6,7 @@ public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance = null;
 
-    [SerializeField, ReadOnly] Inventory playerInventory;  
+    [SerializeField, ReadOnly] public Inventory playerInventory;  
 
 
     private void Awake()
@@ -14,9 +14,14 @@ public class InventoryManager : MonoBehaviour
         if (Instance == null)
         {
             InventoryManager.Instance = this;
+
+            // we try to get inventory if it exists on the same gameobject
+            playerInventory = GetComponent<Inventory>();
+
+            // if it doesn't exist we make it
             if (playerInventory == null)
             {
-                playerInventory = GetComponent<Inventory>();
+                playerInventory = gameObject.AddComponent<Inventory>();
             }
         }
            
@@ -35,7 +40,7 @@ public class InventoryManager : MonoBehaviour
         List<InventorySlot> slots = playerInventory.Slots;
         if (slotIndex < 0 || slotIndex >= slots.Count)
         {
-            Debug.Log("You tried to plant a seed from the iventory which was outside of the possible indexes");
+            Debug.LogWarning("You tried to plant a seed from the iventory which was outside of the possible indexes");
             return false;
         }
             
@@ -43,7 +48,7 @@ public class InventoryManager : MonoBehaviour
         InventorySlot slot = slots[slotIndex];
         if (slot.IsEmpty || slot.seed == null || slot.seed.plantPrefab == null)
         {
-            Debug.Log("You tried to use an empty slots seed to plant, or there was a missing prefab for that seed");
+            Debug.LogWarning("You tried to use an empty slots seed to plant, or there was a missing prefab for that seed");
             return false;
         }
           

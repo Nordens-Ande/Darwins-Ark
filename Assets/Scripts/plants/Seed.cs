@@ -6,15 +6,19 @@ using UnityEngine;
 /// </summary>
 
 
-public class Seed : MonoBehaviour
+public class Seed
 {
 
     [Header("Basic Info")]
     [SerializeField] public string seedName = "name";
-    [SerializeField] Sprite icon; //the picture in the inventory
-    [SerializeField] string description;
-    [SerializeField] int maxStackSize = 99; //how many of one seed we can have in one slot
+    [SerializeField] private Sprite icon; // the picture in the inventory
+    [SerializeField] private string description;
+    [SerializeField, ReadOnly] private int seedRarity = 100; // a value that can be calulated somehow and used to decide backgorund color in ui
+    [SerializeField] private int maxStackSize = 99; // how many of one seed we can have in one slot
     [Space]
+
+
+
 
     [Header("Planting Reference")]
     public Plant plantPrefab; // Prefaben från PlantManager/Plant som ska gro
@@ -22,36 +26,14 @@ public class Seed : MonoBehaviour
 
 
 
-    //getters and setters
-    public string SeedName 
-    { 
-        get 
-        { 
-            return seedName; 
-        } 
-    }
+    // getters and setters
+    public string SeedName => seedName;
+    public Sprite Icon => icon;
+    public string Description => description;
+    public int MaxStackSize => maxStackSize;
 
-    public Sprite Icon
-    {
-        get
-        {
-            return icon;
-        }
-    }
 
-    public string Description
-    {
-        get
-        {
-            return description;
-        }
-    }
 
-    public int MaxStackSize
-    {
-        get
-        {
-            return maxStackSize;
-        }
-    }
+
+
 }

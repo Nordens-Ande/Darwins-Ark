@@ -2,6 +2,12 @@ using JetBrains.Annotations;
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// this script is what the inventory actually is, it' populated with inventory slots
+/// </summary>
+
+
 public class Inventory : MonoBehaviour
 {
     [SerializeField, ReadOnly] int maxSlots = 16;
@@ -11,7 +17,7 @@ public class Inventory : MonoBehaviour
 
     private void Awake()
     {
-        //we init the inventory
+        // we init the inventory
         if (slots.Count != maxSlots)
         {
             slots.Clear();
@@ -23,11 +29,11 @@ public class Inventory : MonoBehaviour
     }
 
 
-    //true if the full amount we wanted to add could be added, else false
+    // true if the full amount we wanted to add could be added, else false
     public bool AddSeed(Seed seedToAdd, int amount = 1)
     {
 
-        //we try to add the seed to an existing slot that has the same seed
+        // we try to add the seed to an existing slot that has the same seed
         foreach (var slot in slots)
         {
             if (!slot.IsEmpty && slot.seed == seedToAdd)
@@ -47,7 +53,7 @@ public class Inventory : MonoBehaviour
             }
         }
 
-        //if there is seeds left or there was no matching seed already there
+        // if there is seeds left or there was no matching seed already there
         foreach (var slot in slots)
         {
             if (slot.IsEmpty)
@@ -64,13 +70,13 @@ public class Inventory : MonoBehaviour
             }
         }
 
-        //if the inventory is full
+        // if the inventory is full
         return amount == 0;
 
     }
 
 
-    //returns true if we were able to remove the seed, otherwise false
+    // returns true if we were able to remove the seed, otherwise false
     public bool RemoveSeedFromSlot(int slotIndex, int amount = 1)
     {
         if (slotIndex < 0 || slotIndex >= slots.Count)
@@ -99,27 +105,9 @@ public class Inventory : MonoBehaviour
 
 
 
-
-
-
-
-
-    //getters and setters
-    public List<InventorySlot> Slots
-    {
-        get 
-        { 
-            return slots;
-        }
-    }
-
-    public int MaxSlots
-    {
-        get
-        {
-            return maxSlots;
-        }
-    }
+    // getters and setters
+    public List<InventorySlot> Slots => slots;
+    public int MaxSlots => maxSlots;
 
 
 
