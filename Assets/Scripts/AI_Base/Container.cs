@@ -6,7 +6,7 @@ using UnityEngine;
 //Then have the subclasses as parameter for the Container, UtilityBrain
 
 //Write the logic here aswell, which value that have priority over which
-public abstract class Container : MonoBehaviour
+public abstract class Container 
 {
     public abstract float Evaluate(AnimalAI animal);
 }

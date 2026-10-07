@@ -1,7 +1,7 @@
 using UnityEngine;
 
 //Takes in container of the value and what type of action that will correspond to that value
-public class UtilityAction : MonoBehaviour
+public class UtilityAction
 {
     private Container container;
     private System.Action action;

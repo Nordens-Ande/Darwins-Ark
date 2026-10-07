@@ -6,7 +6,7 @@ using UnityEngine.InputSystem.EnhancedTouch;
 //Acts as the decisionmaking process for the animal where its given a list of UtilityActions and weighs what value is highest and performs the
 //coresponding action in regards to it
 //If UtilityBrain is supposed to be used in other ai then just make all AI a subclass of one class and then evaluate that
-public class UtilityBrain : MonoBehaviour
+public class UtilityBrain
 {
     private List<UtilityAction> actionList;
     private AnimalAI animalAI;
@@ -17,7 +17,7 @@ public class UtilityBrain : MonoBehaviour
         this.animalAI = animal;
     }
 
-    void DecisionProcess() 
+    public void DecisionProcess() 
     {
         if (actionList.Count == 0) return;
 

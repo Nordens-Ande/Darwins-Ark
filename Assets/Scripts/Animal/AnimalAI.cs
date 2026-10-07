@@ -1,8 +1,9 @@
 using Assets.Scripts.Environment;
 using NUnit.Framework;
-//using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Cryptography;
+using TMPro;
 using Unity.IO.LowLevel.Unsafe;
 using UnityEditor.Rendering;
 using UnityEngine;
@@ -56,6 +57,10 @@ public class AnimalAI : MonoBehaviour
     [Header("DebugMode")]
     [SerializeField] private bool TestMutation = false;
 
+    //Manager instances 
+    private TileManager tileManager;
+    private MutationManager mutationManager;
+
 
     //Traversing
     private Vector3 walkPoint;
@@ -63,7 +68,7 @@ public class AnimalAI : MonoBehaviour
 
     //Find plant
     private int tileCheckSize = 2; //How many tiles animal should see plant
-    private List<Tile> tileList;
+    //private List<Tile> tileList;
     private Tile currentTile;
     private Plant choosenPlant = null;
 
@@ -79,12 +84,16 @@ public class AnimalAI : MonoBehaviour
     private bool HasProcreated = false;
     private bool AwaitMate = false;
 
+    //Utility AI
+    private UtilityBrain utilityBrain;
+    private List<UtilityAction> utilityChoosesList;
+
     //Actions for utility AI
-    //System.Action bossFightAction;
-    //System.Action procreateAction;
-    //System.Action leaveIslandAction;
-    //System.Action searchForFoodAction;
-    //System.Action walkAroundAction;
+    System.Action bossFightAction;
+    System.Action procreateAction;
+    System.Action leaveIslandAction;
+    System.Action searchForFoodAction;
+    System.Action walkAroundAction;
 
     //Properties
     public float BossThreat
@@ -151,25 +160,41 @@ public class AnimalAI : MonoBehaviour
 
     void Start()
     {
+        tileManager = TileManager.Instance;
+        mutationManager = MutationManager.instance;
         maxAttackTime = 2;
         tileCheckSize = 1;
         BossThreat = 0;
         matingSeason = 0;
 
-        //Utility action defined
-        //bossFightAction = () => { BossFigth(); };
-        //procreateAction = () => { Procreate(); };
-        //leaveIslandAction = () => { LeaveIsland(); };
-        //searchForFoodAction = () => { SearchForFood(); };
-        //walkAroundAction = () => { WalkAround(); };
+        InstantiateUtilityBrain();
     }
 
     void Update()
     {
-        CheckBestAction();
+        utilityBrain.DecisionProcess();
         ClockCycleDeteriation();
+    }
 
-        currentAttackTime += Time.deltaTime;
+    //Creates and feeds all the possible action in relation to its value to the utility brain
+    void InstantiateUtilityBrain() 
+    {
+        //Utility action defined
+        bossFightAction = () => { BossFigth(); };
+        procreateAction = () => { Procreate(); };
+        leaveIslandAction = () => { LeaveIsland(); };
+        searchForFoodAction = () => { SearchForFood(); };
+        walkAroundAction = () => { WalkAround(); };
+
+        //UtilityActions with its containers 
+        UtilityAction bossAction = new UtilityAction(new BossValueContainer(), bossFightAction);
+        UtilityAction walkAction = new UtilityAction(new walkAroundContainer(), walkAroundAction);
+        UtilityAction leaveAction = new UtilityAction(new LeaveContainer(), leaveIslandAction);
+        UtilityAction hungerAction = new UtilityAction(new HungryContainer(), searchForFoodAction);
+        utilityChoosesList = new List<UtilityAction> { bossAction, walkAction, leaveAction, hungerAction };
+
+        utilityBrain = new UtilityBrain(utilityChoosesList, this);
+
     }
 
     //Simple deteriation of the utility points during game time
@@ -181,14 +206,19 @@ public class AnimalAI : MonoBehaviour
             hunger += hungerDeteration;
             tired++;
 
-            Happiness = Happiness - hunger / 2;
+            Happiness = Happiness - hunger / 10;
 
             clockCycleTimeCurrent = 0;
+
+            if(hunger > 60) 
+            {
+                Happiness++;
+            }
 
             //Testing if the mutations work
             if (TestMutation)
             {
-                MutationManager.instance.MutateAnimal_RandomMutation(this);
+                mutationManager.MutateAnimal_RandomMutation(this);
             }
         }
 
@@ -201,11 +231,11 @@ public class AnimalAI : MonoBehaviour
     //Now animals mutation dosent happen instantly, this method checks if the timer is done and then mutates after the MutationRate hits the MutationMax
     void CheckMutationRate() 
     {
-        currentMutationValue += MutationRate;
+        currentMutationValue += MutationRate * Time.deltaTime;
         if(currentMutationValue > MutationMax) 
         { 
             isMutated = true;
-            MutationManager.instance.MutateAnimal_RandomMutation(this);
+            mutationManager.MutateAnimal_RandomMutation(this);
         }
     }
 
@@ -252,10 +282,24 @@ public class AnimalAI : MonoBehaviour
     //Updated movement to chunk logic / will need modification if we want something other then square chunks so animals dont hoover between chunks 
     Vector3 FindWalkPoint()
     {
-        if (TileManager.Instance.chunks.Count > 0)
+        if (tileManager.chunks.Count > 0)
         {
-            Chunk choosenChunk = TileManager.Instance.chunks[Random.Range(0, TileManager.Instance.chunks.Count)];
-            Tile choosenTile = choosenChunk.Tiles[Random.Range(0, TileManager.Instance.ChunkSize), Random.Range(0, TileManager.Instance.ChunkSize)];
+            //Chunk choosenChunk = TileManager.Instance.chunks[Random.Range(0, TileManager.Instance.chunks.Count)];
+            //Tile choosenTile = choosenChunk.Tiles[Random.Range(0, TileManager.Instance.ChunkSize), Random.Range(0, TileManager.Instance.ChunkSize)];
+            //Vector3 point = new Vector3(choosenTile.position.x, choosenTile.position.y + transform.localScale.y / 2, choosenTile.position.z);
+            //return point;
+
+            Chunk choosenChunk = tileManager.chunks[Random.Range(0, tileManager.chunks.Count)];
+            Vector2Int[] choosenTiles = choosenChunk.GetTiles(TileType.Grass).ToArray();
+            if(choosenTiles == null) 
+            {
+                //Try again
+                FindWalkPoint();
+            }
+
+            int randomPos = Random.Range(0, choosenTiles.Length-1);
+            Vector2Int choosenPosition = choosenTiles[randomPos];
+            Tile choosenTile = tileManager.GetTile(choosenPosition);
             Vector3 point = new Vector3(choosenTile.position.x, choosenTile.position.y + transform.localScale.y / 2, choosenTile.position.z);
             return point;
         }
@@ -292,7 +336,7 @@ public class AnimalAI : MonoBehaviour
     //Checks if animal has changed tile
     bool HasAnimalMovedTile() 
     { 
-        if(currentTile == TileManager.Instance.GetTile(transform.position)) 
+        if(currentTile == tileManager.GetTile(transform.position)) 
         {
             return false;
         }
@@ -311,7 +355,7 @@ public class AnimalAI : MonoBehaviour
             for (int y = -tileCheckSize; y < tileCheckSize; y++) 
             {
                 Vector2 position = new Vector2(transform.position.x + i, transform.position.z + y);
-                Tile tile = TileManager.Instance.GetTile(position);
+                Tile tile = tileManager.GetTile(position);
                 if(tile != null) 
                 {
                     tileList.Add(tile);
@@ -383,7 +427,7 @@ public class AnimalAI : MonoBehaviour
         if (choosenPlant == null && HasAnimalMovedTile())
         {
             SurroundingPlants();
-            currentTile = TileManager.Instance.GetTile(transform.position);
+            currentTile = tileManager.GetTile(transform.position);
         }
         else 
         {
@@ -404,7 +448,6 @@ public class AnimalAI : MonoBehaviour
     //eatplant 
     void EatFood(Plant plant) 
     {
-        //Debug.LogWarning("Has eaten", gameObject);
         choosenPlant = null;
         plant.EatPlant();
         hunger = 0;
@@ -428,17 +471,19 @@ public class AnimalAI : MonoBehaviour
         Vector3 leaveVec = new Vector3(0, 0, 0);
 
         AnimalWalkMoveTowards(leaveVec);
-        if(Vector3.Distance(transform.position, leaveVec) < 3) 
+        if (Vector3.Distance(transform.position, leaveVec) < 3)
         {
-            Debug.LogWarning("Im out of here");
+            Debug.LogWarning("Im out of here: ", this);
             Destroy(gameObject);
         }
+
     }
     //Prototype can only handle one enemy in the sceen, can be changed later
     void BossFigth() 
     {
         if (health > 25)
         {
+            currentAttackTime += Time.deltaTime;
             Vector3 bossPosition = BossManager.Instance.CurrentBoss.transform.position;
             bossPosition.y = 0.5f;
             Vector3 directionToBoss = Vector3.Normalize(bossPosition - transform.position);
