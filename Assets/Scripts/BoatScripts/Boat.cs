@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Net;
 using Assets.Scripts.Environment;
 using UnityEngine;
 
@@ -12,7 +13,7 @@ public interface IBoatSpawning
 
 public class Boat : MonoBehaviour
 {
-    PathFinding pathFinder;
+    PathFinding pathFinding;
 
     enum BoatSequence // what step of the journey we are at
     {
@@ -56,7 +57,7 @@ public class Boat : MonoBehaviour
     
     public void Initialize(Tile beachTile, Tile startTile) // constructor called from BoatManager after a boat is instantiated
     {
-        pathFinder = new PathFinding();
+        pathFinding = new PathFinding();
         path = new List<Tile>();
         pathStage = 0;
 
@@ -233,15 +234,15 @@ public class Boat : MonoBehaviour
 
         List<TileType> traversableTiles = new List<TileType>();
         traversableTiles.Add(TileType.Ocean);
-        path = pathFinder.GetPath(startTile, rotationTile, IsBoatTraversable, 1);
+        path = pathFinding.GetPath(startTile, rotationTile, IsBoatTraversable, 1);
 
-        for(int i = path.Count - 1; i >= 0; i--) // remove all tiles except every 10th to make movement nicer!
+        for (int i = path.Count - 1; i >= 0; i--) // remove all tiles except every 10th to make path more fluent
         {
-            if(i == 0)
+            if (i == 0)
                 path.RemoveAt(i);
-            if(i != 0)
+            if (i != 0)
             {
-                if(i % 10 != 0)
+                if (i % 5 != 0)
                 {
                     path.RemoveAt(i);
                 }
@@ -249,7 +250,7 @@ public class Boat : MonoBehaviour
         }
 
         //path.Reverse(); // since we start from rotation tile
-        
+
         return path;
     }
 
@@ -330,7 +331,11 @@ public class Boat : MonoBehaviour
     float DecideSpeed()
     {
         float movementSpeed = maxMovementSpeed;
-
+        if(currentTile == null || nextTile == null)
+        {
+            Debug.Log("current or next tile == null: Boat.cs: DecideSpeed()");
+            return movementSpeed;
+        }
         float maxDistance = Vector3.Distance(currentTile.position, nextTile.position);
         float distance = Vector3.Distance(transform.position, nextTile.position);
         float d = distance / maxDistance;

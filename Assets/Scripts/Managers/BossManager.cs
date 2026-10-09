@@ -56,13 +56,13 @@ public class BossManager : MonoBehaviour
 
         if (currentBoss != null)
         {
-            if (currentBoss.GetComponent<BossHealth>())
-            {
-                if (currentBoss.GetComponent<BossHealth>().IsAlive == false)
-                {
-                    BossDied();
-                }
-            }
+            //if (currentBoss.GetComponent<BossHealth>())
+            //{
+            //    if (currentBoss.GetComponent<BossHealth>().IsAlive == false)
+            //    {
+            //        BossDied();
+            //    }
+            //}
         }
     }
 }

@@ -64,6 +64,7 @@ public class PathFinding
         List<Vector2Int> neighbours = new List<Vector2Int>();
         foreach(Vector2Int direction in directions)
         {
+            if(tileManager.GetTile(currentTile + direction) == null) continue;
             neighbours.Add(currentTile + direction);
         }
         return neighbours;
@@ -71,7 +72,13 @@ public class PathFinding
 
     float DistanceToTargetTile(Vector2Int currentTile, Vector2Int targetTile) //incorrect probably
     {
-        return Vector2.Distance(currentTile, targetTile);
+        float dx = Mathf.Abs(currentTile.x - targetTile.x);
+        float dy = Mathf.Abs(currentTile.y - targetTile.y);
+
+        float diagonal = Mathf.Min(dx, dy);
+        float straight = Mathf.Max(dx, dy) - diagonal;
+
+        return diagonal * Mathf.Sqrt(2f) + straight;
     }
 
     public List<Tile> GetPath(Tile startTile, Tile targetTile, Func<Tile, bool> traversable, float maxHeightDifference)
@@ -136,8 +143,28 @@ public class PathFinding
                     continue;
                 }
 
+                Vector2 direction = tile - currentTile;
+                float movementCost;
+
+                //check if diagonal movement
+                if(direction.x != 0 && direction.y != 0)
+                {
+                    //make sure both of the orthogonal tiles are traversable aswell regarding height, prevents clipping the corner hopefully
+                    Tile tileXDir = tileManager.GetTile(tile.x + direction.x, tile.y);
+                    Tile tileZDir = tileManager.GetTile(tile.x, tile.y + direction.y);
+
+                    if (Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileXDir.position.y) > maxHeightDifference) continue;
+                    if (Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileZDir.position.y) > maxHeightDifference) continue;
+
+                    movementCost = Mathf.Sqrt(2f);
+                }
+                else
+                {
+                    movementCost = 1f;
+                }
+
                 TileNode node = tileNodes[tile];
-                float g = tileNodes[currentTile].g + 1;
+                float g = tileNodes[currentTile].g + movementCost;
                 float h = DistanceToTargetTile(tile, TileToVector2Int(targetTile));
                 float f = g + h;
                 if(g < node.g)
