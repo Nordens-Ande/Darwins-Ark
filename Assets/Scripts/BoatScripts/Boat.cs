@@ -234,7 +234,7 @@ public class Boat : MonoBehaviour
 
         List<TileType> traversableTiles = new List<TileType>();
         traversableTiles.Add(TileType.Ocean);
-        path = pathFinding.GetPath(startTile, rotationTile, IsBoatTraversable, 1);
+        path = pathFinding.GetPathDijkstra(startTile, rotationTile, IsBoatTraversable, 1);
 
         for (int i = path.Count - 1; i >= 0; i--) // remove all tiles except every 10th to make path more fluent
         {
@@ -242,7 +242,7 @@ public class Boat : MonoBehaviour
                 path.RemoveAt(i);
             if (i != 0)
             {
-                if (i % 5 != 0)
+                if (i % 8 != 0)
                 {
                     path.RemoveAt(i);
                 }
@@ -373,7 +373,7 @@ public class Boat : MonoBehaviour
         float movementSpeed = DecideSpeed();
 
         //move and rotate
-        Vector3 direction = nextTile.position - transform.position;
+        Vector3 direction = nextTile.position - currentTile.position;
         direction.Normalize();
 
         Vector3 moveDirection = transform.forward;
@@ -387,7 +387,7 @@ public class Boat : MonoBehaviour
         if(direction != Vector3.zero)
         {
             Quaternion targetRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 20f * Time.deltaTime);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 25f * Time.deltaTime);
         }
 
         transform.position = Vector3.MoveTowards(transform.position, transform.position + moveDirection, movementSpeed * Time.deltaTime);

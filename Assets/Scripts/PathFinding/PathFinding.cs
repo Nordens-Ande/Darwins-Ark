@@ -8,16 +8,30 @@ using UnityEngine.Assemblies;
 
 public class PathFinding
 {
-    class TileNode
+    abstract class TileNode
     {
         public Vector2Int prevTile;
+    }
+
+    class TileNodeAStar : TileNode
+    {
         public float f, g, h;
-        public TileNode()
+        public TileNodeAStar()
         {
             prevTile = new Vector2Int();
             f = float.MaxValue; //total cost, g+h
             g = float.MaxValue; //cost to reach the tile from start
             h = float.MaxValue; //cost to reach the target tile from this tile
+        }
+    }
+
+    class TileNodeDijkstra : TileNode
+    {
+        public float totalCost;
+        public TileNodeDijkstra()
+        {
+            prevTile = new Vector2Int();
+            totalCost = float.MaxValue;
         }
     }
 
@@ -40,7 +54,7 @@ public class PathFinding
         return new Vector2Int((int)tile.position.x, (int)tile.position.z);
     }
 
-    List<Tile> BuildPath(Tile targetTile, Tile startTile, Dictionary<Vector2Int, TileNode> tileNodes)
+    List<Tile> BuildPath(Tile targetTile, Tile startTile, Dictionary<Vector2Int, TileNodeAStar> tileNodes)
     {
         List<Tile> path = new List<Tile>();
 
@@ -55,7 +69,26 @@ public class PathFinding
 
         path.Add(startTile);
         path.Reverse();
-        Debug.Log("pathfinding: path length: " + path.Count);
+        //Debug.Log("pathfinding: path length: " + path.Count);
+        return path;
+    }
+
+    List<Tile> BuildPath(Tile targetTile, Tile startTile, Dictionary<Vector2Int, TileNodeDijkstra> tileNodes)
+    {
+        List<Tile> path = new List<Tile>();
+
+        Vector2Int current = TileToVector2Int(targetTile);
+        Vector2Int start = TileToVector2Int(startTile);
+
+        while (current != start)
+        {
+            path.Add(tileManager.GetTile(current));
+            current = tileNodes[current].prevTile;
+        }
+
+        path.Add(startTile);
+        path.Reverse();
+        //Debug.Log("pathfinding: path length: " + path.Count);
         return path;
     }
 
@@ -81,9 +114,9 @@ public class PathFinding
         return diagonal * Mathf.Sqrt(2f) + straight;
     }
 
-    public List<Tile> GetPath(Tile startTile, Tile targetTile, Func<Tile, bool> traversable, float maxHeightDifference)
+    public List<Tile> GetPathAStar(Tile startTile, Tile targetTile, Func<Tile, bool> traversable, float maxHeightDifference)
     {
-        Dictionary<Vector2Int, TileNode> tileNodes = new Dictionary<Vector2Int, TileNode>();
+        Dictionary<Vector2Int, TileNodeAStar> tileNodes = new Dictionary<Vector2Int, TileNodeAStar>();
         SortedSet<Vector2Int> openSet = new SortedSet<Vector2Int>(
             Comparer<Vector2Int>.Create((a, b) =>
             {
@@ -105,11 +138,11 @@ public class PathFinding
         {
             foreach(Tile tile in chunk.Tiles)
             {
-                tileNodes[TileToVector2Int(tile)] = new TileNode();
+                tileNodes[TileToVector2Int(tile)] = new TileNodeAStar();
             }
         }
 
-        TileNode startNode = tileNodes[TileToVector2Int(startTile)];
+        TileNodeAStar startNode = tileNodes[TileToVector2Int(startTile)];
         startNode.g = 0;
         startNode.h = DistanceToTargetTile(TileToVector2Int(startTile), TileToVector2Int(targetTile));
         startNode.f = startNode.g + startNode.h;
@@ -150,8 +183,8 @@ public class PathFinding
                 if(direction.x != 0 && direction.y != 0)
                 {
                     //make sure both of the orthogonal tiles are traversable aswell regarding height, prevents clipping the corner hopefully
-                    Tile tileXDir = tileManager.GetTile(tile.x + direction.x, tile.y);
-                    Tile tileZDir = tileManager.GetTile(tile.x, tile.y + direction.y);
+                    Tile tileXDir = tileManager.GetTile(currentTile.x + direction.x, currentTile.y);
+                    Tile tileZDir = tileManager.GetTile(currentTile.x, currentTile.y + direction.y);
 
                     if (Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileXDir.position.y) > maxHeightDifference) continue;
                     if (Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileZDir.position.y) > maxHeightDifference) continue;
@@ -163,7 +196,7 @@ public class PathFinding
                     movementCost = 1f;
                 }
 
-                TileNode node = tileNodes[tile];
+                TileNodeAStar node = tileNodes[tile];
                 float g = tileNodes[currentTile].g + movementCost;
                 float h = DistanceToTargetTile(tile, TileToVector2Int(targetTile));
                 float f = g + h;
@@ -182,4 +215,98 @@ public class PathFinding
         return BuildPath(targetTile, startTile, tileNodes);
     }
 
+    public List<Tile> GetPathDjikstra(Tile startTile, Tile targetTile, Func<Tile, bool> traversable, float maxHeightDifference)
+    {
+        Dictionary<Vector2Int, TileNodeDijkstra> tileNodes = new Dictionary<Vector2Int, TileNodeDijkstra>();
+        SortedSet<Vector2Int> openSet = new SortedSet<Vector2Int>(
+            Comparer<Vector2Int>.Create((a, b) =>
+            {
+                int comparison = tileNodes[a].totalCost.CompareTo(tileNodes[b].totalCost);
+                if (comparison == 0)
+                {
+                    comparison = a.x.CompareTo(b.x);
+
+                    if (comparison == 0)
+                        comparison = a.y.CompareTo(b.y);
+                }
+                return comparison;
+            })
+        );
+
+        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+
+        foreach (Chunk chunk in tileManager.chunks)
+        {
+            foreach (Tile tile in chunk.Tiles)
+            {
+                tileNodes[TileToVector2Int(tile)] = new TileNodeDijkstra();
+            }
+        }
+
+        TileNodeDijkstra startNode = tileNodes[TileToVector2Int(startTile)];
+        startNode.totalCost = 0;
+
+        openSet.Add(TileToVector2Int(startTile));
+
+        while (openSet.Count > 0)
+        {
+            Vector2Int currentTile = openSet.Min;
+            openSet.Remove(currentTile);
+            visited.Add(currentTile);
+
+            if (currentTile == TileToVector2Int(targetTile))
+            {
+                break;
+            }
+
+            List<Vector2Int> neighbourTiles = GetNeighbours(currentTile);
+            foreach (Vector2Int tile in neighbourTiles)
+            {
+                if (visited.Contains(tile))
+                {
+                    continue;
+                }
+                if (!traversable(tileManager.GetTile(tile)))
+                {
+                    continue;
+                }
+                if (Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileManager.GetTile(tile).position.y) > maxHeightDifference)
+                {
+                    continue;
+                }
+
+                Vector2 direction = tile - currentTile;
+                float movementCost;
+
+                //check if diagonal movement
+                if (direction.x != 0 && direction.y != 0)
+                {
+                    //make sure both of the orthogonal tiles are traversable aswell regarding height, prevents clipping the corner hopefully
+                    Tile tileXDir = tileManager.GetTile(currentTile.x + direction.x, currentTile.y);
+                    Tile tileZDir = tileManager.GetTile(currentTile.x, currentTile.y + direction.y);
+
+                    if (Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileXDir.position.y) > maxHeightDifference) continue;
+                    if (Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileZDir.position.y) > maxHeightDifference) continue;
+
+                    movementCost = Mathf.Sqrt(2f);
+                }
+                else
+                {
+                    movementCost = 1f;
+                }
+
+                TileNodeDijkstra node = tileNodes[tile];
+                float totalCost = tileNodes[currentTile].totalCost + movementCost;
+
+                if (totalCost < node.totalCost)
+                {
+                    openSet.Remove(tile);
+                    node.totalCost = totalCost;
+                    node.prevTile = currentTile;
+                    openSet.Add(tile);
+                }
+            }
+        }
+        return BuildPath(targetTile, startTile, tileNodes);
+    }
 }
