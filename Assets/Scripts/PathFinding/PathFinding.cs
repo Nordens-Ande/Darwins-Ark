@@ -103,7 +103,7 @@ public class PathFinding
         return neighbours;
     }
 
-    float DistanceToTargetTile(Vector2Int currentTile, Vector2Int targetTile) //incorrect probably
+    float DistanceToTargetTile(Vector2Int currentTile, Vector2Int targetTile)
     {
         float dx = Mathf.Abs(currentTile.x - targetTile.x);
         float dy = Mathf.Abs(currentTile.y - targetTile.y);
@@ -215,7 +215,7 @@ public class PathFinding
         return BuildPath(targetTile, startTile, tileNodes);
     }
 
-    public List<Tile> GetPathDjikstra(Tile startTile, Tile targetTile, Func<Tile, bool> traversable, float maxHeightDifference)
+    public List<Tile> GetPathDijkstra(Tile startTile, Tile targetTile, Func<Tile, bool> traversable, float maxHeightDifference)
     {
         Dictionary<Vector2Int, TileNodeDijkstra> tileNodes = new Dictionary<Vector2Int, TileNodeDijkstra>();
         SortedSet<Vector2Int> openSet = new SortedSet<Vector2Int>(
