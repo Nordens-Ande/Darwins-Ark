@@ -1,18 +1,18 @@
 using UnityEngine;
 
 //Takes in container of the value and what type of action that will correspond to that value
-public class UtilityAction
+public class UtilityAction<T>
 {
-    private Container container;
+    private Container<T> container;
     private System.Action action;
 
-    public UtilityAction(Container container, System.Action action) 
+    public UtilityAction(Container<T> container, System.Action action) 
     { 
         this.container = container;
         this.action = action;
     }
 
-    public Container Container { get { return container; }}
+    public Container<T> Container { get { return container; }}
     public System.Action Action { get { return action; }}
 
     public void Execute() 

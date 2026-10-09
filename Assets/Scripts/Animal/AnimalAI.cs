@@ -43,7 +43,7 @@ public class AnimalAI : MonoBehaviour
     [SerializeField, ReadOnly] private float currentAttackTime = 0;
 
     [SerializeField] private float clockCycleTime = 10; //How long before points deteriate
-    [SerializeField,ReadOnly] private float clockCycleTimeCurrent;
+    [SerializeField, ReadOnly] private float clockCycleTimeCurrent;
 
     [Header("Boss")]
     [Space]
@@ -85,8 +85,8 @@ public class AnimalAI : MonoBehaviour
     private bool AwaitMate = false;
 
     //Utility AI
-    private UtilityBrain utilityBrain;
-    private List<UtilityAction> utilityChoosesList;
+    private UtilityBrain<AnimalAI> utilityBrain;
+    private List<UtilityAction<AnimalAI>> utilityChoosesList;
 
     //Actions for utility AI
     System.Action bossFightAction;
@@ -187,13 +187,13 @@ public class AnimalAI : MonoBehaviour
         walkAroundAction = () => { WalkAround(); };
 
         //UtilityActions with its containers 
-        UtilityAction bossAction = new UtilityAction(new BossValueContainer(), bossFightAction);
-        UtilityAction walkAction = new UtilityAction(new walkAroundContainer(), walkAroundAction);
-        UtilityAction leaveAction = new UtilityAction(new LeaveContainer(), leaveIslandAction);
-        UtilityAction hungerAction = new UtilityAction(new HungryContainer(), searchForFoodAction);
-        utilityChoosesList = new List<UtilityAction> { bossAction, walkAction, leaveAction, hungerAction };
+        UtilityAction<AnimalAI> bossAction = new UtilityAction<AnimalAI>(new BossValueContainer(), bossFightAction);
+        UtilityAction<AnimalAI> walkAction = new UtilityAction<AnimalAI>(new WalkAroundContainer(), walkAroundAction);
+        UtilityAction<AnimalAI> leaveAction = new UtilityAction<AnimalAI>(new LeaveContainer(), leaveIslandAction);
+        UtilityAction<AnimalAI> hungerAction = new UtilityAction<AnimalAI>(new HungryContainer(), searchForFoodAction);
+        utilityChoosesList = new List<UtilityAction<AnimalAI>> { bossAction, walkAction, leaveAction, hungerAction };
 
-        utilityBrain = new UtilityBrain(utilityChoosesList, this);
+        utilityBrain = new UtilityBrain<AnimalAI>(utilityChoosesList, this);
 
     }
 

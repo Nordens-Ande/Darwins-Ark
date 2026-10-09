@@ -232,8 +232,8 @@ public class Boat : MonoBehaviour
         //    currentTile = nextTile;
         //}
 
-        List<TileType> traversableTiles = new List<TileType>();
-        traversableTiles.Add(TileType.Ocean);
+        //List<TileType> traversableTiles = new List<TileType>();
+        //traversableTiles.Add(TileType.Ocean);
         path = pathFinding.GetPathDijkstra(startTile, rotationTile, IsBoatTraversable, 1);
 
         for (int i = path.Count - 1; i >= 0; i--) // remove all tiles except every 10th to make path more fluent

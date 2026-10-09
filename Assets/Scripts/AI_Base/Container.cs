@@ -6,12 +6,12 @@ using UnityEngine;
 //Then have the subclasses as parameter for the Container, UtilityBrain
 
 //Write the logic here aswell, which value that have priority over which
-public abstract class Container 
+public abstract class Container<T>
 {
-    public abstract float Evaluate(AnimalAI animal);
+    public abstract float Evaluate(T agent);
 }
 
-public class BossValueContainer : Container 
+public class BossValueContainer : Container<AnimalAI>
 {
     public override float Evaluate(AnimalAI animal)
     {
@@ -26,7 +26,7 @@ public class BossValueContainer : Container
     }
 }
 
-public class TiredContainer : Container
+public class TiredContainer : Container<AnimalAI>
 {
     public override float Evaluate(AnimalAI animal)
     {
@@ -41,7 +41,7 @@ public class TiredContainer : Container
     }
 }
 
-public class MatingContainer : Container
+public class MatingContainer : Container<AnimalAI>
 {
     public override float Evaluate(AnimalAI animal)
     {
@@ -49,7 +49,7 @@ public class MatingContainer : Container
     }
 }
 
-public class LeaveContainer : Container
+public class LeaveContainer : Container<AnimalAI>
 {
     public override float Evaluate(AnimalAI animal)
     {
@@ -58,7 +58,7 @@ public class LeaveContainer : Container
     }
 }
 
-public class HungryContainer : Container
+public class HungryContainer : Container<AnimalAI>
 {
     public override float Evaluate(AnimalAI animal)
     {
@@ -66,7 +66,7 @@ public class HungryContainer : Container
     }
 }
 
-public class walkAroundContainer : Container
+public class WalkAroundContainer : Container<AnimalAI>
 {
     public override float Evaluate(AnimalAI animal)
     {

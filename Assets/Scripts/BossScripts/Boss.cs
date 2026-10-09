@@ -8,6 +8,10 @@ public class Boss : MonoBehaviour, IBoatSpawning
     BossHealth healthScript;
     BossMovement movementScript;
 
+    Tile currentTile;
+
+    public Tile CurrentTile => currentTile;
+
     void Start()
     {
         transform.localPosition = Vector3.zero;

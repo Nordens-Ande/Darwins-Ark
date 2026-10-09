@@ -295,6 +295,7 @@ public class PathFinding
                     movementCost = 1f;
                 }
 
+                //update node if lower cost than previous paths
                 TileNodeDijkstra node = tileNodes[tile];
                 float totalCost = tileNodes[currentTile].totalCost + movementCost;
 
