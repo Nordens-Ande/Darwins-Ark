@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NUnit.Framework.Internal;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -34,6 +35,8 @@ namespace Assets.Scripts.Environment
 
         private bool useNoise => noise != null;
         private bool useSlops = true;
+        private bool alwaysSlope = false;
+        private float maxSlopeHeight = 0.1f;
 
         public Chunk(Vector2 position, int size)
         {
@@ -113,6 +116,17 @@ namespace Assets.Scripts.Environment
             }
         }
 
+        private enum Direction
+        {
+            North,
+            NorthWest,
+            West,
+            SouthWest,
+            South,
+            SouthEast,
+            East,
+            NorthEast
+        }
 
         // Divide the logic into more methods (refactoring), this is very annoying and hard to read
         public void GenerateMeshData(bool usePureNoise = false)
@@ -128,13 +142,31 @@ namespace Assets.Scripts.Environment
                 for (int z = 0; z < size; z++)
                 {
                     Vector3 tilePos = tiles[x, z].position/* + new Vector3(position.x, 0, position.y)*/;
-                    float[] neighbourHeights = new float[4] 
-                    { 
-                        GetTileHeight(x, z + 1, Space.Self), // Noth
-                        GetTileHeight(x - 1, z, Space.Self), // West
-                        GetTileHeight(x, z - 1, Space.Self), // South
-                        GetTileHeight(x + 1, z, Space.Self)  // East
-                    };
+                    //float[] neighbourHeights = new float[4] 
+                    //{ 
+                    //    GetTileHeight(x, z + 1, Space.Self), // Noth
+                    //    GetTileHeight(x - 1, z, Space.Self), // West
+                    //    GetTileHeight(x, z - 1, Space.Self), // South
+                    //    GetTileHeight(x + 1, z, Space.Self)  // East
+                    //};
+                    Dictionary<Direction, float> neighbourHeights = new Dictionary<Direction, float>();
+                    foreach (Direction direction in Enum.GetValues(typeof(Direction)))
+                    {
+                        float value = direction switch
+                        {
+                            Direction.North     => GetTileHeight(x,     z + 1, Space.Self),
+                            Direction.NorthWest => GetTileHeight(x - 1, z + 1, Space.Self),
+                            Direction.West      => GetTileHeight(x - 1, z,     Space.Self),
+                            Direction.SouthWest => GetTileHeight(x - 1, z - 1, Space.Self),
+                            Direction.South     => GetTileHeight(x,     z - 1, Space.Self),
+                            Direction.SouthEast => GetTileHeight(x + 1, z - 1, Space.Self),
+                            Direction.East      => GetTileHeight(x + 1, z,     Space.Self),
+                            Direction.NorthEast => GetTileHeight(x + 1, z + 1, Space.Self),
+                            _ => 0
+                        };
+                        neighbourHeights.Add(direction, value);
+                    }
+
                     Color tileColor = useNoise ? noise.GetColor(new Vector2(tilePos.x, tilePos.z)) : Color.white;
 
                     //Top face
@@ -152,108 +184,73 @@ namespace Assets.Scripts.Environment
                     {
                         float currentHeight = tilePos.y;
 
-                        bool northHigh = neighbourHeights[0] > currentHeight;
-                        bool westHigh = neighbourHeights[1] > currentHeight;
-                        bool southHigh = neighbourHeights[2] > currentHeight;
-                        bool eastHigh = neighbourHeights[3] > currentHeight;
+                        //float nwHeight = Mathf.Max(currentHeight, neighbourHeights[Direction.North], neighbourHeights[Direction.West], neighbourHeights[Direction.NorthWest]);
+                        //float neHeight = Mathf.Max(currentHeight, neighbourHeights[Direction.North], neighbourHeights[Direction.East], neighbourHeights[Direction.NorthEast]);
+                        //float seHeight = Mathf.Max(currentHeight, neighbourHeights[Direction.South], neighbourHeights[Direction.East], neighbourHeights[Direction.SouthEast]);
+                        //float swHeight = Mathf.Max(currentHeight, neighbourHeights[Direction.South], neighbourHeights[Direction.West], neighbourHeights[Direction.SouthWest]);
+                        //if (alwaysSlope)
+                        //{
+                        //    nwHeight = Mathf.Min(currentHeight + maxSlopeHeight, nwHeight);
+                        //    neHeight = Mathf.Min(currentHeight + maxSlopeHeight, neHeight);
+                        //    seHeight = Mathf.Min(currentHeight + maxSlopeHeight, seHeight);
+                        //    swHeight = Mathf.Min(currentHeight + maxSlopeHeight, swHeight);
+                        //}
+                        //else
+                        //{
+                        //    nwHeight = nwHeight - currentHeight < maxSlopeHeight ? nwHeight : currentHeight;
+                        //    neHeight = neHeight - currentHeight < maxSlopeHeight ? neHeight : currentHeight;
+                        //    seHeight = seHeight - currentHeight < maxSlopeHeight ? seHeight : currentHeight;
+                        //    swHeight = swHeight - currentHeight < maxSlopeHeight ? swHeight : currentHeight;
+                        //}
 
-                        int highGroundCount =
-                            (northHigh ? 1 : 0) +
-                            (westHigh ? 1 : 0) +
-                            (southHigh ? 1 : 0) +
-                            (eastHigh ? 1 : 0);
+                        float nwHeight;
+                        float neHeight;
+                        float seHeight;
+                        float swHeight;
 
-                        float nwHeight = 0f;
-                        float neHeight = 0f;
-                        float seHeight = 0f;
-                        float swHeight = 0f;
+                        nwHeight = Closest(currentHeight, neighbourHeights[Direction.North], neighbourHeights[Direction.West], neighbourHeights[Direction.NorthWest]);
+                        neHeight = Closest(currentHeight, neighbourHeights[Direction.North], neighbourHeights[Direction.East], neighbourHeights[Direction.NorthEast]);
+                        seHeight = Closest(currentHeight, neighbourHeights[Direction.South], neighbourHeights[Direction.East], neighbourHeights[Direction.SouthEast]);
+                        swHeight = Closest(currentHeight, neighbourHeights[Direction.South], neighbourHeights[Direction.West], neighbourHeights[Direction.SouthWest]);
 
-                        if (highGroundCount == 0)
+                        nwHeight = Mathf.Max(currentHeight, nwHeight);
+                        neHeight = Mathf.Max(currentHeight, neHeight);
+                        seHeight = Mathf.Max(currentHeight, seHeight);
+                        swHeight = Mathf.Max(currentHeight, swHeight);
+
+
+                        int heightCount = (Mathf.Approximately(nwHeight, currentHeight) ? 0 : 1)
+                                        + (Mathf.Approximately(neHeight, currentHeight) ? 0 : 1)
+                                        + (Mathf.Approximately(seHeight, currentHeight) ? 0 : 1)
+                                        + (Mathf.Approximately(swHeight, currentHeight) ? 0 : 1);
+
+                        //bool isFlat = Mathf.Approximately(nwHeight, currentHeight) 
+                        //           && Mathf.Approximately(neHeight, currentHeight) 
+                        //           && Mathf.Approximately(seHeight, currentHeight) 
+                        //           && Mathf.Approximately(swHeight, currentHeight);
+
+                        if (heightCount <= 1)
                         {
-                            // Flat.
                             AddFace(
-                                new Vector3(-0.5f, 0, 0.5f) + tilePos,      // top-left
-                                new Vector3(+0.5f, 0, 0.5f) + tilePos,      // top-right
-                                new Vector3(+0.5f, 0, -0.5f) + tilePos,     // bottom-right
-                                new Vector3(-0.5f, 0, -0.5f) + tilePos,     // bottom-left
+                                new Vector3(-0.5f, currentHeight, 0.5f) + new Vector3(tilePos.x, 0, tilePos.z),
+                                new Vector3(+0.5f, currentHeight, 0.5f) + new Vector3(tilePos.x, 0, tilePos.z),
+                                new Vector3(+0.5f, currentHeight, -0.5f) + new Vector3(tilePos.x, 0, tilePos.z),
+                                new Vector3(-0.5f, currentHeight, -0.5f) + new Vector3(tilePos.x, 0, tilePos.z),
                                 tileColor
                             );
                         }
-                        else if (highGroundCount == 1)
+                        else
                         {
-                            // Normal single slope.
-                            nwHeight = Mathf.Max(currentHeight, northHigh ? neighbourHeights[0] : currentHeight, westHigh ? neighbourHeights[1] : currentHeight);
-
-                            neHeight = Mathf.Max(currentHeight, northHigh ? neighbourHeights[0] : currentHeight, eastHigh ? neighbourHeights[3] : currentHeight);
-
-                            seHeight = Mathf.Max(currentHeight, southHigh ? neighbourHeights[2] : currentHeight, eastHigh ? neighbourHeights[3] : currentHeight );
-
-                            swHeight = Mathf.Max(currentHeight, southHigh ? neighbourHeights[2] : currentHeight, westHigh ? neighbourHeights[1] : currentHeight);
+                            AddSlopeTop(
+                                new Vector3(tilePos.x, 0f, tilePos.z),
+                                currentHeight,
+                                nwHeight,
+                                neHeight,
+                                seHeight,
+                                swHeight,
+                                tileColor
+                            );
                         }
-                        else if (highGroundCount == 2)
-                        {
-                            // Merge the two slopes.
-                            nwHeight = Mathf.Max(currentHeight, northHigh ? neighbourHeights[0] : currentHeight, westHigh ? neighbourHeights[1] : currentHeight);
-
-                            neHeight = Mathf.Max(currentHeight, northHigh ? neighbourHeights[0] : currentHeight, eastHigh ? neighbourHeights[3] : currentHeight);
-
-                            seHeight = Mathf.Max(currentHeight, southHigh ? neighbourHeights[2] : currentHeight, eastHigh ? neighbourHeights[3] : currentHeight);
-
-                            swHeight = Mathf.Max(currentHeight, southHigh ? neighbourHeights[2] : currentHeight, westHigh ? neighbourHeights[1] : currentHeight);
-                        }
-                        else if (highGroundCount == 3)
-                        {
-                            // We reuse the 1-side slop scenario, as otherwise this merged slope would look very of and weird.
-
-                            if (!northHigh)
-                            {
-                                // W + S + E are high -> use SOUTH slope.
-                                nwHeight = currentHeight;
-                                neHeight = currentHeight;
-                                seHeight = neighbourHeights[2];
-                                swHeight = neighbourHeights[2];
-                            }
-                            else if (!westHigh)
-                            {
-                                // N + S + E are high -> use EAST slope.
-                                nwHeight = currentHeight;
-                                swHeight = currentHeight;
-                                neHeight = neighbourHeights[3];
-                                seHeight = neighbourHeights[3];
-                            }
-                            else if (!southHigh)
-                            {
-                                // N + W + E are high -> use NORTH slope.
-                                swHeight = currentHeight;
-                                seHeight = currentHeight;
-                                nwHeight = neighbourHeights[0];
-                                neHeight = neighbourHeights[0];
-                            }
-                            else if (!eastHigh)
-                            {
-                                // N + W + S are high -> use WEST slope.
-                                neHeight = currentHeight;
-                                seHeight = currentHeight;
-                                nwHeight = neighbourHeights[1];
-                                swHeight = neighbourHeights[1];
-                            }
-                        }
-                        else if (highGroundCount == 4)
-                        {
-                            Vector3 center = tilePos;
-
-                            Vector3 nw = new Vector3(-0.5f, nwHeight, 0.5f) + tilePos;
-                            Vector3 ne = new Vector3(0.5f, neHeight, 0.5f) + tilePos;
-                            Vector3 se = new Vector3(0.5f, seHeight, -0.5f) + tilePos;
-                            Vector3 sw = new Vector3(-0.5f, swHeight, -0.5f) + tilePos;
-
-                            AddTriangle(center, nw, ne, tileColor);
-                            AddTriangle(center, ne, se, tileColor);
-                            AddTriangle(center, se, sw, tileColor);
-                            AddTriangle(center, sw, nw, tileColor);
-                        }
-
-                        AddSlopeTop(new Vector3(0, -currentHeight, 0) + tilePos, currentHeight, nwHeight, neHeight, seHeight, swHeight, tileColor);
                     }
 
 
@@ -261,7 +258,7 @@ namespace Assets.Scripts.Environment
 
                     for (int i = 0; i < 4; i++)
                     {
-                        float neighbourHeight = neighbourHeights[i];
+                        float neighbourHeight = neighbourHeights[(Direction)(2*i)]; //PLEASE FIX THIS, this is so wrong
 
                         if (neighbourHeight >= tileHeight)
                             continue;
@@ -399,6 +396,13 @@ namespace Assets.Scripts.Environment
             {
                 AddTriangle(sw, se, new Vector3(-0.5f, currentHeight, -0.5f) + tilePos, color);
             }
+        }
+
+        // Returns the Closest value to the target from the values list
+        private float Closest(float target, params float[] values)
+        {
+            // Orders values depedning on the delta value, if the delta is smaller, the higher up it lands in the list (i.e giving us the closest value)
+            return values.OrderBy(value => Mathf.Abs(value - target)).First();
         }
 
 
