@@ -129,11 +129,17 @@ MonoBehaviour:
   hunger: 0
   bossThreat: 0
   Happiness: 75
+  matingSeason: 0
+  tired: 0
   walkSpeed: 0.75
   runSpeed: 1.3
   damage: 10
   health: 100
   hungerDeteration: 1
+  MutationRate: 1
+  currentMutationValue: 0
+  MutationMax: 100
+  Defence: 1
   maxIdleTime: 5
   currentIdleTime: 0
   maxAttackTime: 2
@@ -141,6 +147,9 @@ MonoBehaviour:
   clockCycleTime: 30
   clockCycleTimeCurrent: 0
   attackDistance: 3
+  poop:
+  - {fileID: 7206990565552924369, guid: 9d83281e4b6364a4bbce31d9758ccd88, type: 3}
+  - {fileID: 5212644513495774897, guid: a7db1c59c01addb40b02cf2d8d146946, type: 3}
   TestMutation: 0
 --- !u!114 &-6405640087756652402
 MonoBehaviour:

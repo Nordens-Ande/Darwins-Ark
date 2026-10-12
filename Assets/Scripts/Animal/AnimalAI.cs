@@ -1,11 +1,8 @@
 using Assets.Scripts.Environment;
-using NUnit.Framework;
+
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using TMPro;
-using Unity.IO.LowLevel.Unsafe;
-using UnityEditor.Rendering;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class AnimalAI : MonoBehaviour
@@ -68,7 +65,6 @@ public class AnimalAI : MonoBehaviour
 
     //Find plant
     private int tileCheckSize = 2; //How many tiles animal should see plant
-    //private List<Tile> tileList;
     private Tile currentTile;
     private Plant choosenPlant = null;
 
@@ -80,9 +76,10 @@ public class AnimalAI : MonoBehaviour
     private bool isMutated = false;
 
     //MatingSeason
-    private bool HasMate = false;
-    private bool HasProcreated = false;
-    private bool AwaitMate = false;
+    private bool hasMate = false;
+    private bool hasProcreated = false;
+    private bool awaitMate = false;
+    private AnimalAI assignedMate = null;
 
     //Utility AI
     private UtilityBrain<AnimalAI> utilityBrain;
@@ -98,65 +95,85 @@ public class AnimalAI : MonoBehaviour
     //Properties
     public float BossThreat
     {
-        get { return bossThreat; }
-        set { bossThreat = value; }
+        get => bossThreat;
+        set => bossThreat = value;
     }
 
     public bool HasMutated 
     { 
-        get {return hasMutated; }
-        set { hasMutated = value; }
+        get => hasMutated;
+        set=> hasMutated = value;
     }
 
-    //Needed for the mutations 
     public float WalkSpeed 
     {
-        get { return walkSpeed; }
-        set { walkSpeed = value; }
+        get => walkSpeed;
+        set => walkSpeed = value;
     }
 
     public float RunSpeed 
     {
-        get {return runSpeed; }
-        set { runSpeed = value; }
+        get => runSpeed;
+        set => runSpeed = value;   
     }
 
     public float DMG
     {
-        get { return damage; }
-        set { damage = value; }
+        get => damage;
+        set => damage = value;
     }
 
     public float Health
     {
-        get { return health; }
-        set { health = value; }
+        get => health;
+        set => health = value;
     }
     public float HungerDeteration
     {
-        get {return hungerDeteration; }
-        set { hungerDeteration = value; }
+        get => hungerDeteration;
+        set => hungerDeteration = value;    
     }
 
     public float MatingSeason
     {
-        get { return matingSeason; }
-        set {  matingSeason = value; }
+        get => matingSeason;
+        set => matingSeason = value;
     }
 
     public float Tired 
     {
-        get { return tired; }
-        set {  tired = value; }
+        get => tired;
+        set => tired = value;
     }
 
     public float Hunger 
-    { 
-        get {return hunger; }
-        set {hunger = value; }
+    {
+        get => hunger;
+        set => hunger = value;
     }
 
+    public AnimalAI AssingedMate 
+    {
+        get => assignedMate;
+        set => assignedMate = value;
+    }
 
+    public bool HasMate 
+    { 
+        get => hasMate;
+        set => hasMate = value;
+    }
+    public bool AwaitMate 
+    {
+        get => awaitMate;
+        set => awaitMate = value;
+    }
+
+    public bool HasProcreated 
+    { 
+        get=> hasProcreated;
+        set => hasProcreated = value;
+    }
 
     void Start()
     {
@@ -238,34 +255,6 @@ public class AnimalAI : MonoBehaviour
             mutationManager.MutateAnimal_RandomMutation(this);
         }
     }
-
-    void CheckBestAction() 
-    {
-        if (bossThreat == 1)
-        {
-            BossFigth();
-        }
-        else if (matingSeason == 1) 
-        {
-            Procreate();
-        }
-        else if (Happiness < 0)
-        {
-            LeaveIsland();
-        }
-        else if (hunger > 50)
-        {
-            SearchForFood();
-        }
-        else if (tired > 75) 
-        { 
-            
-        }
-        else
-        {
-            WalkAround();
-        }
-    }
     
     //Action methods
     void Idle() 
@@ -306,6 +295,21 @@ public class AnimalAI : MonoBehaviour
         return new Vector3(0, 0, 0);
     }
 
+    //Checks so the animals dosent collide
+    bool WillCollideWithNeighbour() 
+    { 
+        if(Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 1)) 
+        {
+            AnimalAI animal =hit.transform.GetComponent<AnimalAI>();
+            if (animal == null)
+            {
+                return false;
+            }
+            else return true;
+        }
+        else return false;
+    }
+
     void WalkAround() 
     {
         if (isIdle) Idle();
@@ -316,14 +320,18 @@ public class AnimalAI : MonoBehaviour
                 hasSetPath = true;
                 walkPoint = FindWalkPoint();
             }
-
-            AnimalWalkMoveTowards(walkPoint);
+            //AnimalWalkMoveTowards(walkPoint);
 
             if (Vector3.Distance(transform.position, walkPoint) < 2f)
             {
                 hasSetPath = false;
                 isIdle = true;
                 Idle();
+            }
+
+            if (!WillCollideWithNeighbour()) 
+            {
+                AnimalWalkMoveTowards(walkPoint);
             }
         }
     }
@@ -514,14 +522,60 @@ public class AnimalAI : MonoBehaviour
         //Sleep
     }
 
+    //Overload incase of wanting to play VFX on the animal when they stand still
+    void StandStill(ParticleSystem VFX) 
+    { 
+        
+    }
+
 
     //Future method for offspring and procreation
+
+    //Can be called in the animalManager to check mating status of every animal
+    public bool CanMate() 
+    { 
+        if(hasProcreated || awaitMate || hasMate) 
+        { 
+            return false;
+        }
+        else return true;
+    }
+
+    //Can be called to assign mates in the animalManager, choices over animal procreation maybe chall be called in animalManager
+    public void AssignMate(AnimalAI animal) 
+    {
+        hasMate = true;
+        awaitMate = true;
+        assignedMate = animal;
+        animal.HasMate = true;
+        animal.AssingedMate = this;
+        animal.AwaitMate = false;
+    } 
+
+    //First draft over the procreate method
     void Procreate() 
     {
-        //Need the list from animalManager to get which animals that can procreate
-        if (HasMate) WalkAround();
-        if(HasProcreated) matingSeason = 0;
-        if (AwaitMate) StandStill();
+        if (hasMate && !awaitMate)
+        {
+            if (assignedMate == null) return;
+            walkPoint = assignedMate.transform.position;
+            float distance = Vector3.Distance(transform.position, assignedMate.transform.position);
+
+            if (distance < 2)
+            {
+                //Instantiate new animal
+                matingSeason = 0;
+                hasProcreated = true;
+                assignedMate.MatingSeason = 0;
+                assignedMate.HasProcreated = true;
+                assignedMate = null;
+            }
+            WalkAround();
+        }
+        else if (hasProcreated) matingSeason = 0;
+        else if (awaitMate) StandStill();
+        else WalkAround();
+
     }
 
     //Can be called to invoke bossfight
@@ -534,7 +588,12 @@ public class AnimalAI : MonoBehaviour
     public void AnimalWalkMoveTowards(Vector3 point) 
     {
         transform.LookAt(point);
-        transform.position = Vector3.MoveTowards(transform.position, point, walkSpeed * Time.deltaTime);
+
+        //Makes sure the animal stays at the tileheight its on
+        Vector2 currentPostion = new Vector2((int)transform.position.x,(int) transform.position.z);
+        Tile currentTile = tileManager.GetTile(currentPostion);
+        Vector3 newPoint = new Vector3(point.x, currentTile.position.y + transform.localScale.y / 2, point.z);
+        transform.position = Vector3.MoveTowards(transform.position, newPoint, walkSpeed * Time.deltaTime);
     }
 
     //If we decide to have animals lose health
@@ -553,6 +612,7 @@ public class AnimalAI : MonoBehaviour
         return Happiness;
     }
 
+    //For later standstill when deity to call it
     public void InvokeStandStill() 
     {
         StandStill();
