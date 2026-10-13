@@ -19,11 +19,8 @@ namespace Assets.Scripts.Environment
         [SerializeField] private Material gridLineMaterial;
         // -----------------------------------------------
 
-        public int ChunkSize
-        { get { return chunkSize; } }
-
-        public Vector2Int ChunkGridSize
-        { get { return chunkGridSize; } }
+        public int ChunkSize => chunkSize;
+        public Vector2Int ChunkGridSize => chunkGridSize;
 
         private void Awake()
         {
@@ -36,11 +33,6 @@ namespace Assets.Scripts.Environment
             chunks = new List<Chunk>();
             chunkObjects = new List<GameObject>();
 
-            //chunks.Add(new Chunk(Vector2.zero, 8));
-            //chunks.Add(new Chunk(new Vector2(-8, 0), 8));
-            //chunks.Add(new Chunk(new Vector2(-8, -8), 8));
-            //chunks.Add(new Chunk(new Vector2(0, -8), 8));
-
             for (int x = -chunkGridSize.x / 2; x < Mathf.Ceil(chunkGridSize.x / 2f); x++)
             {
                 for (int z = -chunkGridSize.y / 2; z < Mathf.Ceil(chunkGridSize.y / 2f); z++)
@@ -51,58 +43,65 @@ namespace Assets.Scripts.Environment
 
             for (int i = 0; i < chunks.Count; i++)
             {
+                //Chunk chunk = chunks[i];
+                //chunk.GenerateMeshData();
+
+                //GameObject chunkObject = new GameObject($"Chunk (x:{chunk.position.x}, z:{chunk.position.y})", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider));
+                //chunkObject.transform.parent = transform;
+                //chunkObjects.Add(chunkObject);
+
+                //chunkObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Shader Graphs/Lit Color"));
+
+                //Mesh mesh = new Mesh();
+
+                //mesh.SetVertices(chunk.vertices);
+                //mesh.SetTriangles(chunk.triangles, 0);
+                //mesh.SetColors(chunk.colors);
+
+                //mesh.RecalculateNormals();
+                //mesh.RecalculateBounds();
+
+                //chunkObject.GetComponent<MeshFilter>().sharedMesh = mesh;
+                //chunkObject.GetComponent<MeshCollider>().sharedMesh = mesh;
+
                 Chunk chunk = chunks[i];
-                chunk.GenerateMeshData();
                 
+                // Generate gameObject
                 GameObject chunkObject = new GameObject($"Chunk (x:{chunk.position.x}, z:{chunk.position.y})", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider));
-                chunkObject.transform.parent = transform;
-                chunkObjects.Add(chunkObject);
-
-                chunkObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Shader Graphs/Lit Color"));
+                chunkObject.transform.SetParent(transform);
                 
-                Mesh mesh = new Mesh();
+                // Generate mesh for chunk
+                GenerateMesh(chunk, chunkObject);
 
-                mesh.SetVertices(chunk.vertices);
-                mesh.SetTriangles(chunk.triangles, 0);
-                mesh.SetColors(chunk.colors);
 
-                mesh.RecalculateNormals();
-                mesh.RecalculateBounds();
+                //// Grid for chunk and tiles in TerraformUI -------------
+                ////  Chunk Grid
+                //GameObject chunkGridObject = 
+                //    new GameObject("ChunkGrid"
+                //    );
 
-                chunkObject.GetComponent<MeshFilter>().sharedMesh = mesh;
-                chunkObject.GetComponent<MeshCollider>().sharedMesh = mesh;
+                //chunkGridObject.transform.SetParent(
+                //    chunkObject.transform, false
+                //    );
 
-                // Grid for chunk and tiles in TerraformUI -------------
-                //  Chunk Grid
-                GameObject chunkGridObject = 
-                    new GameObject("ChunkGrid"
-                    );
+                //ChunkGridOverlay chunkGrid = chunkGridObject.AddComponent<ChunkGridOverlay>();
 
-                chunkGridObject.transform.SetParent(
-                    chunkObject.transform, false
-                    );
+                //chunkGrid.Setup(chunk, chunkSize, gridLineMaterial);
 
-                ChunkGridOverlay chunkGrid =
-                    chunkGridObject.AddComponent<ChunkGridOverlay>();
+                //chunkGridObject.SetActive(false);
 
-                chunkGrid.Setup(
-                    chunk,
-                    chunkSize, 
-                    gridLineMaterial
-                    );
+                ////  Tile Grid
+                //GameObject tileGridObject = new GameObject("TileGrid");
+                //tileGridObject.transform.SetParent(chunkObject.transform, false);
 
-                chunkGridObject.SetActive(false);
+                //TerraformTileGridOverlay tileGrid = tileGridObject.AddComponent<TerraformTileGridOverlay>();
 
-                //  Tile Grid
-                GameObject tileGridObject = new GameObject("TileGrid");
-                tileGridObject.transform.SetParent(chunkObject.transform, false);
+                //tileGrid.Setup(chunk, gridLineMaterial);
+                //tileGridObject.SetActive(false);
+                ////-------------------------------------------------------
+                
+                GenerateGrid(chunk, chunkObject);
 
-                TerraformTileGridOverlay tileGrid = 
-                    tileGridObject.AddComponent<TerraformTileGridOverlay>();
-
-                tileGrid.Setup(chunk, gridLineMaterial);
-                tileGridObject.SetActive(false);
-                //-------------------------------------------------------
             }
         }
 
@@ -143,6 +142,7 @@ namespace Assets.Scripts.Environment
             }
         }
 
+        //All Getters here can be refactored for more perfomance, currently they are not super efficient
         public Chunk GetChunk(float x, float z)
         {
             foreach(Chunk chunk in chunks)
@@ -153,8 +153,7 @@ namespace Assets.Scripts.Environment
             return null;
         }
 
-        public Chunk GetChunk(Vector2 positionXZ)
-            => GetChunk(positionXZ.x, positionXZ.y);
+        public Chunk GetChunk(Vector2 positionXZ) => GetChunk(positionXZ.x, positionXZ.y);
 
         public Chunk GetChunk(Vector3 position)
         {
@@ -170,14 +169,52 @@ namespace Assets.Scripts.Environment
             }
             return null;
         }
-        public Tile GetTile(Vector2 posXZ)
+        public Tile GetTile(Vector2 positionXZ) => GetTile(positionXZ.x, positionXZ.y);
+        public Tile GetTile(Vector3 positionXZ) => GetTile(positionXZ.x, positionXZ.z);
+
+
+        private void GenerateMesh(Chunk chunk, GameObject chunkObject)
         {
-            return GetTile(posXZ.x, posXZ.y);
+            chunk.GenerateMeshData();
+            chunkObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Shader Graphs/Lit Color"));
+
+            Mesh mesh = new Mesh() 
+            { 
+                name = "Chunk Mesh" 
+            };
+
+            mesh.SetVertices(chunk.vertices);
+            mesh.SetTriangles(chunk.triangles, 0);
+            mesh.SetColors(chunk.colors);
+
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+
+            chunkObject.GetComponent<MeshFilter>().sharedMesh = mesh;
+            chunkObject.GetComponent<MeshCollider>().sharedMesh = mesh;
         }
-        public Tile GetTile(Vector3 posXZ)
+
+        private void GenerateGrid(Chunk chunk, GameObject chunkObject)
         {
-            return GetTile(posXZ.x, posXZ.z);
+            // Chunk grid object instansiate
+            GameObject chunkGridObject = new GameObject("ChunkGrid");
+            chunkGridObject.transform.SetParent(chunkObject.transform, false);
+
+            // Chunk grid setup
+            ChunkGridOverlay chunkGrid = chunkGridObject.AddComponent<ChunkGridOverlay>();
+            chunkGrid.Setup(chunk, chunkSize, gridLineMaterial);
+            chunkGridObject.SetActive(false);
+
+            // Tile grid instansiate
+            GameObject tileGridObject = new GameObject("TileGrid");
+            tileGridObject.transform.SetParent(chunkObject.transform, false);
+
+            // Tile grid setup
+            TerraformTileGridOverlay tileGrid = tileGridObject.AddComponent<TerraformTileGridOverlay>();
+            tileGrid.Setup(chunk, gridLineMaterial);
+            tileGridObject.SetActive(false);
         }
+
 
         // Booleans for when chunk/tile grids are visible
         public void SetChunkGridVisible(bool visible)

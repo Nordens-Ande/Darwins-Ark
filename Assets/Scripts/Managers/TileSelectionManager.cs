@@ -7,15 +7,14 @@ using UnityEngine.InputSystem;
 public class TileSelectionManager : MonoBehaviour
 {
     [SerializeField] private UIStateManager uiStateManager;
+    [SerializeField] private TileManager tileManager;
+
     //[SerializeField] private float doubleTapTime = 0.3f;
-    [SerializeField]
-        private TileGridVisibilityMode visibilityMode =
-                TileGridVisibilityMode.AllTiles;
+    [SerializeField] private TileGridVisibilityMode visibilityMode = TileGridVisibilityMode.AllTiles;
 
-    private Vector2Int? highlightedTile;
+    [SerializeField, ReadOnly] private Vector2Int? highlightedTile;
 
-    private HashSet<Vector2Int> selectedTiles =
-        new HashSet<Vector2Int>();
+    private HashSet<Vector2Int> selectedTiles = new HashSet<Vector2Int>();
 
     //Mouse input
     [SerializeField] private float mouseMoveThreshold = 20f;
@@ -33,13 +32,18 @@ public class TileSelectionManager : MonoBehaviour
     private Color highlightColor = Color.cyan;
     private Color selectedColor = Color.yellow;
 
+    private void Start()
+    {
+        //uiStateManager = UIStateManager.Instance;
+        TileManager tileManager = TileManager.Instance;
+    }
+
     private void Update()
     {
         if (uiStateManager == null)
             return;
 
-        bool isTerraforming =
-            uiStateManager.IsTerraforming();
+        bool isTerraforming = uiStateManager.IsTerraforming();
 
         // Just entered terraform mode
         if (isTerraforming && !wasTerraforming)
@@ -60,28 +64,21 @@ public class TileSelectionManager : MonoBehaviour
     // Initial highlight
     private void SetMiddleTile()
     {
-        int mapwidth =
-            TileManager.Instance.ChunkGridSize.x * 
-            TileManager.Instance.ChunkSize;
+        int mapwidth = tileManager.ChunkGridSize.x * tileManager.ChunkSize;
 
-        int mapDepth =
-            TileManager.Instance.ChunkGridSize.y *
-            TileManager.Instance.ChunkSize;
+        int mapDepth = tileManager.ChunkGridSize.y * tileManager.ChunkSize;
 
         int middleX = mapwidth / 2;
         int middleZ = mapDepth / 2;
 
         //highlightedTile =
-        //    TileManager.Instance.GetTile(middleX, middleZ);
+        //    tileManager.GetTile(middleX, middleZ);
 
-        highlightedTile = TileManager.Instance.GetTile(middleX, middleZ) != null ? new Vector2Int(middleX, middleZ) : null;
+        highlightedTile = tileManager.GetTile(middleX, middleZ) != null ? new Vector2Int(middleX, middleZ) : null;
 
         if (highlightedTile != null) //kan ändra till "highlighetTile.HasValue" eller "highlighetTile is Vector2Int tilePos", null funkar ändå dock
         {
-            SetTileColor(
-                highlightedTile.Value, 
-                highlightColor
-                );
+            SetTileColor(highlightedTile.Value, highlightColor);
         }
     }
 
@@ -92,19 +89,10 @@ public class TileSelectionManager : MonoBehaviour
 
         Vector2Int oldHighlightedTilePos = highlightedTile.Value;
 
-        int newX =
-            Mathf.RoundToInt(highlightedTile.Value.x)
-            + xDirection;
+        int newX = Mathf.RoundToInt(highlightedTile.Value.x) + xDirection;
+        int newZ = Mathf.RoundToInt(highlightedTile.Value.y) + zDirection;
 
-        int newZ =
-            Mathf.RoundToInt(highlightedTile.Value.y)
-            + zDirection;
-
-        Tile newTile =
-            TileManager.Instance.GetTile(
-                newX,
-                newZ
-            );
+        Tile newTile = tileManager.GetTile(newX, newZ);
 
         if (newTile == null)
             return;
@@ -175,7 +163,7 @@ public class TileSelectionManager : MonoBehaviour
     //----------------------------------------------
     private void SetHighlight(int x, int z)
     {
-        Tile newTile = TileManager.Instance.GetTile(x, z);
+        Tile newTile = tileManager.GetTile(x, z);
 
         if (newTile == null)
             return;
@@ -319,7 +307,7 @@ public class TileSelectionManager : MonoBehaviour
     private TerraformTileGridOverlay GetOverlay(Tile tile) //make this an overload to GetOverlay(Vector2Int)
     {
         Chunk chunk =
-            TileManager.Instance.GetChunk(
+            tileManager.GetChunk(
                 tile.position.x,
                 tile.position.z
             );
@@ -328,13 +316,13 @@ public class TileSelectionManager : MonoBehaviour
             return null;
 
         int chunkIndex =
-            TileManager.Instance.chunks.IndexOf(chunk);
+            tileManager.chunks.IndexOf(chunk);
 
         if (chunkIndex < 0)
             return null;
 
         Transform tileGrid =
-            TileManager.Instance.chunkObjects[chunkIndex]
+            tileManager.chunkObjects[chunkIndex]
             .transform.Find("TileGrid");
 
         if (tileGrid == null)
@@ -345,19 +333,19 @@ public class TileSelectionManager : MonoBehaviour
 
     private TerraformTileGridOverlay GetOverlay(Vector2Int tilePos)
     {
-        Chunk chunk = TileManager.Instance.GetChunk(tilePos);
+        Chunk chunk = tileManager.GetChunk(tilePos);
 
         if (chunk == null)
             return null;
 
         int chunkIndex =
-            TileManager.Instance.chunks.IndexOf(chunk);
+            tileManager.chunks.IndexOf(chunk);
 
         if (chunkIndex < 0)
             return null;
 
         Transform tileGrid =
-            TileManager.Instance.chunkObjects[chunkIndex]
+            tileManager.chunkObjects[chunkIndex]
             .transform.Find("TileGrid");
 
         if (tileGrid == null)
@@ -403,7 +391,7 @@ public class TileSelectionManager : MonoBehaviour
 
     private void RefreshAllTileVisibility()
     {
-        foreach (Chunk chunk in TileManager.Instance.chunks)
+        foreach (Chunk chunk in tileManager.chunks)
         {
             foreach (Tile tile in chunk.Tiles)
             {
@@ -415,7 +403,7 @@ public class TileSelectionManager : MonoBehaviour
     public IEnumerable<Tile> GetSelectedTiles()
     {
         return selectedTiles
-            .Select(pos => TileManager.Instance.GetTile(pos))
+            .Select(pos => tileManager.GetTile(pos))
             .Where(tile => tile != null);
     }
     //----------------------------------------------
