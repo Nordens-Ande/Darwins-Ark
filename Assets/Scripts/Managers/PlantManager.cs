@@ -13,6 +13,9 @@ public class PlantManager : MonoBehaviour
 
     [Header("Varibles")]
     [SerializeField] float secondsForPlantToGrow = 10.0f;
+    [SerializeField, ReadOnly] float closeToWaterModifier = 1.0f;
+    [SerializeField] float waterModiferFastGrowth = 1.25f; 
+    [SerializeField] float waterModiferSlowGrowth = 1.0f;
     [Space]
 
     [Header("Plant Spawning")]
@@ -77,8 +80,19 @@ public class PlantManager : MonoBehaviour
                 continue;
             }
 
+            //check if the plant is close to water
+            if (IsPlantCloseToWater(plants[i]))
+            {
+                //if the plant is close to water, we make it grow faster
+                closeToWaterModifier = waterModiferFastGrowth;
+            }
+            else
+            {
+                closeToWaterModifier = waterModiferSlowGrowth;
+            }
+
             //check if the plant is ready to grow, depnding on growth speed and time since last growth
-            if (plants[i].TimeSinceLastGrowth / plants[i].GrowthSpeed >= secondsForPlantToGrow)
+            if (plants[i].TimeSinceLastGrowth / plants[i].GrowthSpeed * closeToWaterModifier >= secondsForPlantToGrow)
             {
                 plants[i].GrowPlant();
             }
@@ -222,4 +236,44 @@ public class PlantManager : MonoBehaviour
             plants.Add(newPlant);
         }
     }
+
+
+    private bool IsPlantCloseToWater(Plant plant)
+    {
+        if (plant == null || plant.CurrentTile == null || tileManager == null)
+            return false;
+        
+
+        // detta är inte superbra, om man måste optimera kan man kolla här
+        // men det borde funka
+
+        foreach (Chunk chunk in tileManager.chunks)
+        {
+            // we get all rivertiles to check if the plant is close to water
+            HashSet<Vector2Int> waterTiles = chunk[TileType.River];
+            if (waterTiles == null || waterTiles.Count == 0)
+            {
+                continue;
+            }
+
+            // we check if the plant is close to any of the water tiles
+            foreach (Vector2Int waterTilePos in waterTiles)
+            {
+                Tile waterTile = chunk.GetTile(waterTilePos.x, waterTilePos.y);
+
+                if (waterTile == null)
+                    continue;
+
+                float distanceToWater = Vector3.Distance(plant.CurrentTile.position, waterTile.position);
+                if (distanceToWater <= plant.IsCloseToWaterRange)
+                {
+                    return true;
+                }
+            }
+
+        }
+
+        return false;
+    }
+
 }

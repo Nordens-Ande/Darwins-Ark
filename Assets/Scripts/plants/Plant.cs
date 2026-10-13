@@ -19,6 +19,9 @@ public class Plant : MonoBehaviour
     [SerializeField] float PlantSmellRadius = 5.0f; // the radius of where animals can smell the plant
     [SerializeField, ReadOnly] Tile currentTile; // the tile that the plant is currently on
     [Space]
+    [SerializeField] float isCloseToWaterRange = 4.0f; // how close a plant needs to be to water to be considered close to water
+    [SerializeField, ReadOnly] bool isCloseToWater = false;
+    [Space]
 
     [Header("Plant Growth Stage")]
     [SerializeField] GrowthStage currentStage = GrowthStage.seed;
@@ -246,6 +249,8 @@ public class Plant : MonoBehaviour
     }
 
     public float TimeSinceLastGrowth => timeSinceLastGrowth;
+    public bool IsCloseToWater => isCloseToWater;
+    public float IsCloseToWaterRange => isCloseToWaterRange;
 
     public bool CanBeEaten
     {
