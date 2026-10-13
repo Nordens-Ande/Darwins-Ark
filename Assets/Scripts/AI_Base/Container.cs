@@ -1,4 +1,5 @@
 using UnityEngine;
+//using UnityEngine.InputSystem.Processors;
 
 
 //These classes are the possible values from the animal given normalised
@@ -53,8 +54,9 @@ public class LeaveContainer : Container<AnimalAI>
 {
     public override float Evaluate(AnimalAI animal)
     {
-        float invese = 100 - animal.GetHappiness();
-        return invese /100;
+        float invese = 100 - animal.GetHappiness() * 2;
+        float normalized = (invese * invese) / invese;
+        return normalized /100;
     }
 }
 
