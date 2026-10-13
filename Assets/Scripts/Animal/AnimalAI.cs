@@ -42,6 +42,9 @@ public class AnimalAI : MonoBehaviour
     [SerializeField] private float clockCycleTime = 10; //How long before points deteriate
     [SerializeField, ReadOnly] private float clockCycleTimeCurrent;
 
+    [SerializeField] private float sleepTimeMax = 10;
+    [SerializeField, ReadOnly] private float currentSleepTime = 0;
+
     [Header("Boss")]
     [Space]
     //bossFight
@@ -91,6 +94,7 @@ public class AnimalAI : MonoBehaviour
     System.Action leaveIslandAction;
     System.Action searchForFoodAction;
     System.Action walkAroundAction;
+    System.Action sleepAction;
 
     //Properties
     public float BossThreat
@@ -202,13 +206,15 @@ public class AnimalAI : MonoBehaviour
         leaveIslandAction = () => { LeaveIsland(); };
         searchForFoodAction = () => { SearchForFood(); };
         walkAroundAction = () => { WalkAround(); };
+        sleepAction = () => {Sleep(); };
 
         //UtilityActions with its containers 
         UtilityAction<AnimalAI> bossAction = new UtilityAction<AnimalAI>(new BossValueContainer(), bossFightAction);
         UtilityAction<AnimalAI> walkAction = new UtilityAction<AnimalAI>(new WalkAroundContainer(), walkAroundAction);
         UtilityAction<AnimalAI> leaveAction = new UtilityAction<AnimalAI>(new LeaveContainer(), leaveIslandAction);
         UtilityAction<AnimalAI> hungerAction = new UtilityAction<AnimalAI>(new HungryContainer(), searchForFoodAction);
-        utilityChoosesList = new List<UtilityAction<AnimalAI>> { bossAction, walkAction, leaveAction, hungerAction };
+        UtilityAction<AnimalAI> tiredAction = new UtilityAction<AnimalAI>(new TiredContainer(), sleepAction);
+        utilityChoosesList = new List<UtilityAction<AnimalAI>> { bossAction, walkAction, leaveAction, hungerAction, tiredAction };
 
         utilityBrain = new UtilityBrain<AnimalAI>(utilityChoosesList, this);
 
@@ -221,7 +227,7 @@ public class AnimalAI : MonoBehaviour
         if (clockCycleTimeCurrent > clockCycleTime) 
         {
             hunger += hungerDeteration;
-            tired++;
+            tired += 2;
 
             Happiness = Happiness - hunger / 10;
 
@@ -525,7 +531,17 @@ public class AnimalAI : MonoBehaviour
     //Overload incase of wanting to play VFX on the animal when they stand still
     void StandStill(ParticleSystem VFX) 
     { 
-        
+    }
+
+    void Sleep() 
+    {
+        StandStill();
+        currentSleepTime += Time.deltaTime;
+        if (currentSleepTime > sleepTimeMax)
+        {
+            tired = 0;
+            currentSleepTime = 0;
+        }
     }
 
 

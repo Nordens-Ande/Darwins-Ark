@@ -412,6 +412,8 @@ MonoBehaviour:
   currentAttackTime: 0
   clockCycleTime: 30
   clockCycleTimeCurrent: 0
+  sleepTimeMax: 10
+  currentSleepTime: 0
   attackDistance: 3
   poop:
   - {fileID: 7206990565552924369, guid: 9d83281e4b6364a4bbce31d9758ccd88, type: 3}
@@ -5955,6 +5957,8 @@ MonoBehaviour:
   currentAttackTime: 0
   clockCycleTime: 30
   clockCycleTimeCurrent: 0
+  sleepTimeMax: 10
+  currentSleepTime: 0
   attackDistance: 3
   poop:
   - {fileID: 7206990565552924369, guid: 9d83281e4b6364a4bbce31d9758ccd88, type: 3}
