@@ -11,6 +11,8 @@ namespace Assets.Scripts.Environment
 
         TileType type;
 
+        public Vector2Int GridPosition => new Vector2Int((int)position.x, (int)position.z);
+
         //plant varibles
         [SerializeField] private Plant currentPlant = null; //this is the plant that is currently on this tile, if any
 

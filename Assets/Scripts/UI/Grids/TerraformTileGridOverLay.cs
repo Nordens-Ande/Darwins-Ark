@@ -119,6 +119,11 @@ public class TerraformTileGridOverlay : MonoBehaviour
 
         line.enabled = visible;
     }
+    public void SetTileVisible(Vector2 posXZ, bool visible) 
+        => SetTileVisible(TileManager.Instance.GetTile(posXZ), visible);
+
+    public void SetTileVisible(Vector3 posXZ, bool visible) 
+        => SetTileVisible(TileManager.Instance.GetTile(posXZ), visible);
 
     public void SetTileColor(Tile tile, Color color)
     {
@@ -141,6 +146,11 @@ public class TerraformTileGridOverlay : MonoBehaviour
         {
             material.SetColor("_Color", color);
         }
-    }  
+    }
+    public void SetTileColor(Vector2 posXZ, Color color)
+        => SetTileColor(TileManager.Instance.GetTile(posXZ), color);
+
+    public void SetTileColor(Vector3 posXZ, Color color)
+        => SetTileColor(TileManager.Instance.GetTile(posXZ), color);
 }
     
