@@ -244,7 +244,7 @@ public class PlantManager : MonoBehaviour
             return false;
         
 
-        // detta är inte superbra, om man måste optimera kan man kolla här
+        // detta ï¿½r inte superbra, om man mï¿½ste optimera kan man kolla hï¿½r
         // men det borde funka
 
         foreach (Chunk chunk in tileManager.chunks)
@@ -276,4 +276,10 @@ public class PlantManager : MonoBehaviour
         return false;
     }
 
+
+    // Needed for wind Deity
+    public IEnumerable<Plant> GetPlants()
+    {
+        return plants;
+    }
 }

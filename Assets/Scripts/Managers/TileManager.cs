@@ -1,6 +1,7 @@
 using NUnit.Framework.Internal;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Environment
 {
@@ -73,13 +74,23 @@ namespace Assets.Scripts.Environment
 
                 // Grid for chunk and tiles in TerraformUI -------------
                 //  Chunk Grid
-                GameObject chunkGridObject = new GameObject("ChunkGrid");
-                chunkGridObject.transform.SetParent(chunkObject.transform, false);
+                GameObject chunkGridObject = 
+                    new GameObject("ChunkGrid"
+                    );
+
+                chunkGridObject.transform.SetParent(
+                    chunkObject.transform, false
+                    );
 
                 ChunkGridOverlay chunkGrid =
                     chunkGridObject.AddComponent<ChunkGridOverlay>();
 
-                chunkGrid.Setup(chunkSize, gridLineMaterial);
+                chunkGrid.Setup(
+                    chunk,
+                    chunkSize, 
+                    gridLineMaterial
+                    );
+
                 chunkGridObject.SetActive(false);
 
                 //  Tile Grid
@@ -142,6 +153,9 @@ namespace Assets.Scripts.Environment
             return null;
         }
 
+        public Chunk GetChunk(Vector2 positionXZ)
+            => GetChunk(positionXZ.x, positionXZ.y);
+
         public Chunk GetChunk(Vector3 position)
         {
             return GetChunk(position.x, position.y);
@@ -160,9 +174,9 @@ namespace Assets.Scripts.Environment
         {
             return GetTile(posXZ.x, posXZ.y);
         }
-        public Tile GetTile(Vector3 pos)
+        public Tile GetTile(Vector3 posXZ)
         {
-            return GetTile(pos.x, pos.z);
+            return GetTile(posXZ.x, posXZ.z);
         }
 
         // Booleans for when chunk/tile grids are visible
