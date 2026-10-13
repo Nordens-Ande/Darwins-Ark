@@ -2,15 +2,17 @@ using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Environment;
 using System.Linq;
+using System.Collections;
 
 
 public class PlantManager : MonoBehaviour
 {
     public static PlantManager Instance = null;
+    TileManager tileManager;
 
 
     [Header("Varibles")]
-    [SerializeField] float SecondsForPlantToGrow = 10.0f;
+    [SerializeField] float secondsForPlantToGrow = 10.0f;
     [Space]
 
     [Header("Plant Spawning")]
@@ -20,9 +22,24 @@ public class PlantManager : MonoBehaviour
     [SerializeField] float spawnPlantAllTilesChance = 20; //chance of a plant spawning on a tile when spawning on all tiles
     [Space]
     [SerializeField] bool useRandomGrowthSpeed = true;
+    [SerializeField] float minGrowthSpeed = 0.5f;
+    [SerializeField] float maxGrowthSpeed = 2.0f;
+    [Space]
     [SerializeField] bool useRandomPlants = true;
+    [Space]
     [SerializeField] bool useRandomPlantRotation = true;
+    [SerializeField] float minPlantRotation = 0f;
+    [SerializeField] float maxPlantRotation = 360f;
+    [Space]
     [SerializeField] bool useRandomPlantScale = true;
+    [SerializeField] float minPlantScale = 0.75f;
+    [SerializeField] float maxPlantScale = 1.35f;
+    [Space]
+    [SerializeField] bool useRandomOffsetsFromTile = true;
+    [SerializeField] float maxTileOffset = 0.25f;
+    [Space]
+    [SerializeField] bool massPlantPlantsAsGrown = true;
+    private bool massSpawning = false; //this is a varible to know if we're mass spawning plants or not
 
     [Header("List of all Plants")]
     [SerializeField] private List<Plant> plants = new List<Plant>();
@@ -36,12 +53,17 @@ public class PlantManager : MonoBehaviour
 
     void Start()
     {
-        //find all plants in the scene
-        if (plants.Count == 0)
-        {
-            plants.AddRange(FindObjectsByType<Plant>());
-        }
+        tileManager = TileManager.Instance;
+
+        StartCoroutine(SpawnPlantsAfter1Frame());
     }
+
+    IEnumerator SpawnPlantsAfter1Frame()
+    {
+        yield return new WaitForEndOfFrame(); // we wait one frame
+        MassPlantPlants();
+    }
+
 
     void Update()
     {
@@ -56,7 +78,7 @@ public class PlantManager : MonoBehaviour
             }
 
             //check if the plant is ready to grow, depnding on growth speed and time since last growth
-            if (plants[i].TimeSinceLastGrowth / plants[i].GrowthSpeed >= SecondsForPlantToGrow)
+            if (plants[i].TimeSinceLastGrowth / plants[i].GrowthSpeed >= secondsForPlantToGrow)
             {
                 plants[i].GrowPlant();
             }
@@ -77,18 +99,22 @@ public class PlantManager : MonoBehaviour
 
     public void MassPlantPlants()
     {
-        if (TileManager.Instance != null && TileManager.Instance.chunks != null)
+        if (tileManager != null && tileManager.chunks != null)
         {
 
-            foreach (Chunk chunk in TileManager.Instance.chunks) //we loop through all chunks
+            foreach (Chunk chunk in tileManager.chunks) // we loop through all chunks
             {
-                foreach (Tile tile in chunk.Tiles) //loop through all tiles in the chunk
-                {
-                    ///todo
-                    ///kolla här så tilen inte är strand  
-                    
-                    if (tile == null || tile.isWater || tile.HasPlant || tile.isWater) continue;
 
+                HashSet<Vector2Int> grassTiles = chunk[TileType.Grass];
+                if (grassTiles == null || grassTiles.Count() == 0)
+                {
+                    continue;
+                }
+
+                foreach (Vector2Int tilePos in grassTiles) // loop through all tiles in the chunk
+                {
+                  
+                  
                     float randomValue = Random.Range(0f, 100f);
                     if (randomValue <= spawnPlantAllTilesChance)
                     {
@@ -98,14 +124,18 @@ public class PlantManager : MonoBehaviour
 
                         if (useRandomGrowthSpeed)
                         {
-                            randomGrowthSpeed = Random.Range(0.5f, 2.0f);
+                            randomGrowthSpeed = Random.Range(minGrowthSpeed, maxGrowthSpeed);
                         }
                         if (useRandomPlants)
                         {
                             plant = plantPrefabToSpawn[Random.Range(0, plantPrefabToSpawn.Count)];
                         }
+                       
+                        massSpawning = true;
 
-                        SpawnPlantOnThisTile(plant, tile, randomGrowthSpeed);
+                        SpawnPlantOnThisTile(plant, chunk.GetTile(tilePos.x, tilePos.y), randomGrowthSpeed);
+
+                        massSpawning = false;
                     }
 
                 }
@@ -129,33 +159,52 @@ public class PlantManager : MonoBehaviour
         // if the tile alredy has a plant
         if (tile.HasPlant)
         {
-            Debug.Log("Tilen har redan en planta!");
+            Debug.LogWarning("You tried to plant a plant on a tile which already has a plant");
             return null;
         }
 
-        //create a new plant on the tile
-        Plant newPlant = Instantiate(prefab, tile.position, Quaternion.identity, transform);
+
+        // the initial pos of the plant on the tile
+        Vector3 spawnPos = tile.position;
 
 
-        //if we want to randomize y rotation so the plants dont all look the same
+        // if we want to use a random offset for the lant on the tile
+        if(useRandomOffsetsFromTile)
+        {
+            float offsetX = Random.Range(-maxTileOffset, maxTileOffset);
+            float offsetZ = Random.Range(-maxTileOffset, maxTileOffset);
+
+            spawnPos.x = spawnPos.x + offsetX;
+            spawnPos.z = spawnPos.z + offsetZ;
+        }
+
+        // create a new plant on the tile
+        Plant newPlant = Instantiate(prefab, spawnPos, Quaternion.identity, transform);
+
+        // if we want to randomize y rotation so the plants dont all look the same
         if (useRandomPlantRotation)
         {
-            float randomYAngle = Random.Range(0f, 360f);
+            float randomYAngle = Random.Range(minPlantRotation, maxPlantRotation);
             newPlant.transform.localRotation = Quaternion.Euler(0f, randomYAngle, 0f);
         }
         
-        //if we want to random scale all the plants so they aren't all the same0
+        // if we want to random scale all the plants so they aren't all the same0
         if (useRandomPlantScale)
         {
-            float randomScale = Random.Range(0.75f, 1.35f);
+            float randomScale = Random.Range(minPlantScale, maxPlantScale);
             newPlant.transform.localScale = new Vector3(randomScale, randomScale, randomScale);
         }
-        
 
-        //set the growth speed of the plant
+        if (massPlantPlantsAsGrown && massSpawning)
+        {
+            newPlant.SetGrowthStage(Plant.GrowthStage.grown);
+        }
+
+
+        // set the growth speed of the plant
         newPlant.GrowthSpeed = CustomGrowSpeed;
 
-        //couple the plant to the tile
+        // couple the plant to the tile
         newPlant.OccupyTile(tile);
 
         // Register in the manager
