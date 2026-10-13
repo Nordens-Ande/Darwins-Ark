@@ -1,4 +1,5 @@
 using NUnit.Framework.Internal;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -65,9 +66,13 @@ namespace Assets.Scripts.Environment
                 //chunkObject.GetComponent<MeshCollider>().sharedMesh = mesh;
 
                 Chunk chunk = chunks[i];
-                
+
                 // Generate gameObject
-                GameObject chunkObject = new GameObject($"Chunk (x:{chunk.position.x}, z:{chunk.position.y})", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider));
+                Type[] components = new Type[]
+                {
+                    typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider)
+                };
+                GameObject chunkObject = new GameObject($"Chunk (x:{chunk.position.x}, z:{chunk.position.y})", components);
                 chunkObject.transform.SetParent(transform);
                 
                 // Generate mesh for chunk
@@ -103,6 +108,8 @@ namespace Assets.Scripts.Environment
                 GenerateGrid(chunk, chunkObject);
 
             }
+
+            SetChunkGridVisible(false);
         }
 
 
@@ -194,25 +201,44 @@ namespace Assets.Scripts.Environment
             chunkObject.GetComponent<MeshCollider>().sharedMesh = mesh;
         }
 
+        //private void GenerateGrid(Chunk chunk, GameObject chunkObject)
+        //{
+        //    // Chunk grid object instansiate
+        //    GameObject chunkGridObject = new GameObject("ChunkGrid");
+        //    chunkGridObject.transform.SetParent(chunkObject.transform, false);
+
+        //    // Chunk grid setup
+        //    ChunkGridOverlay chunkGrid = chunkGridObject.AddComponent<ChunkGridOverlay>();
+        //    chunkGrid.Setup(chunk, chunkSize, gridLineMaterial);
+        //    chunkGridObject.SetActive(false);
+
+        //    // Tile grid instansiate
+        //    GameObject tileGridObject = new GameObject("TileGrid");
+        //    tileGridObject.transform.SetParent(chunkObject.transform, false);
+
+        //    // Tile grid setup
+        //    TerraformTileGridOverlay tileGrid = tileGridObject.AddComponent<TerraformTileGridOverlay>();
+        //    tileGrid.Setup(chunk, gridLineMaterial);
+        //    tileGridObject.SetActive(false);
+        //}
         private void GenerateGrid(Chunk chunk, GameObject chunkObject)
         {
-            // Chunk grid object instansiate
-            GameObject chunkGridObject = new GameObject("ChunkGrid");
+            Type[] components = new Type[]
+            {
+                typeof(MeshFilter), typeof(MeshRenderer), typeof(LineMesh)
+            };
+
+            GameObject chunkGridObject = new GameObject("ChunkGrid", components);
             chunkGridObject.transform.SetParent(chunkObject.transform, false);
 
-            // Chunk grid setup
-            ChunkGridOverlay chunkGrid = chunkGridObject.AddComponent<ChunkGridOverlay>();
-            chunkGrid.Setup(chunk, chunkSize, gridLineMaterial);
-            chunkGridObject.SetActive(false);
+            MeshRenderer meshRenderer = chunkGridObject.GetComponent<MeshRenderer>();
+            meshRenderer.material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            meshRenderer.material.color = Color.red;
 
-            // Tile grid instansiate
-            GameObject tileGridObject = new GameObject("TileGrid");
-            tileGridObject.transform.SetParent(chunkObject.transform, false);
+            LineMesh lineMesh = chunkGridObject.GetComponent<LineMesh>();
+            lineMesh.meshData = chunk.lineMeshData;
 
-            // Tile grid setup
-            TerraformTileGridOverlay tileGrid = tileGridObject.AddComponent<TerraformTileGridOverlay>();
-            tileGrid.Setup(chunk, gridLineMaterial);
-            tileGridObject.SetActive(false);
+            lineMesh.Rebuild();
         }
 
 

@@ -21,6 +21,8 @@ namespace Assets.Scripts.Environment
         public List<Color> colors;
         public List<int> triangles;
 
+        public LineMeshData lineMeshData;
+
         public int Size => size; 
         public Tile[,] Tiles => tiles;
 
@@ -42,6 +44,8 @@ namespace Assets.Scripts.Environment
             //Create tileType hashsets
             tileTypes = new Dictionary<TileType, HashSet<Vector2Int>>();
             InitializeTileHashsets();
+
+            lineMeshData = new LineMeshData();
 
             //Creates all the tiles (and assigns to tile hashsets)
             tiles = new Tile[size, size];
@@ -134,11 +138,17 @@ namespace Assets.Scripts.Environment
 
                     //Top face
                     AddFace(
-                        new Vector3(-0.5f, 0, 0.5f) + tilePos,      // top-left
-                        new Vector3(+0.5f, 0, 0.5f) + tilePos,      // top-right
-                        new Vector3(+0.5f, 0, -0.5f) + tilePos,     // bottom-right
-                        new Vector3(-0.5f, 0, -0.5f) + tilePos,     // bottom-left
+                        new Vector3(-0.5f, 0, 0.5f) + tilePos,  // top-left
+                        new Vector3(+0.5f, 0, 0.5f) + tilePos,  // top-right
+                        new Vector3(+0.5f, 0, -0.5f) + tilePos, // bottom-right
+                        new Vector3(-0.5f, 0, -0.5f) + tilePos, // bottom-left
                         tileColor
+                    );
+                    lineMeshData.AddFace(
+                        new Vector3(-0.5f, 0.01f, 0.5f) + tilePos,  // top-left
+                        new Vector3(+0.5f, 0.01f, 0.5f) + tilePos,  // top-right
+                        new Vector3(+0.5f, 0.01f, -0.5f) + tilePos, // bottom-right
+                        new Vector3(-0.5f, 0.01f, -0.5f) + tilePos  // bottom-left
                     );
 
                     float tileHeight = tilePos.y;
