@@ -22,13 +22,24 @@ public class PlantManager : MonoBehaviour
     [SerializeField] float spawnPlantAllTilesChance = 20; //chance of a plant spawning on a tile when spawning on all tiles
     [Space]
     [SerializeField] bool useRandomGrowthSpeed = true;
+    [SerializeField] float minGrowthSpeed = 0.5f;
+    [SerializeField] float maxGrowthSpeed = 2.0f;
+    [Space]
     [SerializeField] bool useRandomPlants = true;
+    [Space]
     [SerializeField] bool useRandomPlantRotation = true;
+    [SerializeField] float minPlantRotation = 0f;
+    [SerializeField] float maxPlantRotation = 360f;
+    [Space]
     [SerializeField] bool useRandomPlantScale = true;
+    [SerializeField] float minPlantScale = 0.75f;
+    [SerializeField] float maxPlantScale = 1.35f;
+    [Space]
     [SerializeField] bool useRandomOffsetsFromTile = true;
     [SerializeField] float maxTileOffset = 0.25f;
     [Space]
     [SerializeField] bool massPlantPlantsAsGrown = true;
+    private bool massSpawning = false; //this is a varible to know if we're mass spawning plants or not
 
     [Header("List of all Plants")]
     [SerializeField] private List<Plant> plants = new List<Plant>();
@@ -44,11 +55,6 @@ public class PlantManager : MonoBehaviour
     {
         tileManager = TileManager.Instance;
 
-        ////find all plants in the scene
-        //if (plants.Count == 0)
-        //{
-        //    plants.AddRange(FindObjectsByType<Plant>());
-        //}
         StartCoroutine(SpawnPlantsAfter1Frame());
     }
 
@@ -118,16 +124,18 @@ public class PlantManager : MonoBehaviour
 
                         if (useRandomGrowthSpeed)
                         {
-                            randomGrowthSpeed = Random.Range(0.5f, 2.0f);
+                            randomGrowthSpeed = Random.Range(minGrowthSpeed, maxGrowthSpeed);
                         }
                         if (useRandomPlants)
                         {
                             plant = plantPrefabToSpawn[Random.Range(0, plantPrefabToSpawn.Count)];
                         }
-
-                       // plant.SetGrowthStage(plant.grow);
+                       
+                        massSpawning = true;
 
                         SpawnPlantOnThisTile(plant, chunk.GetTile(tilePos.x, tilePos.y), randomGrowthSpeed);
+
+                        massSpawning = false;
                     }
 
                 }
@@ -176,17 +184,22 @@ public class PlantManager : MonoBehaviour
         // if we want to randomize y rotation so the plants dont all look the same
         if (useRandomPlantRotation)
         {
-            float randomYAngle = Random.Range(0f, 360f);
+            float randomYAngle = Random.Range(minPlantRotation, maxPlantRotation);
             newPlant.transform.localRotation = Quaternion.Euler(0f, randomYAngle, 0f);
         }
         
         // if we want to random scale all the plants so they aren't all the same0
         if (useRandomPlantScale)
         {
-            float randomScale = Random.Range(0.75f, 1.35f);
+            float randomScale = Random.Range(minPlantScale, maxPlantScale);
             newPlant.transform.localScale = new Vector3(randomScale, randomScale, randomScale);
         }
-        
+
+        if (massPlantPlantsAsGrown && massSpawning)
+        {
+            newPlant.SetGrowthStage(Plant.GrowthStage.grown);
+        }
+
 
         // set the growth speed of the plant
         newPlant.GrowthSpeed = CustomGrowSpeed;
