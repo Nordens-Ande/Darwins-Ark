@@ -2,9 +2,8 @@ using System.Threading;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using static TMPro.SpriteAssetUtilities.TexturePacker_JsonArray;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
 using Assets.Scripts.Environment;
+using System.Collections;
 
 // This is the main script for how the camera moves around
 // the script is supposed to be attached to the camera object in unity
@@ -12,6 +11,7 @@ using Assets.Scripts.Environment;
 
 public class CameraMovement : MonoBehaviour
 {
+    public static CameraMovement Instance { get; private set; }
     TileManager tileManager;
 
     Camera cam = null;
@@ -41,11 +41,15 @@ public class CameraMovement : MonoBehaviour
     [SerializeField, ReadOnly] private InputAction movementAction;
     [SerializeField, ReadOnly] private InputAction zoomAction;
     [SerializeField, ReadOnly] private InputAction angleAction;
-
+    [Space]
+    [Header("Test Pan to point")]
+    [SerializeField] private bool testPanToPoint = false;
 
     private Vector3 currentVelocity = Vector3.zero;
     private float targetZoom; // The desired zoom level based on user input
     private float targetYaw; // The desired angle based on user input
+
+    private bool isLerpingToTarget = false; // Flag to indicate if the camera is currently lerping to a target position
 
 
     private void Awake()
@@ -107,6 +111,12 @@ public class CameraMovement : MonoBehaviour
 
         if (allowAngleChange)
             updateAngle();
+
+        if (testPanToPoint)
+        {
+            testPanToPoint = false;
+            PanToPosition(new Vector3(0, transform.position.y, 0), 1.0f); // Example target position and duration
+        }
     }
 
     private void updateZoom()
@@ -201,24 +211,7 @@ public class CameraMovement : MonoBehaviour
 
 
         // get the chunk parameters so we can make sure to not go far away from the island
-        if (tileManager != null)
-        {
-            int chunkSize = tileManager.ChunkSize;
-            Vector2Int gridSize = tileManager.ChunkGridSize;
-
-            // world is centered at 0,0, so we need to calculate the half width and half height of the grid
-            float halfWidth = (gridSize.x * chunkSize) / 2f;
-            float halfHeight = (gridSize.y * chunkSize) / 2f;
-
-            float minX = -halfWidth;
-            float maxX = halfWidth;
-            float minZ = -halfHeight;
-            float maxZ = halfHeight;
-
-            // Clamp the camera's position within the bounds plus margin
-            position.x = Mathf.Clamp(position.x, minX - cameraBoundsMargin, maxX + cameraBoundsMargin);
-            position.z = Mathf.Clamp(position.z, minZ - cameraBoundsMargin, maxZ + cameraBoundsMargin);
-        }
+        position = GetClampedPosition(position);
 
         transform.position = position;
 
@@ -273,5 +266,66 @@ public class CameraMovement : MonoBehaviour
 
 
 
+    private Vector3 GetClampedPosition(Vector3 position)
+    {
+        if (tileManager != null)
+        {
+            int chunkSize = tileManager.ChunkSize;
+            Vector2Int gridSize = tileManager.ChunkGridSize;
+
+            float halfWidth = (gridSize.x * chunkSize) / 2f;
+            float halfHeight = (gridSize.y * chunkSize) / 2f;
+
+            float minX = -halfWidth;
+            float maxX = halfWidth;
+            float minZ = -halfHeight;
+            float maxZ = halfHeight;
+
+            position.x = Mathf.Clamp(position.x, minX - cameraBoundsMargin, maxX + cameraBoundsMargin);
+            position.z = Mathf.Clamp(position.z, minZ - cameraBoundsMargin, maxZ + cameraBoundsMargin);
+        }
+        return position;
+    }
+
+
+    public void PanToPosition(Vector3 targetWorldPosition, float duration = 0.5f)
+    {
+        StartCoroutine(LerpCameraRoutine(targetWorldPosition, duration));
+    }
+
+    private IEnumerator LerpCameraRoutine(Vector3 targetWorldPosition, float duration = 0.5f)
+    {
+        isLerpingToTarget = true;
+        currentVelocity = Vector3.zero; // Reset velocity so it doesn't continue to slide
+
+        // get the current focus point and the offset from the camera to that point
+        Vector3 currentFocus = GetFocusPoint();
+        Vector3 cameraOffset = transform.position - currentFocus;
+
+        // get the target world position and clamp it to the island bounds
+        targetWorldPosition.y = 0f; // we assume ground is y=0
+        targetWorldPosition = GetClampedPosition(targetWorldPosition);
+
+        // calculate the target camera position based on the target world position and the current offset
+        Vector3 startPos = transform.position;
+        Vector3 targetCameraPos = targetWorldPosition + cameraOffset;
+
+        float elapsedTime = 0f;
+
+        while (elapsedTime < duration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsedTime / duration);
+
+            // Smooth Ease-In-Out curve
+            t = Mathf.SmoothStep(0f, 1f, t);
+
+            transform.position = Vector3.Lerp(startPos, targetCameraPos, t);
+            yield return null;
+        }
+
+        transform.position = targetCameraPos;
+        isLerpingToTarget = false;
+    }
 
 }
