@@ -25,8 +25,9 @@ public class UIStateManager : MonoBehaviour
 
         Debug.Log("Entered Terraform Mode");
 
-        TileManager.Instance.SetChunkGridVisible(true);
-        TileManager.Instance.SetTileGridVisible(true);
+        //TileManager.Instance.SetChunkGridVisible(true);
+        //TileManager.Instance.SetTileGridVisible(true);
+        tileSelectionManager.SetGridVisible(true);
     }
 
     public void ExitTerraformMode()
@@ -39,8 +40,9 @@ public class UIStateManager : MonoBehaviour
         normalUI.SetActive(true);
         terraformUI.SetActive(false);
 
-        TileManager.Instance.SetChunkGridVisible(false);
-        TileManager.Instance.SetTileGridVisible(false);
+        //TileManager.Instance.SetChunkGridVisible(false);
+        //TileManager.Instance.SetTileGridVisible(false);
+        tileSelectionManager.SetGridVisible(false);
 
         Debug.Log("Exited Terraform Mode");
     }
