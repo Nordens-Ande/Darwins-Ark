@@ -285,13 +285,13 @@ public class AnimalAI : MonoBehaviour
             //return point;
 
             Chunk choosenChunk = tileManager.chunks[Random.Range(0, tileManager.chunks.Count)];
-            Vector2Int[] choosenTiles = choosenChunk.GetTiles(TileType.Grass).ToArray();
+            //Vector2Int[] choosenTiles = choosenChunk.GetTiles(TileType.Grass).ToArray();
+            Vector2Int[] choosenTiles = choosenChunk.GetTiles(TileType.Grass).ToArray<Vector2Int>();
             if(choosenTiles == null) 
             {
                 //Try again
-                FindWalkPoint();
+                return FindWalkPoint(); //fixed
             }
-
             int randomPos = Random.Range(0, choosenTiles.Length-1);
             Vector2Int choosenPosition = choosenTiles[randomPos];
             Tile choosenTile = tileManager.GetTile(choosenPosition);
@@ -311,7 +311,12 @@ public class AnimalAI : MonoBehaviour
             {
                 return false;
             }
-            else return true;
+            else 
+            {
+                transform.position += Vector3.right * Time.deltaTime;
+                hit.transform.position += Vector3.left * Time.deltaTime;
+                return true;
+            }
         }
         else return false;
     }
@@ -335,7 +340,7 @@ public class AnimalAI : MonoBehaviour
                 Idle();
             }
 
-            if (!WillCollideWithNeighbour()) 
+            if (!WillCollideWithNeighbour())
             {
                 AnimalWalkMoveTowards(walkPoint);
             }
@@ -608,7 +613,8 @@ public class AnimalAI : MonoBehaviour
         //Makes sure the animal stays at the tileheight its on
         Vector2 currentPostion = new Vector2((int)transform.position.x,(int) transform.position.z);
         Tile currentTile = tileManager.GetTile(currentPostion);
-        Vector3 newPoint = new Vector3(point.x, currentTile.position.y + transform.localScale.y / 2, point.z);
+        //Vector3 newPoint = new Vector3(point.x, currentTile.position.y + transform.localScale.y / 2, point.z);
+        Vector3 newPoint = new Vector3(point.x, currentTile.GetHeight() + transform.localScale.y / 2, point.z);
         transform.position = Vector3.MoveTowards(transform.position, newPoint, walkSpeed * Time.deltaTime);
     }
 
