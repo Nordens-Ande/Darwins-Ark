@@ -279,26 +279,50 @@ public class AnimalAI : MonoBehaviour
     {
         if (tileManager.chunks.Count > 0)
         {
-            //Chunk choosenChunk = TileManager.Instance.chunks[Random.Range(0, TileManager.Instance.chunks.Count)];
-            //Tile choosenTile = choosenChunk.Tiles[Random.Range(0, TileManager.Instance.ChunkSize), Random.Range(0, TileManager.Instance.ChunkSize)];
-            //Vector3 point = new Vector3(choosenTile.position.x, choosenTile.position.y + transform.localScale.y / 2, choosenTile.position.z);
-            //return point;
+            //New solution that takes in all possible grasspaths, instead of having to rekursion find another walkpoint
+            //Now the issue seems to be fixed 
+            //Might be better to have this as a standalone method that updates everytime the island does, right now this updates every time the animal chooses a new path
+            List<Vector2Int> tileList = new List<Vector2Int>();
 
-            Chunk choosenChunk = tileManager.chunks[Random.Range(0, tileManager.chunks.Count)];
-            //Vector2Int[] choosenTiles = choosenChunk.GetTiles(TileType.Grass).ToArray();
-            Vector2Int[] choosenTiles = choosenChunk.GetTiles(TileType.Grass).ToArray<Vector2Int>();
-            if(choosenTiles == null) 
+            foreach (Chunk chunk in tileManager.chunks) 
             {
-                //Try again
-                return FindWalkPoint(); //fixed
+                List<Vector2Int> temp = chunk.GetTiles(TileType.Grass).ToList();
+                if(temp.Count != 0) 
+                { 
+                    tileList.AddRange(temp);
+                }
             }
-            int randomPos = Random.Range(0, choosenTiles.Length-1);
-            Vector2Int choosenPosition = choosenTiles[randomPos];
+            int randomPos = Random.Range(0, tileList.Count);
+            Vector2Int choosenPosition = tileList[randomPos];
             Tile choosenTile = tileManager.GetTile(choosenPosition);
             Vector3 point = new Vector3(choosenTile.position.x, choosenTile.position.y + transform.localScale.y / 2, choosenTile.position.z);
             return point;
+
+
+            //Old solution
+            //Chunk choosenChunk = tileManager.chunks[Random.Range(0, tileManager.chunks.Count)];
+            ////Vector2Int[] choosenTiles = choosenChunk.GetTiles(TileType.Grass).ToArray();
+            //Vector2Int[] choosenTiles = choosenChunk.GetTiles(TileType.Grass).ToArray<Vector2Int>();
+            //Debug.LogWarning(choosenTiles.Length);
+
+            //if (choosenTiles == null || choosenTiles.Length > 0)
+            //{
+            //    //Try again
+            //    return FindWalkPoint(); //fixed
+            //}
+            //else
+            //{
+            //    int randomPos = Random.Range(0, choosenTiles.Length - 1);
+            //    Vector2Int choosenPosition = choosenTiles[randomPos];
+            //    Tile choosenTile = tileManager.GetTile(choosenPosition);
+            //    Vector3 point = new Vector3(choosenTile.position.x, choosenTile.position.y + transform.localScale.y / 2, choosenTile.position.z);
+            //    return point;
+            //}
         }
-        return new Vector3(0, 0, 0);
+        else 
+        {
+            return new Vector3(0, 0, 0);
+        }
     }
 
     //Checks so the animals dosent collide
@@ -616,6 +640,17 @@ public class AnimalAI : MonoBehaviour
         //Vector3 newPoint = new Vector3(point.x, currentTile.position.y + transform.localScale.y / 2, point.z);
         Vector3 newPoint = new Vector3(point.x, currentTile.GetHeight() + transform.localScale.y / 2, point.z);
         transform.position = Vector3.MoveTowards(transform.position, newPoint, walkSpeed * Time.deltaTime);
+
+        //Makes sure the animal moves fast enough to the top of the tile, otherwise it will move through the tile
+
+        if (transform.position.y < currentTile.GetHeight() + transform.localScale.y / 2)
+        {
+            transform.position += new Vector3(0, 0.5f, 0) * Time.deltaTime;
+        }
+        else if (transform.position.y > currentTile.GetHeight() + transform.localScale.y / 2)
+        {
+            transform.position -= new Vector3(0, 0.5f, 0) * Time.deltaTime;
+        }
     }
 
     //If we decide to have animals lose health
