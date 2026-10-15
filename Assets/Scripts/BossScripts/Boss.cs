@@ -1,43 +1,205 @@
 using UnityEngine;
 using Assets.Scripts.Environment;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
 
 public class Boss : MonoBehaviour, IBoatSpawning
 {
+    TileManager tileManager = TileManager.Instance;
+    AnimalManager animalManager = AnimalManager.Instance;
     public Transform Transform => transform;
 
     BossHealth healthScript;
+
+    PathFinding pathFinder;
     BossMovement movementScript;
 
-    Tile currentTile;
+    bool unloaded;
 
-    public Tile CurrentTile => currentTile;
+    //ai
+    List<BossAIState> AIStates;
+    BossAIState currentState;
+    BossAIState beachState;
+    float sightDistanceToAnimals;
+    float sightDistanceToTiles;
+    float attackTime;
+
+    Tile currentTile; //?
+    public Tile CurrentTile => currentTile; //?
+
+    public PathFinding PathFinder => pathFinder;
+    public BossHealth HealthScript => healthScript;
+    public BossMovement MovementScript => movementScript;
+    public float SightDistanceToAnimals => sightDistanceToAnimals;
+    public float SightDistanceToTiles => sightDistanceToTiles;
+    public float AttackTime => attackTime;
 
     void Start()
     {
         transform.localPosition = Vector3.zero;
-        //healthScript = gameObject.GetComponent<BossHealth>();
+        pathFinder = new PathFinding();
+        healthScript = gameObject.GetComponent<BossHealth>();
         movementScript = gameObject.GetComponent<BossMovement>();
+        movementScript.PathFinder = pathFinder;
         movementScript.enabled = false;
+        unloaded = false;
+        sightDistanceToAnimals = 10;
+        sightDistanceToTiles = 20;
+        attackTime = 3;
+
+        AIStates = new List<BossAIState>();
+        BossRelocateState relocate = new BossRelocateState(this);
+        BossAttackPlantState attack = new BossAttackPlantState(this);
+        BossEscapeState escape = new BossEscapeState(this);
+        beachState = new BossOnBeachState(this);
+        AIStates.Add(relocate);
+        AIStates.Add(attack);
+        AIStates.Add(escape);
+        AIStates.Add(beachState);
+        currentState = null;
     }
 
     public bool Unload(Tile beachTile)
     {
         transform.position = beachTile.position;
         movementScript.enabled = true;
+        unloaded = true;
         return true;
+    }
+
+    List<Tile> FindAllTilesWithPlants()
+    {
+        List<Tile> tilesWithPlants = new List<Tile>();
+        foreach(Chunk chunk in tileManager.chunks)
+        {
+            foreach(Tile tile in chunk.Tiles)
+            {
+                if(tile.HasPlant)
+                {
+                    tilesWithPlants.Add(tile);
+                }
+            }
+        }
+        Debug.Log("tile with plants: " + tilesWithPlants.Count);
+        return tilesWithPlants;
+    }
+
+    /// <summary>
+    /// Finds the closest reachable plant by the boss.
+    /// </summary>
+    /// <returns>Returns the Tile the plant is on, or null if tile is unreachable</returns>
+    public Tile FindClosestPlantTile()
+    {
+        List<Tile> tilesWithPlants = FindAllTilesWithPlants();
+        if (tilesWithPlants.Count <= 0) return null;
+
+        tilesWithPlants = tilesWithPlants.OrderBy(tile => Vector3.Distance(transform.position, tile.position)).ToList();
+
+        for(int i = 0; i < tilesWithPlants.Count; i++)
+        {
+            float distance = Vector3.Distance(transform.position, tilesWithPlants[i].position);
+            if (distance > sightDistanceToTiles) continue;
+
+            if(movementScript.PathFinder.GetPathAStar(tileManager.GetTile(transform.position), tilesWithPlants[i], movementScript.IsBossTraversable, 2f, (int)(distance * 2)) != null)
+            {
+                return tilesWithPlants[i];
+            }
+        }
+        return null; // no plants on tiles with path that is traversable
+    }
+
+    public List<AnimalAI> FindClosestAnimals(int amountOfAnimals)
+    {
+        List<AnimalAI> orderedList = animalManager.Animals.OrderBy(animal => Vector3.Distance(transform.position, animal.transform.position)).ToList();
+
+        int amountAdded = 0;
+        List<AnimalAI> closestAnimals = new List<AnimalAI>();
+        for (int i = 0; i < orderedList.Count; i++)
+        {
+            float distance = Vector3.Distance(transform.position, orderedList[i].transform.position);
+            if (distance > SightDistanceToAnimals) continue;
+            //change to animal traversable func later? (not implemented yet)
+            if(movementScript.PathFinder.GetPathAStar(tileManager.GetTile(transform.position), tileManager.GetTile(orderedList[i].transform.position), movementScript.IsBossTraversable, 2f, (int)(distance * 2)) != null)
+            {
+                closestAnimals.Add(orderedList[i]);
+                amountAdded++;
+                if (amountAdded >= amountOfAnimals)
+                {
+                    break;
+                }
+            }
+        }
+        return closestAnimals;
+    }
+
+    List<BossAIState> EvaluateStates()
+    {
+        List<BossAIState> states = AIStates;
+        states = states.OrderByDescending(state => state.Evaluate()).ToList();
+        return states;
     }
 
     void Update()
     {
+        if(!unloaded) return;
+
+        if(currentState == null) // as the boss arrives on beach, hopefully not after that (:
+        {
+            //currentState = beachState;
+            //currentState.OnEnterState();
+            //return;
+            List<BossAIState> statesOrdered = EvaluateStates();
+            for (int i = 0; i < statesOrdered.Count; i++)
+            {
+                Debug.Log("score: " + statesOrdered[i].ToString());
+            }
+
+            for (int i = 0; i < statesOrdered.Count; i++)
+            {
+                if (statesOrdered[i].OnEnterState())
+                {
+                    currentState = statesOrdered[i];
+                    break;
+                }
+            }
+            return;
+        }
+
+        if (currentState == null)
+        {
+            Debug.Log("state null");
+            return;
+        }
+        currentState.Tick();
         
+        if (!currentState.CanBeInterupted) return;
+
+        List<BossAIState> statesOrderedByScore = EvaluateStates();
+        for (int i = 0; i < statesOrderedByScore.Count; i++)
+        {
+            Debug.Log("score: " + statesOrderedByScore[i].ToString());
+        }
+
+        for (int i = 0; i < statesOrderedByScore.Count; i++)
+        {
+            if (currentState == statesOrderedByScore[i]) //if first iteration is same state as current no need to continue;
+            {
+                break;
+            }
+
+            if (statesOrderedByScore[i].OnEnterState())
+            {
+                currentState.OnExitState();
+                currentState = statesOrderedByScore[i];
+                Debug.Log("currentState changed to: " + currentState.ToString());
+                break;
+            }
+            else
+            {
+                Debug.Log("cant enter state " + statesOrderedByScore[i].ToString());
+            }
+
+        }
     }
-
-    //util ai
-    //behaviours
-
-    //move from beach to playable area // override utility ai if on beach tiles
-    //seek //too far from plants / no line of sight / no animals close
-    //escape // low hp / animals too close / distance to target?
-    //move // go to decided point
-    //destroy tile // distance to target tile (plant, river etc depending on boss type) at tile basically
 }

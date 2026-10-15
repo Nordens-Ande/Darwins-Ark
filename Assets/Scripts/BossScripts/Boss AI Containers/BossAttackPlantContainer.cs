@@ -1,0 +1,16 @@
+using UnityEngine;
+using Assets.Scripts.Environment;
+
+public class BossAttackPlantContainer : Container<Boss>
+{
+    public override float Evaluate(Boss boss)
+    {
+        Tile plantTile = boss.FindClosestPlantTile();
+        if (plantTile == null) return 0f; //no plants that are reachable
+        
+        float distance = Vector3.Distance(boss.transform.position, plantTile.position);
+        if(distance >= boss.SightDistanceToTiles) return 0f; // too far
+
+        return 1 - distance / boss.SightDistanceToTiles; //should be 1 - distance / boss bla bla
+    }
+}
