@@ -83,6 +83,17 @@
                 },
                 {
                     "name": "",
+                    "id": "a2ac59f9-def9-468b-9919-d3d68ef81c6b",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TileMove",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "208e34a4-7932-49d6-a433-491d36d3808d",
                     "path": "<Keyboard>/leftCtrl",
                     "interactions": "",
@@ -96,6 +107,17 @@
                     "name": "",
                     "id": "93a76ab3-8f90-46de-b26a-f7bfe36610df",
                     "path": "<Keyboard>/ctrl",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TileSelect",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "83ce6318-216e-4e9b-8951-60d12fe98f9e",
+                    "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

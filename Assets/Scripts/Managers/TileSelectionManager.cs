@@ -1,5 +1,6 @@
 using Assets.Scripts.Environment;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,21 +12,22 @@ public class TileSelectionManager : MonoBehaviour
         private TileGridVisibilityMode visibilityMode =
                 TileGridVisibilityMode.AllTiles;
 
-    private Tile highlightedTile;
+    private Vector2Int? highlightedTile;
 
-    private HashSet<Tile> selectedTiles =
-        new HashSet<Tile>();
+    private HashSet<Vector2Int> selectedTiles =
+        new HashSet<Vector2Int>();
 
-    //// Select Button Settings-------------------
-    //[SerializeField] private Key selectionKey = Key.LeftCtrl;
-    //private float lastSelectKeyPressTime = -1f;
-    ////------------------------------------------
-    private bool selectHeld;
+    //Mouse input
+    [SerializeField] private float mouseMoveThreshold = 20f;
+    private Vector2 mouseAccumulator;
+    //---------------------------------------
+
+    [SerializeField, ReadOnly] private bool selectHeld;
+    [SerializeField, ReadOnly] private bool isAddingTiles;
 
     private bool wasTerraforming = false;
 
     //Flag used to activate/deactive keyboard/mouse inputs
-    private bool usingMouse = true;
 
     private Color normalColor = Color.red;
     private Color highlightColor = Color.cyan;
@@ -69,13 +71,15 @@ public class TileSelectionManager : MonoBehaviour
         int middleX = mapwidth / 2;
         int middleZ = mapDepth / 2;
 
-        highlightedTile =
-            TileManager.Instance.GetTile(middleX, middleZ);
+        //highlightedTile =
+        //    TileManager.Instance.GetTile(middleX, middleZ);
 
-        if (highlightedTile != null)
+        highlightedTile = TileManager.Instance.GetTile(middleX, middleZ) != null ? new Vector2Int(middleX, middleZ) : null;
+
+        if (highlightedTile != null) //kan ändra till "highlighetTile.HasValue" eller "highlighetTile is Vector2Int tilePos", null funkar ändå dock
         {
             SetTileColor(
-                highlightedTile, 
+                highlightedTile.Value, 
                 highlightColor
                 );
         }
@@ -86,14 +90,14 @@ public class TileSelectionManager : MonoBehaviour
         if (highlightedTile == null)
             return;
 
-        Tile oldHighlightedTile = highlightedTile;
+        Vector2Int oldHighlightedTilePos = highlightedTile.Value;
 
         int newX =
-            Mathf.RoundToInt(highlightedTile.position.x)
+            Mathf.RoundToInt(highlightedTile.Value.x)
             + xDirection;
 
         int newZ =
-            Mathf.RoundToInt(highlightedTile.position.z)
+            Mathf.RoundToInt(highlightedTile.Value.y)
             + zDirection;
 
         Tile newTile =
@@ -106,71 +110,142 @@ public class TileSelectionManager : MonoBehaviour
             return;
 
         // Restore old tile
-        if (selectedTiles.Contains(oldHighlightedTile))
+        if (selectedTiles.Contains(oldHighlightedTilePos))
         {
             SetTileColor(
-                oldHighlightedTile,
+                oldHighlightedTilePos,
                 selectedColor
             );
         }
         else
         {
             SetTileColor(
-                oldHighlightedTile,
+                oldHighlightedTilePos,
                 normalColor
             );
         }
 
-        highlightedTile = newTile;
+        highlightedTile = newTile != null ? newTile.GridPosition : null;
 
         // Holding select = toggle the tile we move onto
         if (selectHeld)
         {
-            if (selectedTiles.Contains(highlightedTile))
+            if (selectedTiles.Contains(highlightedTile.Value))
             {
-                selectedTiles.Remove(highlightedTile);
+                selectedTiles.Remove(highlightedTile.Value);
 
                 SetTileColor(
-                    highlightedTile,
+                    highlightedTile.Value,
                     highlightColor
                 );
             }
             else
             {
-                selectedTiles.Add(highlightedTile);
+                selectedTiles.Add(highlightedTile.Value);
 
                 SetTileColor(
-                    highlightedTile,
+                    highlightedTile.Value,
                     selectedColor
                 );
             }
         }
         else
         {
-            if (selectedTiles.Contains(highlightedTile))
+            if (selectedTiles.Contains(highlightedTile.Value))
             {
                 SetTileColor(
-                    highlightedTile,
+                    highlightedTile.Value,
                     selectedColor
                 );
             }
             else
             {
                 SetTileColor(
-                    highlightedTile,
+                    highlightedTile.Value,
                     highlightColor
                 );
             }
         }
 
-        UpdateTileVisibility(oldHighlightedTile);
-        UpdateTileVisibility(highlightedTile);
+        UpdateTileVisibility(oldHighlightedTilePos);
+        UpdateTileVisibility(highlightedTile.Value);
     }
- 
+
+
+    //----------------------------------------------
+    private void SetHighlight(int x, int z)
+    {
+        Tile newTile = TileManager.Instance.GetTile(x, z);
+
+        if (newTile == null)
+            return;
+
+        if (!highlightedTile.HasValue)
+        {
+            highlightedTile = newTile.GridPosition;
+
+            SetTileColor(
+                highlightedTile.Value,
+                highlightColor
+            );
+
+            UpdateTileVisibility(
+                highlightedTile.Value
+            );
+
+            return;
+        }
+
+        Vector2Int oldHighlightedTile = highlightedTile.Value;
+
+        if (selectedTiles.Contains(oldHighlightedTile))
+        {
+            SetTileColor(oldHighlightedTile, selectedColor);
+        }
+        else
+        {
+            SetTileColor(oldHighlightedTile, normalColor);
+        }
+
+        highlightedTile = newTile != null ? newTile.GridPosition : null;
+
+        if (selectHeld)
+        {
+            if (!isAddingTiles)
+            {
+                selectedTiles.Remove(highlightedTile.Value);
+
+                SetTileColor(highlightedTile.Value, highlightColor);
+            }
+            else
+            {
+                selectedTiles.Add(highlightedTile.Value);
+
+                SetTileColor(highlightedTile.Value, selectedColor);
+            }
+        }
+        else
+        {
+            if (selectedTiles.Contains(highlightedTile.Value))
+            {
+                SetTileColor(highlightedTile.Value, selectedColor);
+            }
+            else
+            {
+                SetTileColor(highlightedTile.Value, highlightColor);
+            }
+        }
+
+        UpdateTileVisibility(oldHighlightedTile);
+        UpdateTileVisibility(highlightedTile.Value);
+    }
+    //----------------------------------------------
+
+
     // Clear selection
     public void ClearSelection()
     {
-        foreach (Tile tile in selectedTiles)
+        foreach (Vector2Int tile in selectedTiles)
         {
             SetTileColor(
                 tile,
@@ -184,7 +259,7 @@ public class TileSelectionManager : MonoBehaviour
         if (highlightedTile != null)
         {
             SetTileColor(
-                highlightedTile,
+                highlightedTile.Value,
                 highlightColor
             );
         }
@@ -193,7 +268,7 @@ public class TileSelectionManager : MonoBehaviour
     }
     private void ClearEverything()
     {
-        foreach (Tile tile in selectedTiles)
+        foreach (Vector2Int tile in selectedTiles)
         {
             SetTileColor(
                 tile,
@@ -206,7 +281,7 @@ public class TileSelectionManager : MonoBehaviour
         if (highlightedTile != null)
         {
             SetTileColor(
-                highlightedTile,
+                highlightedTile.Value,
                 normalColor
             );
         }
@@ -219,7 +294,7 @@ public class TileSelectionManager : MonoBehaviour
     }
 
     // Grid color and visibility
-    public void SetTileColor(Tile tile, Color color)
+    public void SetTileColor(Tile tile, Color color) //make this to overload to SetTileColor(Vector2Int..)
     {
         TerraformTileGridOverlay overlay =
         GetOverlay(tile);
@@ -229,7 +304,19 @@ public class TileSelectionManager : MonoBehaviour
 
         overlay.SetTileColor(tile, color);
     }
-    private TerraformTileGridOverlay GetOverlay(Tile tile)
+    public void SetTileColor(Vector2Int tilePos, Color color)
+    {
+        TerraformTileGridOverlay overlay =
+        GetOverlay(tilePos);
+
+        if (overlay == null)
+            return;
+
+        overlay.SetTileColor(tilePos, color);
+    }
+
+
+    private TerraformTileGridOverlay GetOverlay(Tile tile) //make this an overload to GetOverlay(Vector2Int)
     {
         Chunk chunk =
             TileManager.Instance.GetChunk(
@@ -255,10 +342,34 @@ public class TileSelectionManager : MonoBehaviour
 
         return tileGrid.GetComponent<TerraformTileGridOverlay>();
     }
-    private void UpdateTileVisibility(Tile tile)
+
+    private TerraformTileGridOverlay GetOverlay(Vector2Int tilePos)
+    {
+        Chunk chunk = TileManager.Instance.GetChunk(tilePos);
+
+        if (chunk == null)
+            return null;
+
+        int chunkIndex =
+            TileManager.Instance.chunks.IndexOf(chunk);
+
+        if (chunkIndex < 0)
+            return null;
+
+        Transform tileGrid =
+            TileManager.Instance.chunkObjects[chunkIndex]
+            .transform.Find("TileGrid");
+
+        if (tileGrid == null)
+            return null;
+
+        return tileGrid.GetComponent<TerraformTileGridOverlay>();
+    }
+
+    private void UpdateTileVisibility(Vector2Int tilePos)
     {
         TerraformTileGridOverlay overlay =
-        GetOverlay(tile);
+        GetOverlay(tilePos);
 
         if (overlay == null)
             return;
@@ -268,7 +379,7 @@ public class TileSelectionManager : MonoBehaviour
             case TileGridVisibilityMode.AllTiles:
 
                 overlay.SetTileVisible(
-                    tile,
+                    tilePos,
                     true
                 );
 
@@ -278,31 +389,34 @@ public class TileSelectionManager : MonoBehaviour
             case TileGridVisibilityMode.HighlightedAndSelected:
 
                 bool shouldBeVisible =
-                    tile == highlightedTile ||
-                    selectedTiles.Contains(tile);
+                    tilePos == highlightedTile ||
+                    selectedTiles.Contains(tilePos);
 
                 overlay.SetTileVisible(
-                    tile,
+                    tilePos,
                     shouldBeVisible
                 );
 
                 break;
         }
     }
+
     private void RefreshAllTileVisibility()
     {
         foreach (Chunk chunk in TileManager.Instance.chunks)
         {
             foreach (Tile tile in chunk.Tiles)
             {
-                UpdateTileVisibility(tile);
+                UpdateTileVisibility(tile.GridPosition);
             }
         }
     }
     // Selected tiles getter -----------------------
     public IEnumerable<Tile> GetSelectedTiles()
     {
-        return selectedTiles;
+        return selectedTiles
+            .Select(pos => TileManager.Instance.GetTile(pos))
+            .Where(tile => tile != null);
     }
     //----------------------------------------------
 
@@ -312,9 +426,16 @@ public class TileSelectionManager : MonoBehaviour
         if (!uiStateManager.IsTerraforming())
             return;
 
+        if (!highlightedTile.HasValue)
+            return;
+
         if (context.started)
         {
             selectHeld = true;
+
+            isAddingTiles =
+                !selectedTiles.Contains(highlightedTile.Value);
+
             ToggleHighlightedTile();
         }
 
@@ -322,12 +443,11 @@ public class TileSelectionManager : MonoBehaviour
         {
             selectHeld = false;
         }
-        
     }
     public void OnTileMove(InputAction.CallbackContext context)
     {
         // Debug
-        Debug.Log("TIleMove event: " + context.phase);
+        //Debug.Log("TIleMove event: " + context.phase);
 
         if (!uiStateManager.IsTerraforming())
             return;
@@ -335,14 +455,24 @@ public class TileSelectionManager : MonoBehaviour
         if(!context.performed)
             return;
 
+        //Handles Mouse input
+        if (context.control.device is Mouse)
+        {
+            Vector3 mouseWorldPosition = MousePositionManager.Instance.WorldPosition;
+            Vector2Int mouseGridPosition = new Vector2Int(Mathf.RoundToInt(mouseWorldPosition.x), Mathf.RoundToInt(mouseWorldPosition.z));
+            
+            SetHighlight(mouseGridPosition.x, mouseGridPosition.y);
+            return;
+        }
+        //Handles Keyboard input
         Vector2 direction = context.ReadValue<Vector2>();
 
         // Debug
         Debug.Log("Direction: " + direction);
 
-        int xDirection = 
+        int xDirection =
             Mathf.RoundToInt(direction.x);
-        int zDirection = 
+        int zDirection =
             Mathf.RoundToInt(direction.y);
 
         MoveHighlight(xDirection, zDirection);
@@ -353,26 +483,25 @@ public class TileSelectionManager : MonoBehaviour
         if (highlightedTile == null)
             return;
 
-        if (selectedTiles.Contains(highlightedTile))
+        if (selectedTiles.Contains(highlightedTile.Value))
         {
-            selectedTiles.Remove(highlightedTile);
+            selectedTiles.Remove(highlightedTile.Value);
 
             SetTileColor(
-                highlightedTile,
+                highlightedTile.Value,
                 highlightColor
             );
         }
         else
         {
-            selectedTiles.Add(highlightedTile);
+            selectedTiles.Add(highlightedTile.Value);
 
             SetTileColor(
-                highlightedTile,
+                highlightedTile.Value,
                 selectedColor
             );
         }
 
-        UpdateTileVisibility(highlightedTile);
+        UpdateTileVisibility(highlightedTile.Value);
     }
-    // --------------------------------------------------
 }
