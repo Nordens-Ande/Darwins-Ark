@@ -83,7 +83,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
                 }
             }
         }
-        Debug.Log("tile with plants: " + tilesWithPlants.Count);
+        //Debug.Log("tile with plants: " + tilesWithPlants.Count);
         return tilesWithPlants;
     }
 
@@ -185,10 +185,10 @@ public class Boss : MonoBehaviour, IBoatSpawning
 
         FindClosestPlantTile();
         List<BossAIState> statesOrderedByScore = EvaluateStates();
-        for (int i = 0; i < statesOrderedByScore.Count; i++)
-        {
-            Debug.Log("score: " + statesOrderedByScore[i].ToString());
-        }
+        //for (int i = 0; i < statesOrderedByScore.Count; i++)
+        //{
+        //    Debug.Log("score: " + statesOrderedByScore[i].ToString());
+        //}
 
         for (int i = 0; i < statesOrderedByScore.Count; i++)
         {
@@ -210,12 +210,12 @@ public class Boss : MonoBehaviour, IBoatSpawning
             {
                 currentState.OnExitState();
                 currentState = statesOrderedByScore[i];
-                Debug.Log("currentState changed to: " + currentState.ToString());
+                //Debug.Log("currentState changed to: " + currentState.ToString());
                 break;
             }
             else
             {
-                Debug.Log("cant enter state " + statesOrderedByScore[i].ToString());
+                //Debug.Log("cant enter state " + statesOrderedByScore[i].ToString());
             }
             
         }
