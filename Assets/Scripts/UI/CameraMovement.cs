@@ -42,7 +42,7 @@ public class CameraMovement : MonoBehaviour
     [SerializeField, ReadOnly] private InputAction zoomAction;
     [SerializeField, ReadOnly] private InputAction angleAction;
     [Space]
-    [Header("Test Pan to point")]
+    [Header("Pan to point")]
     [SerializeField] private bool testPanToPoint = false;
 
     private Vector3 currentVelocity = Vector3.zero;
