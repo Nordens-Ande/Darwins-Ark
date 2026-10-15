@@ -7,6 +7,15 @@ public class SpawnManager : MonoBehaviour
     public static SpawnManager Instance;
     
 
+
+
+    //class is not being used
+
+
+
+
+
+
     void Awake()
     {
         if(Instance == null)

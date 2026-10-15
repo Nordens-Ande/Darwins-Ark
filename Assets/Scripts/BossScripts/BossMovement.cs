@@ -84,7 +84,16 @@ public class BossMovement : MonoBehaviour
         if(currentPath == null) return (false, false);
         if(currentPath.Count == 0) return (false, false);
 
-        Tile target = currentPath[pathStage + 1];
+        Tile target = null;
+        if(currentPath.Count <= 1)
+        {
+            return (true, true);
+        }
+        else
+        {
+            target = currentPath[pathStage + 1];
+        }
+        
         transform.position = Vector3.MoveTowards(transform.position, target.position, movementSpeed * Time.deltaTime);
 
         Rotate((target.position - currentPath[pathStage].position).normalized);

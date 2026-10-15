@@ -17,7 +17,8 @@ public class BossEscapeState : BossAIState
 
     public override bool OnEnterState()
     {
-        //set path away from animals? somehow, random within range? could be weird with unreachable tiles. find the 3 closest animals? maybe
+        TaskCompleted = false;
+
         List<AnimalAI> animals = boss.FindClosestAnimals(3);
 
         if (animals.Count <= 0) return false;
@@ -88,7 +89,7 @@ public class BossEscapeState : BossAIState
         }
         if (reachedTargetTile)
         {
-            OnEnterState();
+            TaskCompleted = true;
             CanBeInterupted = true;
         }
     }

@@ -6,24 +6,26 @@ using System.Net;
 
 public class Boss : MonoBehaviour, IBoatSpawning
 {
-    TileManager tileManager = TileManager.Instance;
-    AnimalManager animalManager = AnimalManager.Instance;
+    private TileManager tileManager = TileManager.Instance;
+    private AnimalManager animalManager = AnimalManager.Instance;
     public Transform Transform => transform;
 
-    BossHealth healthScript;
+    private BossHealth healthScript;
 
-    PathFinding pathFinder;
-    BossMovement movementScript;
+    private PathFinding pathFinder;
+    private BossMovement movementScript;
 
-    bool unloaded;
+    private bool unloaded;
 
     //ai
-    List<BossAIState> AIStates;
-    BossAIState currentState;
-    BossAIState beachState;
-    float sightDistanceToAnimals;
-    float sightDistanceToTiles;
-    float attackTime;
+    private List<BossAIState> AIStates;
+    private BossAIState currentState;
+    private BossAIState beachState;
+    private float sightDistanceToAnimals;
+    private float sightDistanceToTiles;
+    private float attackTime;
+
+    private List<Tile> closestPlantTilePath; //used to cache the path to the closest plant, minimizes A star pathfinding calls #optimization
 
     Tile currentTile; //?
     public Tile CurrentTile => currentTile; //?
@@ -34,6 +36,8 @@ public class Boss : MonoBehaviour, IBoatSpawning
     public float SightDistanceToAnimals => sightDistanceToAnimals;
     public float SightDistanceToTiles => sightDistanceToTiles;
     public float AttackTime => attackTime;
+    public List<Tile> ClosestPlantTilePath => closestPlantTilePath;
+
 
     void Start()
     {
@@ -89,10 +93,14 @@ public class Boss : MonoBehaviour, IBoatSpawning
     /// Finds the closest reachable plant by the boss.
     /// </summary>
     /// <returns>Returns the Tile the plant is on, or null if tile is unreachable</returns>
-    public Tile FindClosestPlantTile()
+    public void FindClosestPlantTile()
     {
         List<Tile> tilesWithPlants = FindAllTilesWithPlants();
-        if (tilesWithPlants.Count <= 0) return null;
+        if (tilesWithPlants.Count <= 0)
+        {
+            closestPlantTilePath = null;
+            return;
+        }
 
         tilesWithPlants = tilesWithPlants.OrderBy(tile => Vector3.Distance(transform.position, tile.position)).ToList();
 
@@ -101,12 +109,12 @@ public class Boss : MonoBehaviour, IBoatSpawning
             float distance = Vector3.Distance(transform.position, tilesWithPlants[i].position);
             if (distance > sightDistanceToTiles) continue;
 
-            if(movementScript.PathFinder.GetPathAStar(tileManager.GetTile(transform.position), tilesWithPlants[i], movementScript.IsBossTraversable, 2f, (int)(distance * 2)) != null)
+            closestPlantTilePath = movementScript.PathFinder.GetPathAStar(tileManager.GetTile(transform.position), tilesWithPlants[i], movementScript.IsBossTraversable, 2f, (int)(distance * 2));
+            if (closestPlantTilePath != null)
             {
-                return tilesWithPlants[i];
+                return;
             }
         }
-        return null; // no plants on tiles with path that is traversable
     }
 
     public List<AnimalAI> FindClosestAnimals(int amountOfAnimals)
@@ -149,6 +157,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
             //currentState = beachState;
             //currentState.OnEnterState();
             //return;
+            FindClosestPlantTile();
             List<BossAIState> statesOrdered = EvaluateStates();
             for (int i = 0; i < statesOrdered.Count; i++)
             {
@@ -160,10 +169,10 @@ public class Boss : MonoBehaviour, IBoatSpawning
                 if (statesOrdered[i].OnEnterState())
                 {
                     currentState = statesOrdered[i];
-                    break;
+                    Debug.Log("state set initially on beach" + currentState.ToString());
+                    return;
                 }
             }
-            return;
         }
 
         if (currentState == null)
@@ -171,10 +180,14 @@ public class Boss : MonoBehaviour, IBoatSpawning
             Debug.Log("state null");
             return;
         }
-        currentState.Tick();
-        
-        if (!currentState.CanBeInterupted) return;
 
+        if (!currentState.CanBeInterupted)
+        {
+            currentState.Tick();
+            return;
+        }
+
+        FindClosestPlantTile();
         List<BossAIState> statesOrderedByScore = EvaluateStates();
         for (int i = 0; i < statesOrderedByScore.Count; i++)
         {
@@ -185,6 +198,15 @@ public class Boss : MonoBehaviour, IBoatSpawning
         {
             if (currentState == statesOrderedByScore[i]) //if first iteration is same state as current no need to continue;
             {
+                if(currentState.TaskCompleted)
+                {
+                    currentState.OnExitState();
+                    currentState.OnEnterState();
+                }
+                else
+                {
+                    currentState.Tick();
+                }
                 break;
             }
 
@@ -199,7 +221,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
             {
                 Debug.Log("cant enter state " + statesOrderedByScore[i].ToString());
             }
-
+            
         }
     }
 }

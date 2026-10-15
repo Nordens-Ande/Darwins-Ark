@@ -16,7 +16,8 @@ public abstract class BossAIState : IBossAIState
 {
     protected Boss boss;
     protected Container<Boss> container;
-    bool canBeInterupted;
+    protected bool canBeInterupted;
+    protected bool taskCompleted;
 
     public bool CanBeInterupted
     {
@@ -24,10 +25,15 @@ public abstract class BossAIState : IBossAIState
         set { canBeInterupted = value; }
     }
 
+    public bool TaskCompleted
+    {
+        get { return taskCompleted; }
+        set { taskCompleted = value; }
+    }
+
     public BossAIState(Boss boss)
     {
         this.boss = boss;
-        canBeInterupted = true;
     }
 
     public abstract bool OnEnterState();

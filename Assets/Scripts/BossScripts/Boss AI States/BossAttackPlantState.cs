@@ -19,8 +19,11 @@ public class BossAttackPlantState : BossAIState
 
     public override bool OnEnterState()
     {
-        CanBeInterupted = true;
-        plantTile = boss.FindClosestPlantTile();
+        CanBeInterupted = false;
+        TaskCompleted = false;
+
+        if (boss.ClosestPlantTilePath == null) return false;
+        plantTile = boss.ClosestPlantTilePath[boss.ClosestPlantTilePath.Count - 1];
         if (plantTile == null) return false;
 
         boss.MovementScript.SetPath(plantTile, boss.MovementScript.IsBossTraversable);
@@ -36,18 +39,24 @@ public class BossAttackPlantState : BossAIState
         if (!atPlantTile)
         {
             (bool reachedTargetTile, bool reachedNextTile) = boss.MovementScript.BossMove();
-            atPlantTile = reachedTargetTile;
+            
             if(reachedNextTile && !reachedTargetTile)
             {
                 CanBeInterupted = true;
             }
+            atPlantTile = reachedTargetTile;
         }
         else
         {
             if (attackTimer >= boss.AttackTime)
             {
-                plantTile.ClearPlant();
-                OnEnterState();
+                if(plantTile.CurrentPlant != null)
+                {
+                    plantTile.CurrentPlant.DamagePlant(100f);
+                }
+                TaskCompleted = true;
+                CanBeInterupted = true;
+                //OnEnterState();
             }
             attackTimer += Time.deltaTime;
         }

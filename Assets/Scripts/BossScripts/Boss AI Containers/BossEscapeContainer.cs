@@ -15,15 +15,22 @@ public class BossEscapeContainer : Container<Boss>
         //health
         //distance to closest animal, hmm
 
-        Tile plantTile = boss.FindClosestPlantTile();
-        if (plantTile == null)
+        if (boss.ClosestPlantTilePath == null)
         {
             distanceTile = 0f;
         }
         else
         {
-            float distance = Vector3.Distance(boss.transform.position, plantTile.position);
-            distanceTile = distance / boss.SightDistanceToTiles;
+            Tile plantTile = boss.ClosestPlantTilePath[boss.ClosestPlantTilePath.Count - 1];
+            if (plantTile == null)
+            {
+                distanceTile = 0f;
+            }
+            else
+            {
+                float distance = Vector3.Distance(boss.transform.position, plantTile.position);
+                distanceTile = distance / boss.SightDistanceToTiles;
+            }
         }
 
         health = boss.HealthScript.Health / boss.HealthScript.MaxHealth;

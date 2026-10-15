@@ -17,6 +17,9 @@ public class BossRelocateState : BossAIState
 
     public override bool OnEnterState()
     {
+        TaskCompleted = false;
+        CanBeInterupted = false;
+
         List<Tile> path = FindTileToRelocate();
         if (path != null)
         {
@@ -77,7 +80,7 @@ public class BossRelocateState : BossAIState
         }
         if(reachedTargetTile)
         {
-            OnEnterState();
+            TaskCompleted = true;
             CanBeInterupted = true;
         }
     }

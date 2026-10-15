@@ -5,7 +5,8 @@ public class BossAttackPlantContainer : Container<Boss>
 {
     public override float Evaluate(Boss boss)
     {
-        Tile plantTile = boss.FindClosestPlantTile();
+        if (boss.ClosestPlantTilePath == null) return 0f;
+        Tile plantTile = boss.ClosestPlantTilePath[boss.ClosestPlantTilePath.Count - 1];
         if (plantTile == null) return 0f; //no plants that are reachable
         
         float distance = Vector3.Distance(boss.transform.position, plantTile.position);

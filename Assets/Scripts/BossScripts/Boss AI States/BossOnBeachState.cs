@@ -13,6 +13,7 @@ public class BossOnBeachState : BossAIState
 
     public override bool OnEnterState()
     {
+        TaskCompleted = false;
         Debug.Log("onenterstate beach called");
         bool foundPath = boss.MovementScript.SetPathFromBeachToGrass();
         if(foundPath)
@@ -31,6 +32,7 @@ public class BossOnBeachState : BossAIState
         if (reachedTargetTile)
         {
             CanBeInterupted = true;
+            TaskCompleted = true;
         }
     }
 
