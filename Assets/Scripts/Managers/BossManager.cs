@@ -28,7 +28,7 @@ public class BossManager : MonoBehaviour
 
     public void SpawnBoss()
     {
-        if (currentBoss != null) return;
+        //if (currentBoss != null) return;
 
         //get boat
         GameObject boat = BoatManager.Instance.SpawnBoat();
