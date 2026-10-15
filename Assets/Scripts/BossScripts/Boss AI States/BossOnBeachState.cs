@@ -2,7 +2,6 @@ using Assets.Scripts.Environment;
 using System;
 using UnityEngine;
 
-
 public class BossOnBeachState : BossAIState
 {
     TileManager tileManager = TileManager.Instance;
@@ -14,11 +13,9 @@ public class BossOnBeachState : BossAIState
     public override bool OnEnterState()
     {
         TaskCompleted = false;
-        Debug.Log("onenterstate beach called");
         bool foundPath = boss.MovementScript.SetPathFromBeachToGrass();
         if(foundPath)
         {
-            Debug.Log("found path beach state");
             CanBeInterupted = false;
             return true;
         }

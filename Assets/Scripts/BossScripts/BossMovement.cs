@@ -26,7 +26,7 @@ public class BossMovement : MonoBehaviour
     public List<Tile> CurrentPath
     {
         get { return currentPath; }
-        set { currentPath = value; Debug.Log("currentPath boss: " + currentPath.Count); pathStage = 0; }
+        set { currentPath = value;  pathStage = 0; } //Debug.Log("currentPath boss: " + currentPath.Count);
     }
     
     public float MaxHeightDifference => maxHeightDifference;
@@ -56,7 +56,7 @@ public class BossMovement : MonoBehaviour
     {
         currentPath = pathFinder.GetPathAStar(tileManager.GetTile(transform.position), targetTile, traversable, maxHeightDifference, 0);
         if(currentPath == null) return false;
-        Debug.Log("currentPath boss: " + currentPath.Count);
+        //Debug.Log("currentPath boss: " + currentPath.Count);
         pathStage = 0;
         return true;
     }
@@ -103,7 +103,7 @@ public class BossMovement : MonoBehaviour
             transform.position = target.position;
             if(CheckIfNextTileIsTargetTile(target))
             {
-                Debug.Log("Reached target tile");
+                //Debug.Log("Reached target tile");
                 return (true, true);
             }
             pathStage++;

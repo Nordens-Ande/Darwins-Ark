@@ -46,7 +46,6 @@ public class Boss : MonoBehaviour, IBoatSpawning
         healthScript = gameObject.GetComponent<BossHealth>();
         movementScript = gameObject.GetComponent<BossMovement>();
         movementScript.PathFinder = pathFinder;
-        movementScript.enabled = false;
         unloaded = false;
         sightDistanceToAnimals = 10;
         sightDistanceToTiles = 20;
@@ -67,7 +66,6 @@ public class Boss : MonoBehaviour, IBoatSpawning
     public bool Unload(Tile beachTile)
     {
         transform.position = beachTile.position;
-        movementScript.enabled = true;
         unloaded = true;
         return true;
     }
@@ -154,22 +152,20 @@ public class Boss : MonoBehaviour, IBoatSpawning
 
         if(currentState == null) // as the boss arrives on beach, hopefully not after that (:
         {
-            //currentState = beachState;
-            //currentState.OnEnterState();
-            //return;
             FindClosestPlantTile();
             List<BossAIState> statesOrdered = EvaluateStates();
-            for (int i = 0; i < statesOrdered.Count; i++)
-            {
-                Debug.Log("score: " + statesOrdered[i].ToString());
-            }
+
+            //for (int i = 0; i < statesOrdered.Count; i++)
+            //{
+            //   Debug.Log("score: " +  statesOrdered[i].ToString());
+            //}
 
             for (int i = 0; i < statesOrdered.Count; i++)
             {
                 if (statesOrdered[i].OnEnterState())
                 {
                     currentState = statesOrdered[i];
-                    Debug.Log("state set initially on beach" + currentState.ToString());
+                    
                     return;
                 }
             }
