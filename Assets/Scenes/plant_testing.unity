@@ -446,7 +446,7 @@ PrefabInstance:
       objectReference: {fileID: 448273538846971165, guid: 190b530bc6dc849479de5ac385334b53, type: 3}
     - target: {fileID: 6953545118476116933, guid: 31b52c025b807a9498ae23a3c3f96908, type: 3}
       propertyPath: massPlantPlantsAsGrown
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -461,6 +461,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1288864631565877607, guid: 796d50e49c43658419bdd58b7211bf97, type: 3}
+      propertyPath: compactness
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 1288864631565877607, guid: 796d50e49c43658419bdd58b7211bf97, type: 3}
       propertyPath: debugDuration
       value: 20

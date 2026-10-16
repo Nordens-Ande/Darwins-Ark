@@ -166,8 +166,8 @@ namespace Assets.Scripts.Environment
                 yield break;
             }
 
-            List<Vector2Int> frontier = new List<Vector2Int>();
-            HashSet<Vector2Int> inFrontier = new HashSet<Vector2Int>();
+            List<Vector2Int> frontier = new List<Vector2Int>(); // this is the tiles that lay at the edge and are the next to be taken over
+            HashSet<Vector2Int> inFrontier = new HashSet<Vector2Int>(); // hashset to check if a tile already is in fronttier so we dont add same tiles multible times
 
             // if we set a startpos we check if it can be changed
             if (origin.HasValue) 
