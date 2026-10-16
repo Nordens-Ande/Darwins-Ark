@@ -6,11 +6,11 @@ namespace Assets.Scripts.Environment
 {
     public enum BiomeType
     {
-        Normal,     // default grass
+        Normal, // just the green grass
         Infected,
         Autumn,
-        // To add a biome: add a value here, then add an entry (type + colour) to the
-        // "Biomes" list on the BiomeManager in the inspector.
+
+        // if you add a new biome you have to make it in List<BiomeDefinition> 
     }
 
     [System.Serializable]
@@ -32,7 +32,7 @@ namespace Assets.Scripts.Environment
 
         [Header("Base Colours")]
         [SerializeField] private Color grassColor = Color.lawnGreen;
-        [SerializeField] private Color sandColor = Color.softYellow; // beach / ocean floor
+        [SerializeField] private Color sandColor = Color.yellow; // beach
 
         [Header("Biome Settings")]
         [SerializeField]
@@ -42,13 +42,13 @@ namespace Assets.Scripts.Environment
             new BiomeDefinition(BiomeType.Autumn, new Color(1f, 0.55f, 0.1f)),
         };
 
-        [Tooltip("If true, a spreading biome can take over tiles that already belong to another biome.")]
+        [Tooltip("Spreading biome can take tiles that already belong to another biome.")]
         [SerializeField] private bool overwriteOtherBiomes = false;
 
         [Tooltip("Higher = rounder patches with fewer holes. 1 = fully random growth.")]
-        [SerializeField, Range(1, 20)] private int compactness = 6;
+        [SerializeField, Range(1, 10)] private int compactness = 3;
 
-        [Tooltip("Fill leftover single-tile holes / notches when a spread finishes.")]
+        [Tooltip("Fill leftover single-tile holes")]
         [SerializeField] private bool fillHoles = true;
 
         [Header("Debug")]
@@ -57,7 +57,7 @@ namespace Assets.Scripts.Environment
         [SerializeField] private int debugTileCount = 100;
         [SerializeField] private float debugDuration = 5f;
 
-        // Only tiles that are NOT Normal are stored. Key = world grid position (same as Tile.GridPosition).
+        // Only tiles that are NOT Normal are stored. Key = world grid position.
         private readonly Dictionary<Vector2Int, BiomeType> tileBiomes = new Dictionary<Vector2Int, BiomeType>();
         private readonly Dictionary<BiomeType, Color> biomeColors = new Dictionary<BiomeType, Color>();
 
@@ -75,7 +75,9 @@ namespace Assets.Scripts.Environment
         private void Awake()
         {
             if (Instance == null)
+            {
                 Instance = this;
+            }
             else
             {
                 Destroy(gameObject);
@@ -87,19 +89,26 @@ namespace Assets.Scripts.Environment
 
         private void OnValidate()
         {
+            // if we change values in the unity editor they change when we do it
             if (Application.isPlaying)
+            {
                 RebuildColorLookup();
+            }
         }
 
+        // rebuilds the dictionary of colors 
         private void RebuildColorLookup()
         {
             biomeColors.Clear();
             foreach (BiomeDefinition def in biomes)
+            {
                 biomeColors[def.type] = def.color;
+            }
         }
 
         private void Update()
         {
+            // debug button for biome switch test
             if (tryToSpreadBiome)
             {
                 tryToSpreadBiome = false;
@@ -107,84 +116,86 @@ namespace Assets.Scripts.Environment
             }
         }
 
-        // ---------------------------------------------------------------
-        // Reading biomes (use these for plant spawning etc.)
-        // ---------------------------------------------------------------
+        /// 
+        /// reading biomes
+        /// 
 
-        /// <summary>Biome at a world grid position. Non-grass tiles always return Normal.</summary>
+        // returns what biometype is on a gird position
         public BiomeType GetBiome(Vector2Int gridPos)
-            => tileBiomes.TryGetValue(gridPos, out BiomeType biome) ? biome : BiomeType.Normal;
-
-        public BiomeType GetBiome(Tile tile) => GetBiome(tile.GridPosition);
-
-        public BiomeType GetBiome(float x, float z)
-            => GetBiome(new Vector2Int(Mathf.FloorToInt(x), Mathf.FloorToInt(z)));
-
-        // ---------------------------------------------------------------
-        // Changing biomes
-        // ---------------------------------------------------------------
-
-        /// <summary>Sets the biome of a single tile. Only grass tiles can change. Returns true if it was applied.</summary>
-        public bool SetBiome(Vector2Int gridPos, BiomeType biome)
         {
-            Chunk chunk = GetChunkAt(gridPos);
-            if (chunk == null)
-                return false;
-
-            Tile tile = chunk.GetTile(gridPos.x, gridPos.y); // world space
-            if (tile == null || tile.Type != TileType.Grass)
-                return false;
-
-            if (GetBiome(gridPos) == biome)
-                return false;
-
-            if (biome == BiomeType.Normal)
-                tileBiomes.Remove(gridPos);
-            else
-                tileBiomes[gridPos] = biome;
-
-            chunk.isDirty = true; // TileManager.FixedUpdate rebuilds the mesh
-            return true;
+            BiomeType biome;
+            if (tileBiomes.TryGetValue(gridPos, out biome))
+            {
+                return biome;
+            }
+            return BiomeType.Normal;
         }
 
-        /// <summary>
-        /// Grows a biome outward over durationSeconds until targetTileCount grass tiles have been converted.
-        /// A new biome starts at a grass tile next to the beach (or at 'origin' if given);
-        /// an existing biome keeps growing from its current edges.
-        /// </summary>
+        // returns biome based on a tile
+        public BiomeType GetBiome(Tile tile)
+        {
+            return GetBiome(tile.GridPosition);
+        }
+
+
+        // returns biome based on coordinates
+        public BiomeType GetBiome(float x, float z)
+        {
+            int convertedX = Mathf.FloorToInt(x);
+            int convertedZ = Mathf.FloorToInt(z);
+            return GetBiome(new Vector2Int(convertedX, convertedZ));
+        }
+
+
+
+        ///
+        /// changing biomes
+        ///
+
+        // this is the funtion that starts the biome change
         public void SpreadBiome(BiomeType biome, int targetTileCount, float durationSeconds, Vector2Int? origin = null)
         {
             StartCoroutine(SpreadBiomeRoutine(biome, targetTileCount, durationSeconds, origin));
         }
 
+       
         private IEnumerator SpreadBiomeRoutine(BiomeType biome, int targetTileCount, float durationSeconds, Vector2Int? origin)
         {
             if (biome == BiomeType.Normal || TileManager.Instance == null || TileManager.Instance.chunks == null)
+            {
                 yield break;
+            }
 
             List<Vector2Int> frontier = new List<Vector2Int>();
             HashSet<Vector2Int> inFrontier = new HashSet<Vector2Int>();
 
-            if (origin.HasValue)
+            // if we set a startpos we check if it can be changed
+            if (origin.HasValue) 
             {
                 if (CanConvert(origin.Value, biome))
+                {
+                    // we add it as the start and let it spread from here
                     AddToFrontier(origin.Value, frontier, inFrontier);
+                }
             }
+            // we need to find a spot to start from
             else
             {
-                // Continue from the edges of any existing tiles of this biome
-                foreach (KeyValuePair<Vector2Int, BiomeType> kv in tileBiomes)
+                foreach (KeyValuePair<Vector2Int, BiomeType> keyValue in tileBiomes)
                 {
-                    if (kv.Value == biome)
-                        AddNeighbours(kv.Key, biome, frontier, inFrontier);
+                    if (keyValue.Value == biome)
+                    {
+                        AddNeighbours(keyValue.Key, biome, frontier, inFrontier);
+                    }
                 }
 
-                // Nothing of this biome yet -> start next to the beach
                 if (frontier.Count == 0)
                 {
                     Vector2Int? seed = PickCoastalSeed(biome);
                     if (seed.HasValue)
+                    {
                         AddToFrontier(seed.Value, frontier, inFrontier);
+                    }
                 }
             }
 
@@ -195,21 +206,30 @@ namespace Assets.Scripts.Environment
             {
                 elapsed += Time.deltaTime;
 
-                int shouldBeConverted = durationSeconds <= 0f
-                    ? targetTileCount
-                    : Mathf.Min(targetTileCount, Mathf.CeilToInt(elapsed / durationSeconds * targetTileCount));
+                int shouldBeConverted;
+                if (durationSeconds <= 0f)
+                {
+                    shouldBeConverted = targetTileCount;
+                }
+                else
+                {
+                    float progress = elapsed / durationSeconds;
+                    shouldBeConverted = Mathf.Min(targetTileCount, Mathf.CeilToInt(progress * targetTileCount));
+                }
 
                 while (converted < shouldBeConverted && frontier.Count > 0)
                 {
                     int i = PickFrontierIndex(frontier, biome);
                     Vector2Int pos = frontier[i];
+
                     frontier[i] = frontier[frontier.Count - 1];
                     frontier.RemoveAt(frontier.Count - 1);
                     inFrontier.Remove(pos);
 
-                    // Might have been changed by another spreading biome in the meantime
                     if (!CanConvert(pos, biome))
+                    {
                         continue;
+                    }
 
                     SetBiome(pos, biome);
                     converted++;
@@ -221,22 +241,60 @@ namespace Assets.Scripts.Environment
             }
 
             if (fillHoles)
+            {
                 FillHoles(biome);
+            }
         }
+
+
+
+        private bool SetBiome(Vector2Int gridPos, BiomeType biome)
+        {
+            Chunk chunk = GetChunkAt(gridPos);
+            if (chunk == null)
+            {
+                return false;
+            }
+
+            Tile tile = chunk.GetTile(gridPos.x, gridPos.y);
+            if (tile == null || tile.Type != TileType.Grass)
+            {
+                return false;
+            }
+
+            if (GetBiome(gridPos) == biome)
+            {
+                return false;
+            }
+
+            if (biome == BiomeType.Normal)
+            {
+                tileBiomes.Remove(gridPos);
+            }
+            else
+            {
+                tileBiomes[gridPos] = biome;
+            }
+
+            chunk.isDirty = true;
+            return true;
+        }
+
+       
+
+       
 
         // ---------------------------------------------------------------
         // Spread helpers
         // ---------------------------------------------------------------
 
-        /// <summary>
-        /// Picks the next frontier tile. Samples 'compactness' random candidates and takes the one
-        /// with the most neighbours already in the biome, which fills gaps and keeps the patch round.
-        /// </summary>
         private int PickFrontierIndex(List<Vector2Int> frontier, BiomeType biome)
         {
             int best = Random.Range(0, frontier.Count);
             if (compactness <= 1 || frontier.Count == 1)
+            {
                 return best;
+            }
 
             int bestScore = CountBiomeNeighbours(frontier[best], biome, true);
 
@@ -257,18 +315,27 @@ namespace Assets.Scripts.Environment
         private int CountBiomeNeighbours(Vector2Int pos, BiomeType biome, bool includeDiagonals)
         {
             int count = 0;
-            Vector2Int[] dirs = includeDiagonals ? Directions8 : Directions4;
+            Vector2Int[] dirs;
+            if (includeDiagonals)
+            {
+                dirs = Directions8;
+            }
+            else
+            {
+                dirs = Directions4;
+            }
 
             foreach (Vector2Int dir in dirs)
             {
                 if (GetBiome(pos + dir) == biome)
+                {
                     count++;
+                }
             }
 
             return count;
         }
 
-        /// <summary>Converts unconverted tiles that are (almost) enclosed by the biome: holes and small notches.</summary>
         private void FillHoles(BiomeType biome)
         {
             for (int pass = 0; pass < 10; pass++)
@@ -279,21 +346,29 @@ namespace Assets.Scripts.Environment
                 foreach (KeyValuePair<Vector2Int, BiomeType> kv in tileBiomes)
                 {
                     if (kv.Value != biome)
+                    {
                         continue;
+                    }
 
                     foreach (Vector2Int dir in Directions4)
                     {
                         Vector2Int n = kv.Key + dir;
                         if (seen.Add(n) && CanConvert(n, biome) && CountBiomeNeighbours(n, biome, false) >= 3)
+                        {
                             toFill.Add(n);
+                        }
                     }
                 }
 
                 if (toFill.Count == 0)
+                {
                     break;
+                }
 
                 foreach (Vector2Int pos in toFill)
+                {
                     SetBiome(pos, biome);
+                }
             }
         }
 
@@ -303,38 +378,50 @@ namespace Assets.Scripts.Environment
             {
                 Vector2Int n = pos + dir;
                 if (!inFrontier.Contains(n) && CanConvert(n, biome))
+                {
                     AddToFrontier(n, frontier, inFrontier);
+                }
             }
         }
 
         private void AddToFrontier(Vector2Int pos, List<Vector2Int> frontier, HashSet<Vector2Int> inFrontier)
         {
             if (inFrontier.Add(pos))
+            {
                 frontier.Add(pos);
+            }
         }
 
-        /// <summary>True if this tile is grass and is allowed to become 'biome'.</summary>
         private bool CanConvert(Vector2Int gridPos, BiomeType biome)
         {
             Tile tile = GetTileAt(gridPos);
             if (tile == null || tile.Type != TileType.Grass)
+            {
                 return false;
+            }
 
             BiomeType current = GetBiome(gridPos);
             if (current == biome)
+            {
                 return false;
+            }
 
-            return overwriteOtherBiomes || current == BiomeType.Normal;
+            if (overwriteOtherBiomes)
+            {
+                return true;
+            }
+            return current == BiomeType.Normal;
         }
 
-        /// <summary>A grass tile with at least one non-grass (beach) tile directly next to it.</summary>
         private bool IsCoastal(Vector2Int gridPos)
         {
             foreach (Vector2Int dir in Directions4)
             {
                 Tile n = GetTileAt(gridPos + dir);
                 if (n == null || n.Type != TileType.Grass)
+                {
                     return true;
+                }
             }
             return false;
         }
@@ -349,17 +436,32 @@ namespace Assets.Scripts.Environment
                 foreach (Vector2Int gridPos in chunk.GetTiles(TileType.Grass))
                 {
                     if (!CanConvert(gridPos, biome))
+                    {
                         continue;
+                    }
 
                     any.Add(gridPos);
                     if (IsCoastal(gridPos))
+                    {
                         coastal.Add(gridPos);
+                    }
                 }
             }
 
-            List<Vector2Int> pool = coastal.Count > 0 ? coastal : any;
+            List<Vector2Int> pool;
+            if (coastal.Count > 0)
+            {
+                pool = coastal;
+            }
+            else
+            {
+                pool = any;
+            }
+
             if (pool.Count == 0)
+            {
                 return null;
+            }
 
             return pool[Random.Range(0, pool.Count)];
         }
@@ -367,7 +469,9 @@ namespace Assets.Scripts.Environment
         private Chunk GetChunkAt(Vector2Int gridPos)
         {
             if (TileManager.Instance == null)
+            {
                 return null;
+            }
 
             return TileManager.Instance.GetChunk(gridPos.x, gridPos.y);
         }
@@ -375,7 +479,11 @@ namespace Assets.Scripts.Environment
         private Tile GetTileAt(Vector2Int gridPos)
         {
             Chunk chunk = GetChunkAt(gridPos);
-            return chunk?.GetTile(gridPos.x, gridPos.y); // world space
+            if (chunk == null)
+            {
+                return null;
+            }
+            return chunk.GetTile(gridPos.x, gridPos.y);
         }
 
         // ---------------------------------------------------------------
@@ -383,15 +491,24 @@ namespace Assets.Scripts.Environment
         // ---------------------------------------------------------------
 
         public Color GetBiomeColor(BiomeType biome, Color defaultColor)
-            => biomeColors.TryGetValue(biome, out Color color) ? color : defaultColor;
+        {
+            Color color;
+            if (biomeColors.TryGetValue(biome, out color))
+            {
+                return color;
+            }
+            return defaultColor;
+        }
 
-        /// <summary>The colour a tile should be drawn with, based on its TileType and biome.</summary>
         public Color GetTileColor(Tile tile)
         {
             if (tile.Type != TileType.Grass)
+            {
                 return sandColor;
+            }
 
-            return GetBiomeColor(GetBiome(tile.GridPosition), grassColor);
+            BiomeType biome = GetBiome(tile.GridPosition);
+            return GetBiomeColor(biome, grassColor);
         }
     }
 }
