@@ -1,15 +1,18 @@
 using UnityEngine;
 
-public class BossHealth
+public class BossHealth : MonoBehaviour
 {
+    [SerializeField] float maxHealth;
     float health;
     bool isAlive;
 
+    public float MaxHealth => maxHealth;
+    public float Health => health;
     public bool IsAlive => isAlive;
-    
-    public BossHealth(int health)
+
+    private void Start()
     {
-        this.health = health;
+        health = maxHealth;
     }
 
     public bool TakeDamage(float damage)

@@ -13,7 +13,7 @@ public class UtilityAction<T>
     }
 
     public Container<T> Container { get { return container; }}
-    public System.Action Action { get { return action; }}
+    public System.Action Action { get { return action; } set { action = value; } }
 
     public void Execute() 
     { 

@@ -114,8 +114,18 @@ public class PathFinding
         return diagonal * Mathf.Sqrt(2f) + straight;
     }
 
-    public List<Tile> GetPathAStar(Tile startTile, Tile targetTile, Func<Tile, bool> traversable, float maxHeightDifference)
+    /// <summary>
+    /// Gives a path of tiles to a specified target tile.
+    /// </summary>
+    /// <param name="startTile">The current tile the object is on</param>
+    /// <param name="targetTile">The target tile we want to find a path to</param>
+    /// <param name="traversable">A method that returns a boolean describing if a tile is traversable, needs Tile as a parameter. Check Boss script IsBossTraversable() method for example</param>
+    /// <param name="maxHeightDifference">The maximum height difference between two tiles to disallow traversing if difference is to big</param>
+    /// <param name="maxIterations">Max iterations the A star algorithm will do, if this is reached "the path is to long" use 0 if you dont want this to be taken into consideration</param>
+    /// <returns>A List<Tile> describing the path</returns>
+    public List<Tile> GetPathAStar(Tile startTile, Tile targetTile, Func<Tile, bool> traversable, float maxHeightDifference, int maxIterations)
     {
+        //Debug.Log("astar initiated");
         Dictionary<Vector2Int, TileNodeAStar> tileNodes = new Dictionary<Vector2Int, TileNodeAStar>();
         SortedSet<Vector2Int> openSet = new SortedSet<Vector2Int>(
             Comparer<Vector2Int>.Create((a, b) =>
@@ -149,14 +159,24 @@ public class PathFinding
 
         openSet.Add(TileToVector2Int(startTile));
 
+        bool foundTarget = false;
+        int iterations = 0;
         while(openSet.Count > 0)
         {
+            if(maxIterations != 0)
+            {
+                if(iterations >= maxIterations)
+                {
+                    return null;
+                }
+            }
             Vector2Int currentTile = openSet.Min;
             openSet.Remove(currentTile);
             visited.Add(currentTile);
 
             if (currentTile == TileToVector2Int(targetTile))
             {
+                foundTarget = true;
                 break;
             }
 
@@ -210,7 +230,9 @@ public class PathFinding
                     openSet.Add(tile);
                 }
             }
+            iterations++;
         }
+        if (!foundTarget) return null;
 
         return BuildPath(targetTile, startTile, tileNodes);
     }
@@ -248,6 +270,7 @@ public class PathFinding
 
         openSet.Add(TileToVector2Int(startTile));
 
+        bool foundTarget = false;
         while (openSet.Count > 0)
         {
             Vector2Int currentTile = openSet.Min;
@@ -256,6 +279,7 @@ public class PathFinding
 
             if (currentTile == TileToVector2Int(targetTile))
             {
+                foundTarget = true;
                 break;
             }
 
@@ -308,6 +332,34 @@ public class PathFinding
                 }
             }
         }
+        if (!foundTarget) return null;
+
         return BuildPath(targetTile, startTile, tileNodes);
+    }
+
+    public List<Tile> GetPathFromBeachToGrass(Tile startTile, System.Func<Tile, bool> traversable, float maxHeightDifference)
+    {
+        List<Tile> availableTiles = new List<Tile>();
+        foreach(Chunk chunk in tileManager.chunks)
+        {
+            foreach(Tile tile in chunk.Tiles)
+            {
+                if(tile.Type == TileType.Grass || tile.Type == TileType.Concrete)
+                {
+                    availableTiles.Add(tile);
+                }
+            }
+        }
+        availableTiles = availableTiles.OrderBy(tile => Vector3.Distance(startTile.position, tile.position)).ToList();
+
+        for(int i = 0; i < availableTiles.Count; i++)
+        {
+            List<Tile> path = GetPathAStar(startTile, availableTiles[i], traversable, maxHeightDifference, 0);
+            if (path != null)
+            {
+                return path;
+            }
+        }
+        return null;
     }
 }

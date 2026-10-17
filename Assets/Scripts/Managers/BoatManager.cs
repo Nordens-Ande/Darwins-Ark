@@ -6,9 +6,12 @@ public class BoatManager : MonoBehaviour
 {
     public static BoatManager Instance;
 
+    private TileManager tileManager;
+    private IslandNoise islandNoise;
+
     [SerializeField] GameObject BoatPrefab;
 
-    List<Boat> boats;
+    List<Boat> boats = new List<Boat>();
 
     float spawnDistanceFromCenter;
 
@@ -22,15 +25,18 @@ public class BoatManager : MonoBehaviour
 
     void Start()
     {
-        boats = new List<Boat>();
+        tileManager = TileManager.Instance;
+        islandNoise = IslandNoise.Instance;
     }
 
     Tile GetSpawnTile()
-    {
-        spawnDistanceFromCenter = IslandNoise.Instance.MaxIslandRadius * 2;
+    {   
+        spawnDistanceFromCenter = (tileManager.ChunkGridSize.x * tileManager.ChunkSize / 2) - 3;
         float angle = Random.Range(0, Mathf.PI * 2);
         Vector3 direction = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
-        Tile spawnTile = TileManager.Instance.GetTile(direction * spawnDistanceFromCenter);
+        Vector3 spawnPos = direction.normalized * spawnDistanceFromCenter;
+        //spawnPos = new Vector3((int)spawnPos.x, 0, (int)spawnPos.z);
+        Tile spawnTile = tileManager.GetTile(spawnPos);
         return spawnTile;
     }
 
@@ -46,18 +52,18 @@ public class BoatManager : MonoBehaviour
 
         List<Tile> possibleTiles = new List<Tile>();
         
-        foreach (Chunk chunk in TileManager.Instance.chunks)
+        foreach (Chunk chunk in tileManager.chunks)
         {
             foreach (Vector2Int tilePos in chunk.GetTiles(TileType.Beach))
             {
                 foreach(Vector3Int direction in directions)
                 {
-                    Tile tile = TileManager.Instance.GetTile(tilePos.x + direction.x, tilePos.y + direction.z);
+                    Tile tile = tileManager.GetTile(tilePos.x + direction.x, tilePos.y + direction.z);
                     if(tile != null)
                     {
                         if(tile.Type is TileType.Ocean)
                         {
-                            possibleTiles.Add(TileManager.Instance.GetTile(tilePos.x, tilePos.y));
+                            possibleTiles.Add(tileManager.GetTile(tilePos.x, tilePos.y));
                             break;
                         }
                     }
@@ -69,13 +75,14 @@ public class BoatManager : MonoBehaviour
         {
             return possibleTiles[Random.Range(0, possibleTiles.Count)];
         }
-        return TileManager.Instance.GetTile(-10, -40);
+        return tileManager.GetTile(-10, -40);
     }
 
     public GameObject SpawnBoat()
     {
         Tile spawnTile = GetSpawnTile();
         Tile beachTile = GetBeachTile();
+
         GameObject boat = Instantiate(BoatPrefab, spawnTile.position, Quaternion.identity);
         if(boat != null)
         {
