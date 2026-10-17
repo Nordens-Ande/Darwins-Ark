@@ -8,7 +8,7 @@ public class MousePositionManager : MonoBehaviour
     //Updated the camera to instead of using references to fetch it from the scene
     private Camera mainCamera;
 
-    private Vector3 worldPosition;
+    [SerializeField, ReadOnly] private Vector3 worldPosition;
     private RaycastHit currentHit;
 
     public Vector3 WorldPosition => worldPosition;

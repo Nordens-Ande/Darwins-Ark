@@ -25,7 +25,7 @@ namespace Assets.Scripts.Environment
 
         private string chunkGridName = "Chunk Grid";
         private string selectionGridName = "Selection Grid";
-        private string cursorGridName = "Cursor Grid";
+        private string heighlightGridName = "Highlight Grid";
 
         private void Awake()
         {
@@ -119,7 +119,7 @@ namespace Assets.Scripts.Environment
                 GenerateGrid(chunkObjects[i].transform, 0.001f, chunkGridName, Color.white, chunks[i][TileType.Grass]);
             }
             GenerateGrid(transform, 0.002f, selectionGridName, Color.red);
-            GenerateGrid(transform, 0.003f, cursorGridName, Color.blue);
+            GenerateGrid(transform, 0.003f, heighlightGridName, Color.blue);
 
             //SetChunkGridVisible(false);
         }
@@ -320,7 +320,7 @@ namespace Assets.Scripts.Environment
 
         private GridMesh GetGridMesh(Transform transform, string gameObjectName)
         {
-            GameObject gridObject = transform.Find(selectionGridName).gameObject;
+            GameObject gridObject = transform.Find(gameObjectName).gameObject;
             if (gridObject == null)
             {
                 Debug.LogWarning($"Grid object {gameObjectName} could not be found.");
@@ -358,23 +358,23 @@ namespace Assets.Scripts.Environment
                 gridMesh.RemoveTile(tile);
         }
 
-        public void SetCursorGridTiles(HashSet<Vector2Int> tiles)
+        public void SetHighlightGridTiles(HashSet<Vector2Int> tiles)
         {
-            GridMesh gridMesh = GetGridMesh(transform, cursorGridName);
+            GridMesh gridMesh = GetGridMesh(transform, heighlightGridName);
 
             if (gridMesh != null)
                 gridMesh.NewTiles(tiles);
         }
-        public void AddCursorGridTile(Vector2Int tile)
+        public void AddHeighlightGridTile(Vector2Int tile)
         {
-            GridMesh gridMesh = GetGridMesh(transform, cursorGridName);
+            GridMesh gridMesh = GetGridMesh(transform, heighlightGridName);
 
             if (gridMesh != null)
                 gridMesh.AddTile(tile);
         }
-        public void RemoveCursorGridTile(Vector2Int tile)
+        public void RemoveHeighlightGridTile(Vector2Int tile)
         {
-            GridMesh gridMesh = GetGridMesh(transform, cursorGridName);
+            GridMesh gridMesh = GetGridMesh(transform, heighlightGridName);
 
             if (gridMesh != null)
                 gridMesh.RemoveTile(tile);
