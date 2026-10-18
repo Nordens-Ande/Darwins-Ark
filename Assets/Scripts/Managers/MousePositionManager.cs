@@ -1,25 +1,24 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class MousePositionManager : MonoBehaviour
+public class MousePositionManager : SingletonManager<MousePositionManager>
 {
-    public static MousePositionManager Instance;
 
     //Updated the camera to instead of using references to fetch it from the scene
-    private Camera mainCamera;
+    [SerializeField] private Camera mainCamera;
 
-    private Vector3 worldPosition;
+    [SerializeField, ReadOnly] private Vector3 worldPosition;
     private RaycastHit currentHit;
 
     public Vector3 WorldPosition => worldPosition;
     public RaycastHit CurrentHit => currentHit;
 
-    private void Awake()
+    protected override void Awake()
     {
-        Instance = this;
+        base.Awake();
         
-        //Fetches the first object found with name "Main Camera" - hardcoded but should work as we should always have a camera (Main Camera)
-        mainCamera = GameObject.Find("Main Camera").GetComponent<Camera>();
+        if (mainCamera == null)
+            mainCamera = GameObject.Find("Main Camera").GetComponent<Camera>();
     }
 
     private void Update()

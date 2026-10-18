@@ -21,6 +21,8 @@ namespace Assets.Scripts.Environment
         public List<Color> colors;
         public List<int> triangles;
 
+        public LineMeshData gridMeshData;
+
         public int Size => size; 
         public Tile[,] Tiles => tiles;
 
@@ -42,6 +44,8 @@ namespace Assets.Scripts.Environment
             //Create tileType hashsets
             tileTypes = new Dictionary<TileType, HashSet<Vector2Int>>();
             InitializeTileHashsets();
+
+            gridMeshData = new LineMeshData();
 
             //Creates all the tiles (and assigns to tile hashsets)
             tiles = new Tile[size, size];
@@ -87,14 +91,24 @@ namespace Assets.Scripts.Environment
 
         public Tile GetTile(int x, int z, Space space = Space.World)
         {
+            if (tiles == null)
+            {
+                Debug.LogError($"Chunk at {position} has a null tiles array!");
+                return null;
+            }
+
             if (space == Space.World)
             {
                 x -= (int)position.x;
                 z -= (int)position.y;
             }
 
-            if (x > tiles.GetLength(0) - 1 || z > tiles.GetLength(1) - 1 || x < 0 || z < 0)
+            if (x >= tiles.GetLength(0) || z >= tiles.GetLength(1) || x < 0 || z < 0)
+            {
+                Debug.LogWarning($"Out of bounds: local ({x}, {z}), array ({tiles.GetLength(0)}, {tiles.GetLength(1)}), chunk position {position}");
+
                 return null;
+            }
 
             return tiles[x, z];
         }
@@ -134,12 +148,18 @@ namespace Assets.Scripts.Environment
 
                     //Top face
                     AddFace(
-                        new Vector3(-0.5f, 0, 0.5f) + tilePos,      // top-left
-                        new Vector3(+0.5f, 0, 0.5f) + tilePos,      // top-right
-                        new Vector3(+0.5f, 0, -0.5f) + tilePos,     // bottom-right
-                        new Vector3(-0.5f, 0, -0.5f) + tilePos,     // bottom-left
+                        new Vector3(-0.5f, 0, 0.5f) + tilePos,  // top-left
+                        new Vector3(+0.5f, 0, 0.5f) + tilePos,  // top-right
+                        new Vector3(+0.5f, 0, -0.5f) + tilePos, // bottom-right
+                        new Vector3(-0.5f, 0, -0.5f) + tilePos, // bottom-left
                         tileColor
                     );
+                    //gridMeshData.AddFace(
+                    //    new Vector3(-0.5f, 0.01f, 0.5f) + tilePos,  // top-left
+                    //    new Vector3(+0.5f, 0.01f, 0.5f) + tilePos,  // top-right
+                    //    new Vector3(+0.5f, 0.01f, -0.5f) + tilePos, // bottom-right
+                    //    new Vector3(-0.5f, 0.01f, -0.5f) + tilePos  // bottom-left
+                    //);
 
                     float tileHeight = tilePos.y;
 
