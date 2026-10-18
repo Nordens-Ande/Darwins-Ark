@@ -626,6 +626,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4698601364645636492, guid: a4dcb21832012704fbedf170618d33e1, type: 3}
+      propertyPath: inputActionsAsset
+      value: 
+      objectReference: {fileID: -944628639613478452, guid: 5e85ea705d4f7a9418425642b2bf6270, type: 3}
     - target: {fileID: 5364796140470332607, guid: a4dcb21832012704fbedf170618d33e1, type: 3}
       propertyPath: m_Name
       value: 'Main Camera '
@@ -784,6 +788,63 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b9a4b2a32b13aa43b558a94a670222b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonToggle
+--- !u!1001 &1097490213
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2786259702362899933, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.22962
+      objectReference: {fileID: 0}
+    - target: {fileID: 2786259702362899933, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2786259702362899933, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.5221
+      objectReference: {fileID: 0}
+    - target: {fileID: 2786259702362899933, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2786259702362899933, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2786259702362899933, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2786259702362899933, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2786259702362899933, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2786259702362899933, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2786259702362899933, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8198732403678017512, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
+      propertyPath: m_Name
+      value: InputModeController
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
 --- !u!1 &1205895019 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6453027670666206484, guid: c28093db3f3fc164c817751265095100, type: 3}
@@ -1354,3 +1415,4 @@ SceneRoots:
   - {fileID: 2144296029}
   - {fileID: 2095791016}
   - {fileID: 1627730753}
+  - {fileID: 1097490213}

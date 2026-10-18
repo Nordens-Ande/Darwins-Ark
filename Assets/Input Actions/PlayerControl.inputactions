@@ -95,18 +95,7 @@
                 {
                     "name": "",
                     "id": "208e34a4-7932-49d6-a433-491d36d3808d",
-                    "path": "<Keyboard>/leftCtrl",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "TileSelect",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "93a76ab3-8f90-46de-b26a-f7bfe36610df",
-                    "path": "<Keyboard>/ctrl",
+                    "path": "<Keyboard>/space",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

@@ -5,7 +5,7 @@ public class MousePositionManager : SingletonManager<MousePositionManager>
 {
 
     //Updated the camera to instead of using references to fetch it from the scene
-    [SerializeField] private Camera mainCamera;
+    private Camera mainCamera;
 
     [SerializeField, ReadOnly] private Vector3 worldPosition;
     private RaycastHit currentHit;
@@ -16,9 +16,9 @@ public class MousePositionManager : SingletonManager<MousePositionManager>
     protected override void Awake()
     {
         base.Awake();
-        
+
         if (mainCamera == null)
-            mainCamera = GameObject.Find("Main Camera").GetComponent<Camera>();
+            mainCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
     }
 
     private void Update()
