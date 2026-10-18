@@ -37,6 +37,7 @@ public class InputModeController : SingletonManager<InputModeController>
     private GameMode currentMode;
 
     public bool IsAlternativeActionActive => isAlternativeActionActive;
+    //public InputActionAsset InputActions => inputActions;
 
     protected override void Awake()
     {

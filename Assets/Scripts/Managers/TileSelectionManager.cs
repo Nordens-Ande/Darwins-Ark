@@ -39,6 +39,8 @@ public class TileSelectionManager : SingletonManager<TileSelectionManager>
     private Color highlightColor = Color.cyan;
     private Color selectedColor = Color.yellow;
 
+    public HashSet<Vector2Int> SelectedTiles => selectedTiles;
+
     private void Start()
     {
         //uiStateManager = UIStateManager.Instance;

@@ -23,6 +23,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "ModifySelection",
+                    "type": "Button",
+                    "id": "1ffc23a9-c88b-4074-9c07-49ede267867b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "TerraformSelection",
+                    "type": "Value",
+                    "id": "869db36c-5aec-48e8-a6c3-8b024473c6c0",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -111,6 +129,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "TileSelect",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8b3ef5ab-a337-4207-8b24-40a0e686a5c4",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ModifySelection",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "802d0886-6768-4249-8d9a-93ae3e0d1f01",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "TerraformSelection",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -1,19 +1,26 @@
 using Assets.Enums.GameTransitions;
 using Assets.Scripts.Events.Data;
 using Assets.Scripts.Managers;
+using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace Assets.Scripts.Environment
 {
     public class TerraformManager : SingletonManager<TerraformManager>
     {
+        private TileManager tileManager;
         private TileSelectionManager tileSelectionManager;
 
-        [SerializeField, ReadOnly] bool isActive = false;
+        private HashSet<Vector2Int> selectedTiles;
+
+        [SerializeField, ReadOnly] private bool isActive = false;
+        [SerializeField, ReadOnly] private bool modifySelectionEnabled = false;
 
         void Start()
         {
+            tileManager = TileManager.Instance;
             tileSelectionManager = TileSelectionManager.Instance;
             GameManager gameManager = GameManager.Instance;
 
@@ -40,5 +47,33 @@ namespace Assets.Scripts.Environment
         }
 
 
+        public void OnModifySelection(InputAction.CallbackContext context)
+        {
+            Debug.Log($"OnModifySelection called: {context.phase}");
+
+            if (context.performed)
+            {
+                modifySelectionEnabled = !modifySelectionEnabled;
+
+                selectedTiles = tileSelectionManager.SelectedTiles;
+            }
+
+        }
+
+        public void OnTerraformSelection(InputAction.CallbackContext context)
+        {
+            Debug.Log($"OnTerraformSelection called: {context.phase}");
+
+            if (!modifySelectionEnabled)
+                return;
+
+            Debug.Log("We are terraforming");
+            Vector2 mouseDelta = context.ReadValue<Vector2>();
+
+            foreach (Vector2Int tile in selectedTiles)
+            {
+                tileManager.GetChunk(tile).ModifyTile(tile, mouseDelta.y);
+            }
+        }
     }
 }
