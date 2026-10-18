@@ -1,4 +1,7 @@
+using Assets.Enums.GameTransitions;
 using Assets.Scripts.Environment;
+using Assets.Scripts.Events.Data;
+using Assets.Scripts.Managers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,10 +10,11 @@ using UnityEngine.InputSystem;
 
 // This class currenlty lacks the ability to change the color of tiles, this should be addressed and fixed in future.
 // Curently you can find the colors of the grids in TileManager where the grids are instansiated.
-public class TileSelectionManager : MonoBehaviour
+public class TileSelectionManager : SingletonManager<TileSelectionManager>
 {
-    [SerializeField] private UIStateManager uiStateManager;
-    [SerializeField] private TileManager tileManager;
+    //[SerializeField] private UIStateManager uiStateManager;
+    private GameManager gameManager;
+    private TileManager tileManager;
 
     //[SerializeField] private float doubleTapTime = 0.3f;
     [SerializeField] private TileGridVisibilityMode visibilityMode = TileGridVisibilityMode.AllTiles;
@@ -38,7 +42,10 @@ public class TileSelectionManager : MonoBehaviour
     private void Start()
     {
         //uiStateManager = UIStateManager.Instance;
+        gameManager = GameManager.Instance;
         tileManager = TileManager.Instance;
+
+        gameManager.OnGameModeChanged += HandleModeChange;
 
         SetGridVisible(false);
     }
@@ -214,7 +221,7 @@ public class TileSelectionManager : MonoBehaviour
     // Player Input Map
     public void OnTileSelect(InputAction.CallbackContext context)
     {
-        if (!uiStateManager.IsTerraforming())
+        if (gameManager.CurrentMode != GameMode.Terraform)
             return;
 
         if (!highlightedTile.HasValue)
@@ -252,10 +259,10 @@ public class TileSelectionManager : MonoBehaviour
         // Debug
         //Debug.Log("TIleMove event: " + context.phase);
 
-        if (!uiStateManager.IsTerraforming())
+        if (gameManager.CurrentMode != GameMode.Terraform)
             return;
 
-        if(!context.performed)
+        if (!context.performed)
             return;
 
         // Handles Mouse input
@@ -279,5 +286,24 @@ public class TileSelectionManager : MonoBehaviour
             Mathf.RoundToInt(direction.y);
 
         MoveHighlight(xDirection, zDirection);
+    }
+
+
+    private void HandleModeChange(GameModeChangedData data)
+    {
+        GameMode mode = data.NewValue;
+
+        switch (mode)
+        {
+            case GameMode.Terraform:
+                SetGridVisible(true);
+                SetMiddleTile();
+                break;
+
+            default:
+                ClearEverything();
+                SetGridVisible(false);
+                break;
+        }
     }
 }

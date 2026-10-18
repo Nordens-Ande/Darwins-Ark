@@ -8,6 +8,7 @@ public class SingletonManager<T> : MonoBehaviour where T : SingletonManager<T>
     {
         if (Instance != null && Instance != (T)this)
         {
+            Debug.LogError($"Instance duplicates of the same Manager occured with {gameObject.name} and {Instance.gameObject.name}.\nDeleting newer gameObject: {gameObject.name}");
             Destroy(gameObject);
             return;
         }
