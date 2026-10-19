@@ -12,6 +12,7 @@ namespace Assets.Scripts.Environment
 
         [HideInInspector] public List<Chunk> chunks;
         [HideInInspector] public List<GameObject> chunkObjects;
+        //[HideInInspector] public List<>
 
         [SerializeField] private int chunkSize = 8; 
         [SerializeField] private Vector2Int chunkGridSize = Vector2Int.one;
@@ -158,6 +159,11 @@ namespace Assets.Scripts.Environment
                 mesh.RecalculateBounds();
 
                 chunkObjects[i].GetComponent<MeshFilter>().sharedMesh = mesh;
+                chunkObjects[i].GetComponent<MeshCollider>().sharedMesh = mesh;
+
+                GetGridMesh(chunkObjects[i].transform, chunkGridName).Rebuild();
+                GetGridMesh(transform, heighlightGridName).Rebuild();
+                GetGridMesh(transform, selectionGridName).Rebuild();
             }
         }
 
@@ -221,64 +227,8 @@ namespace Assets.Scripts.Environment
             chunkObject.GetComponent<MeshFilter>().sharedMesh = mesh;
             chunkObject.GetComponent<MeshCollider>().sharedMesh = mesh;
         }
-        //private void GenerateGrid(Chunk chunk, GameObject chunkObject)
-        //{
-        //    // Chunk grid object instansiate
-        //    GameObject chunkGridObject = new GameObject("ChunkGrid");
-        //    chunkGridObject.transform.SetParent(chunkObject.transform, false);
 
-        //    // Chunk grid setup
-        //    ChunkGridOverlay chunkGrid = chunkGridObject.AddComponent<ChunkGridOverlay>();
-        //    chunkGrid.Setup(chunk, chunkSize, gridLineMaterial);
-        //    chunkGridObject.SetActive(false);
 
-        //    // Tile grid instansiate
-        //    GameObject tileGridObject = new GameObject("TileGrid");
-        //    tileGridObject.transform.SetParent(chunkObject.transform, false);
-
-        //    // Tile grid setup
-        //    TerraformTileGridOverlay tileGrid = tileGridObject.AddComponent<TerraformTileGridOverlay>();
-        //    tileGrid.Setup(chunk, gridLineMaterial);
-        //    tileGridObject.SetActive(false);
-        //}
-        //private void GenerateGrid(Chunk chunk, GameObject chunkObject)
-        //{
-        //    Type[] components = new Type[]
-        //    {
-        //        typeof(MeshFilter), typeof(MeshRenderer), typeof(LineMesh)
-        //    };
-
-        //    GameObject chunkGridObject = new GameObject("ChunkGrid", components);
-        //    chunkGridObject.transform.SetParent(chunkObject.transform, false);
-
-        //    MeshRenderer meshRenderer = chunkGridObject.GetComponent<MeshRenderer>();
-        //    meshRenderer.material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-        //    meshRenderer.material.color = Color.red;
-
-        //    LineMesh lineMesh = chunkGridObject.GetComponent<LineMesh>();
-        //    lineMesh.meshData = chunk.gridMeshData;
-
-        //    lineMesh.Rebuild();
-        //}
-        //private void GenerateGrid(Chunk chunk, GameObject chunkObject)
-        //{
-        //    Type[] components = new Type[]
-        //    {
-        //        typeof(MeshFilter), typeof(MeshRenderer), typeof(GridMesh)
-        //    };
-
-        //    GameObject chunkGridObject = new GameObject("ChunkGrid", components);
-        //    chunkGridObject.transform.SetParent(chunkObject.transform, false);
-
-        //    MeshRenderer meshRenderer = chunkGridObject.GetComponent<MeshRenderer>();
-        //    meshRenderer.material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
-        //    meshRenderer.material.color = Color.red;
-
-        //    GridMesh gridMesh = chunkGridObject.GetComponent<GridMesh>();
-        //    gridMesh.NewTiles(chunk.GetTiles(TileType.Grass));
-
-        //    gridMesh.Rebuild();
-        //}
         private void GenerateGrid(Transform parent, float heightOffset, string name, Color color, HashSet<Vector2Int> tiles = null)
         {
             Type[] components = new Type[]
@@ -302,6 +252,7 @@ namespace Assets.Scripts.Environment
                 gridMesh.Rebuild();
             }
         }
+
 
         // Booleans for when chunk/tile grids are visible
         public void SetChunkGridVisible(bool visible)

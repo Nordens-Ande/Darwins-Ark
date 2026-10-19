@@ -245,6 +245,20 @@ namespace Assets.Scripts.Environment
             triangles.Add(index + 3);
         }
 
+
+        // Returns true if the position is within the chunk, false if not
+        private bool LocalizePositions(ref int x, ref int z, Space space = Space.World)
+        {
+            if (space == Space.World)
+            {
+                x -= (int)position.x;
+                z -= (int)position.y;
+            }
+
+            return !(x > size - 1 || z > size - 1 || x < 0 || z < 0);
+        }
+
+
         public void ModifyTile(int x, int z, float newY, Space space = Space.World)
         {
             if (space == Space.World)
@@ -265,8 +279,17 @@ namespace Assets.Scripts.Environment
         public void ModifyTile(Vector2Int positionXZ, float newY, Space space = Space.World) => ModifyTile(positionXZ.x, positionXZ.y, newY, space);
 
 
+        public void IncreaseTileHeight(int x, int z, float yIncrement, Space space = Space.World)
+        {
+            if (!LocalizePositions(ref x, ref z, space))
+                return;
 
+            isDirty = true;
 
+            tiles[x, z].position.y += yIncrement;
+            tiles[x, z].localPosition.y += yIncrement;
+        }
+        public void IncreaseTileHeight(Vector2Int positionXZ, float yIncrement, Space space = Space.World) => IncreaseTileHeight(positionXZ.x, positionXZ.y, yIncrement, space);
 
     }
 }

@@ -9,9 +9,9 @@ namespace Assets.Scripts.Environment
         public Vector3 position;
         public Vector3 localPosition;
 
-        TileType type;
+        private TileType type;
 
-        public Vector2Int GridPosition => new Vector2Int((int)position.x, (int)position.z);
+        public Vector2Int GridPosition => new Vector2Int(Mathf.RoundToInt(position.x), Mathf.RoundToInt(position.z));
 
         //plant varibles
         [SerializeField] private Plant currentPlant = null; //this is the plant that is currently on this tile, if any

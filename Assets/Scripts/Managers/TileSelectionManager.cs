@@ -246,6 +246,8 @@ public class TileSelectionManager : SingletonManager<TileSelectionManager>
                 {
                     selectedTiles.Add(highlightedTile.Value);
                 }
+
+                RefreshGrids();
             }
 
             //ToggleHighlightedTile();

@@ -49,30 +49,35 @@ namespace Assets.Scripts.Environment
 
         public void OnModifySelection(InputAction.CallbackContext context)
         {
-            Debug.Log($"OnModifySelection called: {context.phase}");
+            //Debug.Log($"OnModifySelection called: {context.phase}");
+            
 
             if (context.performed)
             {
-                modifySelectionEnabled = !modifySelectionEnabled;
-
                 selectedTiles = tileSelectionManager.SelectedTiles;
+                modifySelectionEnabled = true;
+            }
+            else
+            {
+                modifySelectionEnabled = false;
             }
 
         }
 
         public void OnTerraformSelection(InputAction.CallbackContext context)
         {
-            Debug.Log($"OnTerraformSelection called: {context.phase}");
+            //Debug.Log($"OnTerraformSelection called: {context.phase}");
 
             if (!modifySelectionEnabled)
                 return;
 
-            Debug.Log("We are terraforming");
+            //Debug.Log("We are terraforming");
             Vector2 mouseDelta = context.ReadValue<Vector2>();
+            float increment = 10.0f * mouseDelta.y > 0 ? 1f : -1f;
 
             foreach (Vector2Int tile in selectedTiles)
             {
-                tileManager.GetChunk(tile).ModifyTile(tile, mouseDelta.y);
+                tileManager.GetChunk(tile).IncreaseTileHeight(tile, mouseDelta.y * Time.deltaTime);
             }
         }
     }
