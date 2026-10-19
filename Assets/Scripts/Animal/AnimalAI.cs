@@ -608,12 +608,10 @@ public class AnimalAI : MonoBehaviour
         { 
             int randomMate = Random.Range(0, potentialMates.Count);
             AnimalAI assignedMate = potentialMates[randomMate];
-            Debug.LogWarning("Found mate");
             AssignMate(assignedMate);
         }
         else 
         {
-            Debug.LogWarning("I tried finding mate");
             hasSearchedForMate = true;
         }
     }   
@@ -645,18 +643,17 @@ public class AnimalAI : MonoBehaviour
             }
             walkPoint = assignedMate.gameObject.transform.position;
             float distance = Vector3.Distance(transform.position, assignedMate.transform.position);
-            Debug.LogWarning(distance);
 
             if (distance < 1.5f)
             {
-                Debug.LogWarning(distance);
-                Debug.LogWarning("Has procreated");
-
                 //Instantiate new animal
                 Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
                 spawnPosition = spawnPosition - (transform.forward * 2);
                 GameObject child = Instantiate(this.gameObject, spawnPosition, Quaternion.identity);
                 AnimalAI childAi = child.GetComponent<AnimalAI>();
+                AnimalChild chiildLogic = child.AddComponent<AnimalChild>();
+                chiildLogic.Parent = this.gameObject;
+                chiildLogic.ChildWalkSpeed = walkSpeed;
                 childAi.enabled = false;
                 child.transform.localScale *= 0.3f;
                 //child.transform.SetParent(transform); //Will be fixed in childscript
