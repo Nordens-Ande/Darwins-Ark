@@ -28,7 +28,9 @@ public class PhoneControllerReceiver : MonoBehaviour
         {
             string json = Encoding.UTF8.GetString(data.Array, data.Offset, data.Count);
 
-            Debug.Log($"Controller input from {id}: {json}");
+            VisualPhoneDebugger.Instance?.ApplyJson(json);
+
+            //Debug.Log($"Controller input from {id}: {json}");
         };
 
         server.onError += (id, exception) =>
