@@ -103,6 +103,7 @@ public class AnimalAI : MonoBehaviour
     private bool hasSetExit;
     private Vector3 leaveVec;
 
+
     //Properties
     public float BossThreat
     {
@@ -195,7 +196,6 @@ public class AnimalAI : MonoBehaviour
         tileCheckSize = 1;
         BossThreat = 0;
         matingSeason = 0;
-
         InstantiateUtilityBrain();
     }
 
@@ -222,13 +222,13 @@ public class AnimalAI : MonoBehaviour
         UtilityAction<AnimalAI> leaveAction = new UtilityAction<AnimalAI>(new LeaveContainer(), leaveIslandAction);
         UtilityAction<AnimalAI> hungerAction = new UtilityAction<AnimalAI>(new HungryContainer(), searchForFoodAction);
         UtilityAction<AnimalAI> tiredAction = new UtilityAction<AnimalAI>(new TiredContainer(), sleepAction);
-        utilityChoosesList = new List<UtilityAction<AnimalAI>> { bossAction, walkAction, leaveAction, hungerAction, tiredAction };
+        UtilityAction<AnimalAI> procreationAction = new UtilityAction<AnimalAI>(new ProcreationContrainer(), procreateAction);
+        utilityChoosesList = new List<UtilityAction<AnimalAI>> { bossAction, walkAction, leaveAction, hungerAction, tiredAction, procreationAction };
 
         utilityBrain = new UtilityBrain<AnimalAI>(utilityChoosesList, this);
-
     }
 
-    //Simple deteriation of the utility points during game time
+    //Simple deteriation of the utility points during game time      
     void ClockCycleDeteriation() 
     {
         clockCycleTimeCurrent += Time.deltaTime;
@@ -236,6 +236,7 @@ public class AnimalAI : MonoBehaviour
         {
             hunger += hungerDeteration;
             tired += 2;
+            matingSeason += 1;
 
             Happiness = Happiness - hunger / 10;
 
@@ -323,7 +324,7 @@ public class AnimalAI : MonoBehaviour
     //Checks so the animals dosent collide
     bool WillCollideWithNeighbour() 
     { 
-        if(Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 2)) 
+        if(Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 1.0f)) 
         {
             AnimalAI animal =hit.transform.GetComponent<AnimalAI>();
             if (animal == null)
@@ -355,7 +356,7 @@ public class AnimalAI : MonoBehaviour
             }
             //AnimalWalkMoveTowards(walkPoint);
 
-            if (Vector3.Distance(transform.position, walkPoint) < 2f)
+            if (Vector3.Distance(transform.position, walkPoint) < 1f)
             {
                 hasSetPath = false;
                 isIdle = true;
@@ -594,11 +595,12 @@ public class AnimalAI : MonoBehaviour
     public void GetMate() 
     {
         List<AnimalAI> potentialMates = new List<AnimalAI>();
+        //Debug.LogWarning(animalManager.Animals.Count);
         foreach(AnimalAI animal in animalManager.Animals) 
         {
-            if (animal.CanMate() && animal.matingSeason > 0.7) 
+            if (animal.CanMate() && animal.MatingSeason > 70 && animal != this) 
             {
-                AnimalAI animalAI = animal.GetComponent<AnimalAI>();
+                AnimalAI animalAI = animal;
                 potentialMates.Add(animalAI);
             }
         }
@@ -606,9 +608,15 @@ public class AnimalAI : MonoBehaviour
         { 
             int randomMate = Random.Range(0, potentialMates.Count);
             AnimalAI assignedMate = potentialMates[randomMate];
+            Debug.LogWarning("Found mate");
             AssignMate(assignedMate);
         }
-    }
+        else 
+        {
+            Debug.LogWarning("I tried finding mate");
+            hasSearchedForMate = true;
+        }
+    }   
 
     //Can be called to assign mates in the animalManager, choices over animal procreation maybe chall be called in animalManager
     public void AssignMate(AnimalAI animal) 
@@ -635,12 +643,25 @@ public class AnimalAI : MonoBehaviour
                 hasMate = false;
                 awaitMate = false;
             }
-            walkPoint = assignedMate.transform.position;
+            walkPoint = assignedMate.gameObject.transform.position;
             float distance = Vector3.Distance(transform.position, assignedMate.transform.position);
+            Debug.LogWarning(distance);
 
-            if (distance < 2)
+            if (distance < 1.5f)
             {
+                Debug.LogWarning(distance);
+                Debug.LogWarning("Has procreated");
+
                 //Instantiate new animal
+                Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+                spawnPosition = spawnPosition - (transform.forward * 2);
+                GameObject child = Instantiate(this.gameObject, spawnPosition, Quaternion.identity);
+                AnimalAI childAi = child.GetComponent<AnimalAI>();
+                childAi.enabled = false;
+                child.transform.localScale *= 0.3f;
+                //child.transform.SetParent(transform); //Will be fixed in childscript
+
+                //Reset mating values
                 matingSeason = 0;
                 hasProcreated = true;
                 assignedMate.MatingSeason = 0;
