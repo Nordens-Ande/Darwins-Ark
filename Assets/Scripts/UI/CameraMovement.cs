@@ -86,7 +86,15 @@ public class CameraMovement : MonoBehaviour
         }
 
         targetYaw = transform.eulerAngles.y;
+    }
 
+    // when switching scenes, make sure the singleton is cleared so it can be reinitialized in the new scene
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
     }
 
     private void OnEnable()
