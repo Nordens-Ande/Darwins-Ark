@@ -202,10 +202,12 @@ namespace Assets.Scripts.Environment
             int converted = 0;
             float elapsed = 0f;
 
+            // we keep going until we have converted enough tiles or there are no more tiles to convert
             while (converted < targetTileCount && frontier.Count > 0)
             {
                 elapsed += Time.deltaTime;
 
+                // we calculate how many tiles should be converted based on the time and the duration
                 int shouldBeConverted;
                 if (durationSeconds <= 0f)
                 {
@@ -217,6 +219,7 @@ namespace Assets.Scripts.Environment
                     shouldBeConverted = Mathf.Min(targetTileCount, Mathf.CeilToInt(progress * targetTileCount));
                 }
 
+                // we convert tiles until we reach the amount that should be converted
                 while (converted < shouldBeConverted && frontier.Count > 0)
                 {
                     int i = PickFrontierIndex(frontier, biome);
@@ -247,7 +250,7 @@ namespace Assets.Scripts.Environment
         }
 
 
-
+        // sets the biome of a tile at a grid position, returns true if successful
         private bool SetBiome(Vector2Int gridPos, BiomeType biome)
         {
             Chunk chunk = GetChunkAt(gridPos);
@@ -280,14 +283,12 @@ namespace Assets.Scripts.Environment
             return true;
         }
 
-       
 
-       
 
-        // ---------------------------------------------------------------
         // Spread helpers
-        // ---------------------------------------------------------------
 
+
+        // picks a tile from the frontier list to convert next, based on the compactness setting
         private int PickFrontierIndex(List<Vector2Int> frontier, BiomeType biome)
         {
             int best = Random.Range(0, frontier.Count);
@@ -298,6 +299,8 @@ namespace Assets.Scripts.Environment
 
             int bestScore = CountBiomeNeighbours(frontier[best], biome, true);
 
+            // we pick a random tile from the frontier and check how many neighbours it has of the same biome
+            // we do this compactness times and pick the one with the most neighbours
             for (int k = 1; k < compactness; k++)
             {
                 int i = Random.Range(0, frontier.Count);
@@ -312,6 +315,7 @@ namespace Assets.Scripts.Environment
             return best;
         }
 
+        // counts how many neighbours of a tile are of the same biome
         private int CountBiomeNeighbours(Vector2Int pos, BiomeType biome, bool includeDiagonals)
         {
             int count = 0;
@@ -336,6 +340,7 @@ namespace Assets.Scripts.Environment
             return count;
         }
 
+        // fills in single-tile holes of a biome by checking if a tile has 3 or more neighbours of the same biome
         private void FillHoles(BiomeType biome)
         {
             for (int pass = 0; pass < 10; pass++)
@@ -372,18 +377,20 @@ namespace Assets.Scripts.Environment
             }
         }
 
+        // adds the neighbours of a tile to the frontier if they can be converted to the biome
         private void AddNeighbours(Vector2Int pos, BiomeType biome, List<Vector2Int> frontier, HashSet<Vector2Int> inFrontier)
         {
             foreach (Vector2Int dir in Directions4)
             {
-                Vector2Int n = pos + dir;
-                if (!inFrontier.Contains(n) && CanConvert(n, biome))
+                Vector2Int neighbour = pos + dir;
+                if (!inFrontier.Contains(neighbour) && CanConvert(neighbour, biome))
                 {
-                    AddToFrontier(n, frontier, inFrontier);
+                    AddToFrontier(neighbour, frontier, inFrontier);
                 }
             }
         }
 
+        // adds a tile to the frontier if it is not already in the frontier
         private void AddToFrontier(Vector2Int pos, List<Vector2Int> frontier, HashSet<Vector2Int> inFrontier)
         {
             if (inFrontier.Add(pos))
@@ -392,6 +399,7 @@ namespace Assets.Scripts.Environment
             }
         }
 
+        // checks if a tile can be converted to a biome, based on its type and current biome
         private bool CanConvert(Vector2Int gridPos, BiomeType biome)
         {
             Tile tile = GetTileAt(gridPos);
@@ -413,12 +421,13 @@ namespace Assets.Scripts.Environment
             return current == BiomeType.Normal;
         }
 
+        // checks if a tile is coastal, meaning it has at least one neighbour that is not grass (e.g., water or beach)
         private bool IsCoastal(Vector2Int gridPos)
         {
             foreach (Vector2Int dir in Directions4)
             {
-                Tile n = GetTileAt(gridPos + dir);
-                if (n == null || n.Type != TileType.Grass)
+                Tile tile = GetTileAt(gridPos + dir);
+                if (tile == null || tile.Type != TileType.Grass)
                 {
                     return true;
                 }
@@ -426,6 +435,7 @@ namespace Assets.Scripts.Environment
             return false;
         }
 
+        // picks a random tile that is coastal to start spreading the biome from
         private Vector2Int? PickCoastalSeed(BiomeType biome)
         {
             List<Vector2Int> coastal = new List<Vector2Int>();
@@ -466,6 +476,7 @@ namespace Assets.Scripts.Environment
             return pool[Random.Range(0, pool.Count)];
         }
 
+        // helper functions to get the chunk and tile at a grid position
         private Chunk GetChunkAt(Vector2Int gridPos)
         {
             if (TileManager.Instance == null)
@@ -476,6 +487,7 @@ namespace Assets.Scripts.Environment
             return TileManager.Instance.GetChunk(gridPos.x, gridPos.y);
         }
 
+        // helper function to get the tile at a grid position
         private Tile GetTileAt(Vector2Int gridPos)
         {
             Chunk chunk = GetChunkAt(gridPos);
@@ -486,10 +498,8 @@ namespace Assets.Scripts.Environment
             return chunk.GetTile(gridPos.x, gridPos.y);
         }
 
-        // ---------------------------------------------------------------
-        // Colour lookup (called from Chunk.GenerateMeshData)
-        // ---------------------------------------------------------------
 
+        // returns the color for a biome
         public Color GetBiomeColor(BiomeType biome, Color defaultColor)
         {
             Color color;
@@ -500,6 +510,7 @@ namespace Assets.Scripts.Environment
             return defaultColor;
         }
 
+        // returns the color for a tile based on its type and biome
         public Color GetTileColor(Tile tile)
         {
             if (tile.Type != TileType.Grass)
