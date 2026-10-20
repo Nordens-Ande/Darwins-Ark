@@ -15,6 +15,8 @@ public class AnimalManager : MonoBehaviour
     float spawnTimer = 0;
     int spawnTimerThreshold = 10;
 
+    public List<AnimalAI> Animals => animals;
+
     private void Awake()
     {
         if(Instance == null)

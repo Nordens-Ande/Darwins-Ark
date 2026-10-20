@@ -161,15 +161,41 @@ namespace Assets.Scripts.Environment
             return GetChunk(position.x, position.y);
         }
 
-        public Tile GetTile(float x, float z)
+        public Tile GetTile(float x, float z) //new version with bug fixes
         {
-            foreach (Chunk chunk in chunks)
+            //coords of tile closest to parameter values
+            int tileX = Mathf.RoundToInt(x);
+            int tileZ = Mathf.RoundToInt(z);
+
+            //"index" of correct chunk, issues before that the wrong chunk was chosen if tile.pos / chunkSize = 8
+            int chunkX = Mathf.FloorToInt((float)tileX / chunkSize);
+            int chunkZ = Mathf.FloorToInt((float)tileZ / chunkSize);
+
+            foreach (Chunk chunk in chunks) // find that chunk
             {
-                if (chunk.position / chunkSize == new Vector2(Mathf.Floor(x / chunkSize), Mathf.Floor(z / chunkSize)))
-                    return chunk.GetTile((int)x, (int)z);
+                int existingX = Mathf.RoundToInt(chunk.position.x / chunkSize);
+                int existingZ = Mathf.RoundToInt(chunk.position.y / chunkSize);
+
+                if (existingX == chunkX && existingZ == chunkZ)
+                    return chunk.GetTile(tileX, tileZ);
             }
+
             return null;
         }
+
+        //public Tile GetTile(float x, float z) // original version except Mathf.RoundToInt instead of (int)
+        //{
+        //    int tileX = Mathf.RoundToInt(x);
+        //    int tileZ = Mathf.RoundToInt(z);
+
+        //    foreach (Chunk chunk in chunks)
+        //    {
+        //        if (chunk.position / chunkSize == new Vector2(Mathf.Floor(x / chunkSize), Mathf.Floor(z / chunkSize)))
+        //            return chunk.GetTile(Mathf.RoundToInt(x), Mathf.RoundToInt(z));
+        //    }
+        //    return null;
+        //}
+
         public Tile GetTile(Vector2 posXZ)
         {
             return GetTile(posXZ.x, posXZ.y);
