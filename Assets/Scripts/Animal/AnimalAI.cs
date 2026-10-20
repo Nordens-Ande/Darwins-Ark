@@ -103,6 +103,11 @@ public class AnimalAI : MonoBehaviour
     private bool hasSetExit;
     private Vector3 leaveVec;
 
+    //PathFinding
+    private PathFinding pathFinder;
+    private List<Tile> activePath;
+    private Vector3 activePathTarget;
+
 
     //Properties
     public float BossThreat
@@ -318,6 +323,52 @@ public class AnimalAI : MonoBehaviour
         else 
         {
             return new Vector3(0, 0, 0);
+        }
+    }
+
+    //Method to decide which tile is traversable, used in pathfinding
+    bool TravesableTile(Tile tile) 
+    { 
+        if(tile.Type == TileType.Grass) 
+        {
+            return true;
+        }
+        else 
+        {
+            return false;
+        }
+    }
+    //Method to get a path from pathfining script. 
+    List<Tile> PathfindingMovement(Vector3 target) 
+    {
+        Tile currentPos = tileManager.GetTile(transform.position);
+        Tile targetPos = tileManager.GetTile(target);
+        float maxHeightDifference = 3;
+        int iterations = 5;
+        List<Tile> path = pathFinder.GetPathAStar(currentPos, targetPos, TravesableTile, maxHeightDifference, iterations);
+        return path;
+    }
+
+    //Beginning to method for pathfinding walking with AStar, Will be used instead of animalWalkMoveTowards in WalkAround method
+    void PathfindingWalk() 
+    {
+        if (activePath[0] != null) 
+        {
+            AnimalWalkMoveTowards(activePathTarget);
+        }
+        else if (activePath[0] == null) 
+        {
+            hasSetPath = false;
+            isIdle = true;
+            Idle();
+            return;
+        }
+        float distance = Vector3.Distance(tileManager.GetTile(transform.position).position, activePath[0].position);
+        if(distance < 1) 
+        {
+            activePath.Remove(activePath[0]);
+            Vector3 updatepath = new Vector3(activePath[0].position.x, activePath[0].GetHeight() + transform.localScale.y / 2, activePath[0].position.z);
+            activePathTarget = updatepath; 
         }
     }
 

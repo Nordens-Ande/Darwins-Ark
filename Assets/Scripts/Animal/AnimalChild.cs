@@ -1,6 +1,5 @@
 using Assets.Scripts.Environment;
 using UnityEngine;
-using UnityEngine.InputSystem.XR.Haptics;
 
 public class AnimalChild : MonoBehaviour
 {
@@ -32,30 +31,43 @@ public class AnimalChild : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
         currentTime += Time.deltaTime;
         StateDecider();
     }
 
     void StateDecider() 
     {
-        if (currentTime > growthTimerMax) 
+        if (Physics.Raycast(transform.position, transform.up, out RaycastHit hit, 1)) //Trampled
+        { 
+            AnimalAI animal = hit.transform.GetComponent<AnimalAI>();
+            if (animal != null) 
+            {
+                transform.localScale = new Vector3(transform.localScale.x, 0.01f, transform.localScale.z);
+            }
+        }
+        else if (currentTime > growthTimerMax) //Grew up
         {
             GrowUp();
         }
-        else if (CheckDistanceToParent()) 
+        else if (CheckDistanceToParent()) //Far away from parent
         {
             FollowParent(parent.transform.position);
         }
-        else if (tempPosition == parent.transform.position) 
-        { 
+        else if (tempPosition == parent.transform.position) //Parent stands still
+        {
             FoolAround();
         }
-        else 
-        { 
-        
+        else
+        {
+
         }
         tempPosition = parent.transform.position;
+        ResetSize();
+    }
+
+    private void ResetSize()
+    {
+        transform.localScale = parent.transform.localScale * 0.3f;
     }
 
     void ResetJumpTimer() 
