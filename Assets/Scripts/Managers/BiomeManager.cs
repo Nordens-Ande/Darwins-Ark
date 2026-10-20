@@ -26,9 +26,9 @@ namespace Assets.Scripts.Environment
         }
     }
 
-    public class BiomeManager : MonoBehaviour
+    public class BiomeManager : SingletonManager<BiomeManager>
     {
-        public static BiomeManager Instance = null;
+        //public static BiomeManager Instance = null; //we dont need this because we inherit from SingletonManager
 
         [Header("Base Colours")]
         [SerializeField] private Color grassColor = Color.lawnGreen;
@@ -72,20 +72,21 @@ namespace Assets.Scripts.Environment
             new Vector2Int(0, -1), new Vector2Int(-1, -1), new Vector2Int(-1, 0), new Vector2Int(-1, 1)
         };
 
-        private void Awake()
-        {
-            if (Instance == null)
-            {
-                Instance = this;
-            }
-            else
-            {
-                Destroy(gameObject);
-                return;
-            }
+        // we dont need this because we inherit from SingletonManager
+        //private void Awake()
+        //{
+        //    if (Instance == null)
+        //    {
+        //        Instance = this;
+        //    }
+        //    else
+        //    {
+        //        Destroy(gameObject);
+        //        return;
+        //    }
 
-            RebuildColorLookup();
-        }
+        //    RebuildColorLookup();
+        //}
 
         private void OnValidate()
         {
