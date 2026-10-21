@@ -49,27 +49,6 @@ namespace Assets.Scripts.Environment
 
             for (int i = 0; i < chunks.Count; i++)
             {
-                //Chunk chunk = chunks[i];
-                //chunk.GenerateMeshData();
-
-                //GameObject chunkObject = new GameObject($"Chunk (x:{chunk.position.x}, z:{chunk.position.y})", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider));
-                //chunkObject.transform.parent = transform;
-                //chunkObjects.Add(chunkObject);
-
-                //chunkObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Shader Graphs/Lit Color"));
-
-                //Mesh mesh = new Mesh();
-
-                //mesh.SetVertices(chunk.vertices);
-                //mesh.SetTriangles(chunk.triangles, 0);
-                //mesh.SetColors(chunk.colors);
-
-                //mesh.RecalculateNormals();
-                //mesh.RecalculateBounds();
-
-                //chunkObject.GetComponent<MeshFilter>().sharedMesh = mesh;
-                //chunkObject.GetComponent<MeshCollider>().sharedMesh = mesh;
-
                 Chunk chunk = chunks[i];
 
                 // Generate gameObject
@@ -83,36 +62,6 @@ namespace Assets.Scripts.Environment
                 
                 // Generate mesh for chunk
                 GenerateMesh(chunk, chunkObject);
-
-
-                //// Grid for chunk and tiles in TerraformUI -------------
-                ////  Chunk Grid
-                //GameObject chunkGridObject = 
-                //    new GameObject("ChunkGrid"
-                //    );
-
-                //chunkGridObject.transform.SetParent(
-                //    chunkObject.transform, false
-                //    );
-
-                //ChunkGridOverlay chunkGrid = chunkGridObject.AddComponent<ChunkGridOverlay>();
-
-                //chunkGrid.Setup(chunk, chunkSize, gridLineMaterial);
-
-                //chunkGridObject.SetActive(false);
-
-                ////  Tile Grid
-                //GameObject tileGridObject = new GameObject("TileGrid");
-                //tileGridObject.transform.SetParent(chunkObject.transform, false);
-
-                //TerraformTileGridOverlay tileGrid = tileGridObject.AddComponent<TerraformTileGridOverlay>();
-
-                //tileGrid.Setup(chunk, gridLineMaterial);
-                //tileGridObject.SetActive(false);
-                ////-------------------------------------------------------
-                
-                //GenerateGrid(chunk, chunkObject);
-
             }
 
             for (int i = 0; i < chunks.Count; i++)

@@ -8,7 +8,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-// This class currenlty lacks the ability to change the color of tiles, this should be addressed and fixed in future.
+// This class currenlty lacks the ability to change the color of selected tiles, this should be addressed and fixed in future.
 // Curently you can find the colors of the grids in TileManager where the grids are instansiated.
 public class TileSelectionManager : SingletonManager<TileSelectionManager>
 {

@@ -679,69 +679,28 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a4dcb21832012704fbedf170618d33e1, type: 3}
---- !u!1 &695006194
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 695006196}
-  - component: {fileID: 695006197}
-  - component: {fileID: 695006195}
-  m_Layer: 0
-  m_Name: Terraform Manager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &695006195
+--- !u!114 &695006195 stripped
 MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 5547338016526990173, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
+  m_PrefabInstance: {fileID: 5748248409227059252}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 695006194}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1933e722c4416ff49827fa2c4ef1aed7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileSelectionManager
-  visibilityMode: 1
-  mouseMoveThreshold: 20
-  selectHeld: 0
-  isAddingTiles: 0
---- !u!4 &695006196
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 695006194}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &695006197
+--- !u!114 &695006197 stripped
 MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 6597558973163832552, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
+  m_PrefabInstance: {fileID: 5748248409227059252}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 695006194}
+  m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c20d1a7477602747b3e82a0e24de079, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Environment.TerraformManager
-  isActive: 0
-  modifySelectionEnabled: 0
 --- !u!1 &696510951
 GameObject:
   m_ObjectHideFlags: 0
@@ -840,10 +799,6 @@ PrefabInstance:
     - target: {fileID: 8198732403678017512, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
       propertyPath: m_Name
       value: InputModeController
-      objectReference: {fileID: 0}
-    - target: {fileID: 8198732403678017512, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1446,6 +1401,63 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4351b6c726d090d4e9dd453c04c42173, type: 3}
+--- !u!1001 &5748248409227059252
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1189809150790197370, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1189809150790197370, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1189809150790197370, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1189809150790197370, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1189809150790197370, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1189809150790197370, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1189809150790197370, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1189809150790197370, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1189809150790197370, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1189809150790197370, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5219250614393762907, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
+      propertyPath: m_Name
+      value: Terraform Manager
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -1459,7 +1471,7 @@ SceneRoots:
   - {fileID: 189979611}
   - {fileID: 1225263738}
   - {fileID: 631922138}
-  - {fileID: 695006196}
+  - {fileID: 5748248409227059252}
   - {fileID: 386020338}
   - {fileID: 5188674882806591944}
   - {fileID: 338747713}
