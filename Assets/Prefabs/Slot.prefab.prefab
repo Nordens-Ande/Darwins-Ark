@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 351129709677447434}
   - component: {fileID: 5513330897628491956}
   - component: {fileID: 1942453404659130599}
+  - component: {fileID: 6039356187206071513}
   m_Layer: 5
   m_Name: Slot.prefab
   m_TagString: Untagged
@@ -100,3 +101,17 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
+--- !u!114 &6039356187206071513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5733304053399157391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: abd82ce092647e440bcdc1e5d209f82d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventorySlotUI
+  itemIcon: {fileID: 0}
+  amountText: {fileID: 0}

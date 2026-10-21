@@ -17,8 +17,10 @@ public class Seed
     [SerializeField] private int maxStackSize = 99; // how many of one seed we can have in one slot
     [Space]
 
+    [SerializeField] private Sprite inventoryIcon;
+    public Sprite InventoryIcon => inventoryIcon;
 
-
+    [Space]
 
     [Header("Planting Reference")]
     public Plant plantPrefab; // Prefaben från PlantManager/Plant som ska gro
