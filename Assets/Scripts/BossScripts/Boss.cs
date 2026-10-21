@@ -39,6 +39,10 @@ public class Boss : MonoBehaviour, IBoatSpawning
     public List<Tile> ClosestPlantTilePath => closestPlantTilePath;
 
 
+    public bool DebugScores => true;
+
+
+
     void Start()
     {
         transform.localPosition = Vector3.zero;
@@ -107,7 +111,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
             float distance = Vector3.Distance(transform.position, tilesWithPlants[i].position);
             if (distance > sightDistanceToTiles) continue;
 
-            closestPlantTilePath = movementScript.PathFinder.GetPathAStar(tileManager.GetTile(transform.position), tilesWithPlants[i], movementScript.IsBossTraversable, 2f, (int)(distance * 2));
+            closestPlantTilePath = movementScript.PathFinder.GetPathAStar(tileManager.GetTile(transform.position), tilesWithPlants[i], movementScript.IsBossTraversable, 2f, (int)(sightDistanceToTiles * 2));
             if (closestPlantTilePath != null)
             {
                 return;
@@ -136,6 +140,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
                 }
             }
         }
+        Debug.Log("amount of animals parameter: " + amountOfAnimals + " list count: "+ closestAnimals.Count);
         return closestAnimals;
     }
 
@@ -197,13 +202,16 @@ public class Boss : MonoBehaviour, IBoatSpawning
                 if(currentState.TaskCompleted)
                 {
                     currentState.OnExitState();
-                    currentState.OnEnterState();
+                    if(currentState.OnEnterState())
+                    {
+                        break;
+                    }
                 }
                 else
                 {
                     currentState.Tick();
+                    break;
                 }
-                break;
             }
 
             if (statesOrderedByScore[i].OnEnterState())
