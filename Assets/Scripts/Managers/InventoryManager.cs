@@ -2,29 +2,31 @@ using Assets.Scripts.Environment;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class InventoryManager : MonoBehaviour
+public class InventoryManager : SingletonManager<InventoryManager>
 {
-    public static InventoryManager Instance = null;
+    //public static InventoryManager Instance = null; // we dont need this anymore since we inherit from SingletonManager
 
     [SerializeField, ReadOnly] public Inventory playerInventory;  
 
 
-    private void Awake()
+    protected override void Awake()
     {
-        if (Instance == null)
+        base.Awake(); // we call the base awake to make sure the singleton is set up correctly
+
+        if (Instance != this)
         {
-            InventoryManager.Instance = this;
-
-            // we try to get inventory if it exists on the same gameobject
-            playerInventory = GetComponent<Inventory>();
-
-            // if it doesn't exist we make it
-            if (playerInventory == null)
-            {
-                playerInventory = gameObject.AddComponent<Inventory>();
-            }
+            return;
         }
-           
+
+        // Vi försöker hämta inventory om det finns på samma GameObject
+        playerInventory = GetComponent<Inventory>();
+
+        // Om det inte finns så skapar vi det
+        if (playerInventory == null)
+        {
+            playerInventory = gameObject.AddComponent<Inventory>();
+        }
+
     }
 
 
@@ -64,13 +66,6 @@ public class InventoryManager : MonoBehaviour
 
         return false;
     }
-
-
-
-
-
-
-
 
 
 }
