@@ -3,7 +3,7 @@ using UnityEngine;
 using Assets.Scripts.Environment;
 using System;
 
-
+[Serializable]
 public class BossEscapeState : BossAIState
 {
     TileManager tileManager = TileManager.Instance;
@@ -12,6 +12,12 @@ public class BossEscapeState : BossAIState
 
     public BossEscapeState(Boss boss) : base(boss)
     {
+        container = new BossEscapeContainer();
+    }
+
+    public override void Initialize(Boss boss)
+    {
+        this.boss = boss;
         container = new BossEscapeContainer();
     }
 

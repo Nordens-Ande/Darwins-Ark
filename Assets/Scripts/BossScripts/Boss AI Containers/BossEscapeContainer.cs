@@ -46,8 +46,8 @@ public class BossEscapeContainer : Container<Boss>
             distanceAnimal = Mathf.Clamp01(1 - distance / boss.SightDistanceToAnimals);
         }
         if (boss.DebugScores)
-            Debug.Log("Boss escape score: " + Mathf.Clamp01(0.2f * distanceTile + 0.5f * health + 0.3f * distanceAnimal));
+            Debug.Log("Boss escape score: " + Mathf.Clamp01(0.3f * distanceTile + 0.2f * health + 0.6f * distanceAnimal));
 
-        return Mathf.Clamp01(0.2f * distanceTile + 0.3f * health + 0.5f * distanceAnimal);
+        return Mathf.Clamp01(0.3f * distanceTile + 0.2f * health + 0.6f * distanceAnimal);
     }
 }

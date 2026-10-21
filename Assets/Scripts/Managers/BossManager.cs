@@ -40,11 +40,11 @@ public class BossManager : SingletonManager<BossManager>
 
     void Update()
     {
-        if (!spawnedBoss)
-        {
-            SpawnBoss();
-            spawnedBoss = true;
-        }
+        //if (!spawnedBoss)
+        //{
+        //    SpawnBoss();
+        //    spawnedBoss = true;
+        //}
 
         if (currentBoss != null)
         {
