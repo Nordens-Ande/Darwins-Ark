@@ -71,7 +71,7 @@ public class BossMovement : MonoBehaviour
 
     bool CheckIfReachedNextTile(Tile nextTile)
     {
-        return Vector3.Distance(transform.position, nextTile.position) < 0.1f;
+        return Vector3.Distance(transform.position, nextTile.position) < 0.03f;
     }
 
     bool CheckIfNextTileIsTargetTile(Tile nextTile)

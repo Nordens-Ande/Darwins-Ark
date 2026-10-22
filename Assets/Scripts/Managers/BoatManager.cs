@@ -2,10 +2,8 @@ using System.Collections.Generic;
 using Assets.Scripts.Environment;
 using UnityEngine;
 
-public class BoatManager : MonoBehaviour
+public class BoatManager : SingletonManager<BoatManager>
 {
-    public static BoatManager Instance;
-
     private TileManager tileManager;
     private IslandNoise islandNoise;
 
@@ -14,14 +12,6 @@ public class BoatManager : MonoBehaviour
     List<Boat> boats = new List<Boat>();
 
     float spawnDistanceFromCenter;
-
-    private void Awake()
-    {
-        if(Instance == null)
-            Instance = this;
-        else
-            Destroy(this);
-    }
 
     void Start()
     {

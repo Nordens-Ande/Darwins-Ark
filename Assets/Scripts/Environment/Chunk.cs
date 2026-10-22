@@ -130,7 +130,20 @@ namespace Assets.Scripts.Environment
                         GetTileHeight(x, z - 1, Space.Self), // South
                         GetTileHeight(x + 1, z, Space.Self)  // East
                     };
-                    Color tileColor = useNoise ? IslandNoise.Instance.GetColor(new Vector2(tilePos.x, tilePos.z)) : Color.white;
+
+                    //Color tileColor = useNoise ? IslandNoise.Instance.GetColor(new Vector2(tilePos.x, tilePos.z)) : Color.white;
+                    // we want to get the color from the BiomeManager instead of the IslandNoise
+                    Color tileColor = Color.white;
+                    if (BiomeManager.Instance != null)
+                    {
+                        // If BiomeManager is available, we get the color from it based on the tile type
+                        tileColor = BiomeManager.Instance.GetTileColor(tiles[x, z]);
+                    }
+                    else
+                    {
+                        // If BiomeManager is not available, we fall back to white color
+                        tileColor = Color.white;
+                    }
 
                     //Top face
                     AddFace(

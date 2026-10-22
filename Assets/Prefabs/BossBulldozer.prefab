@@ -49,15 +49,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Boss
   AIStates:
-  - rid: -2
-  - rid: -2
-  - rid: -2
-  - rid: -2
+  - rid: 5362588082175213635
+  - rid: 5362588082175213636
+  - rid: 5362588082175213637
+  - rid: 5362588082175213638
   references:
     version: 2
     RefIds:
-    - rid: -2
-      type: {class: , ns: , asm: }
+    - rid: 5362588082175213635
+      type: {class: BossAttackPlantState, ns: , asm: Assembly-CSharp}
+      data: 
+    - rid: 5362588082175213636
+      type: {class: BossEscapeState, ns: , asm: Assembly-CSharp}
+      data: 
+    - rid: 5362588082175213637
+      type: {class: BossOnBeachState, ns: , asm: Assembly-CSharp}
+      data: 
+    - rid: 5362588082175213638
+      type: {class: BossRelocateState, ns: , asm: Assembly-CSharp}
+      data: 
 --- !u!114 &9169712178164064144
 MonoBehaviour:
   m_ObjectHideFlags: 0

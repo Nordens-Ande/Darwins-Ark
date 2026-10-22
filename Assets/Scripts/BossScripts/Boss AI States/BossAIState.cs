@@ -6,14 +6,17 @@ public interface IBossAIState
     public bool CanBeInterupted
     { get; set; }
 
+    public void Initialize(Boss boss);
+
     public bool OnEnterState();
     public void Tick();
     public void OnExitState();
 }
 
-
+[Serializable]
 public abstract class BossAIState : IBossAIState
 {
+    [NonSerialized]
     protected Boss boss;
     protected Container<Boss> container;
     protected bool canBeInterupted;
@@ -35,6 +38,8 @@ public abstract class BossAIState : IBossAIState
     {
         this.boss = boss;
     }
+
+    public abstract void Initialize(Boss boss);
 
     public abstract bool OnEnterState();
 
