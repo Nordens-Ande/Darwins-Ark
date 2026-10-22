@@ -14,10 +14,14 @@ public class BossOnBeachContainer : Container<Boss>
 
         if (tile.Type == TileType.Beach)
         {
+            if (boss.DebugScores)
+                Debug.Log("Boss on beach score: 1");
             return 1f;
         }
         else
         {
+            if (boss.DebugScores)
+                Debug.Log("Boss on beach score: 0");
             return 0f;
         }
     }

@@ -216,6 +216,13 @@ public class PathFinding
                     movementCost = 1f;
                 }
 
+                //add additional cost to height difference movement
+                float heightDifference = Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileManager.GetTile(tile).position.y);
+                if(heightDifference != 0f)
+                {
+                    movementCost += heightDifference / maxHeightDifference;
+                }
+
                 TileNodeAStar node = tileNodes[tile];
                 float g = tileNodes[currentTile].g + movementCost;
                 float h = DistanceToTargetTile(tile, TileToVector2Int(targetTile));

@@ -67,6 +67,13 @@ public class HungryContainer : Container<AnimalAI>
         return animal.Hunger / 100;
     }
 }
+public class ProcreationContrainer : Container<AnimalAI>
+{
+    public override float Evaluate(AnimalAI animal)
+    {
+        return animal.MatingSeason / 100;
+    }
+}
 
 public class WalkAroundContainer : Container<AnimalAI>
 {

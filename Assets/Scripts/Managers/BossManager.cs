@@ -1,10 +1,8 @@
 using Assets.Scripts.Environment;
 using UnityEngine;
 
-public class BossManager : MonoBehaviour
+public class BossManager : SingletonManager<BossManager>
 {
-    public static BossManager Instance = null;
-
     [SerializeField] GameObject bossPrefab;
     GameObject currentBoss;
 
@@ -14,12 +12,6 @@ public class BossManager : MonoBehaviour
     }
 
     bool spawnedBoss = false;
-
-    private void Awake()
-    {
-        if(Instance == null)
-            BossManager.Instance = this;
-    }
 
     void Start()
     {
@@ -48,11 +40,11 @@ public class BossManager : MonoBehaviour
 
     void Update()
     {
-        if (!spawnedBoss)
-        {
-            SpawnBoss();
-            spawnedBoss = true;
-        }
+        //if (!spawnedBoss)
+        //{
+        //    SpawnBoss();
+        //    spawnedBoss = true;
+        //}
 
         if (currentBoss != null)
         {

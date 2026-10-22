@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 using Assets.Scripts.Environment;
 using UnityEngine;
 
-
+[Serializable]
 public class BossRelocateState : BossAIState
 {
     TileManager tileManager = TileManager.Instance;
@@ -12,6 +13,12 @@ public class BossRelocateState : BossAIState
 
     public BossRelocateState(Boss boss) : base(boss)
     {
+        container = new BossRelocateContainer();
+    }
+
+    public override void Initialize(Boss boss)
+    {
+        this.boss = boss;
         container = new BossRelocateContainer();
     }
 
@@ -51,7 +58,7 @@ public class BossRelocateState : BossAIState
        
         for (int i = possibleTiles.Count - 1; i > 0; i--)
         {
-            int j = Random.Range(0, i + 1);
+            int j = UnityEngine.Random.Range(0, i + 1);
             (possibleTiles[i], possibleTiles[j]) =
                 (possibleTiles[j], possibleTiles[i]);
         }

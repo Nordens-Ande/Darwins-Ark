@@ -5,9 +5,9 @@ using System.Linq;
 using System.Collections;
 
 
-public class PlantManager : MonoBehaviour
+public class PlantManager : SingletonManager<PlantManager>
 {
-    public static PlantManager Instance = null;
+    //public static PlantManager Instance = null; // we dont need this anymore since we inherit from SingletonManager
     TileManager tileManager;
 
 
@@ -47,12 +47,12 @@ public class PlantManager : MonoBehaviour
     [Header("List of all Plants")]
     [SerializeField] private List<Plant> plants = new List<Plant>();
 
-
-    private void Awake()
-    {
-        if (Instance == null)
-            PlantManager.Instance = this;
-    }
+    // we dont need this anymore since we inherit from SingletonManager
+    //private void Awake()
+    //{
+    //    if (Instance == null)
+    //        PlantManager.Instance = this;
+    //}
 
     void Start()
     {
