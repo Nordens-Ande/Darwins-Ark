@@ -45,7 +45,7 @@ public class UIStateManager : MonoBehaviour
         isTerraforming = false;
 
         // TileSelectionManager-------------------
-        tileSelectionManager.ClearSelection();
+        //tileSelectionManager.ClearSelection();
 
         normalUI.SetActive(true);
         terraformUI.SetActive(false);
