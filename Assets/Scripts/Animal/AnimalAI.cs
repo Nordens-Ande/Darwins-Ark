@@ -6,7 +6,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class AnimalAI : MonoBehaviour
+public class AnimalAI : MonoBehaviour, IBoatSpawning
 {
     [Header("Utility points")]
     [Space]
@@ -63,6 +63,12 @@ public class AnimalAI : MonoBehaviour
     private MutationManager mutationManager;
     private AnimalManager animalManager;
 
+    //Boat Spawning
+    private bool unloaded = false;
+
+    //Boss fighting
+    private List<Boss> activeBosses;
+    public bool ActiveBosses => activeBosses.Count > 0;
 
     //Traversing
     private Vector3 walkPoint;
@@ -110,6 +116,8 @@ public class AnimalAI : MonoBehaviour
 
 
     //Properties
+    public Transform Transform => transform;
+
     public float BossThreat
     {
         get => bossThreat;
@@ -194,9 +202,11 @@ public class AnimalAI : MonoBehaviour
 
     void Start()
     {
+        transform.localPosition = Vector3.zero;
         tileManager = TileManager.Instance;
         mutationManager = MutationManager.instance;
         animalManager = AnimalManager.Instance;
+        activeBosses = new List<Boss>();
         maxAttackTime = 2;
         tileCheckSize = 1;
         BossThreat = 0;
@@ -204,8 +214,32 @@ public class AnimalAI : MonoBehaviour
         InstantiateUtilityBrain();
     }
 
+    public bool Unload(Tile beachTile)
+    {
+        transform.position = beachTile.position;
+        unloaded = true;
+
+        return true;
+    }
+
+    public void BossSpawned(BossSpawnedEventData data)
+    {
+        BossHealth bossHealth = data.Boss.gameObject.GetComponent<BossHealth>();
+        bossHealth.OnBossDeath += BossDied;
+        activeBosses.Add(data.Boss);
+    }
+
+    public void BossDied(BossDeathEventData data)
+    {
+        data.Boss.OnBossDeath -= BossDied;
+        Boss boss = data.Boss.gameObject.GetComponent<Boss>();
+        activeBosses.Remove(boss);
+    }
+
     void Update()
     {
+        if (!unloaded) return;
+
         utilityBrain.DecisionProcess();
         ClockCycleDeteriation();
     }
@@ -577,31 +611,31 @@ public class AnimalAI : MonoBehaviour
 
     }
     //Prototype can only handle one enemy in the sceen, can be changed later
-    void BossFigth() 
+    void BossFigth() //will fix later //Milton
     {
         if (health > 25)
         {
-            currentAttackTime += Time.deltaTime;
-            Vector3 bossPosition = BossManager.Instance.CurrentBoss.transform.position;
-            bossPosition.y = 0.5f;
-            Vector3 directionToBoss = Vector3.Normalize(bossPosition - transform.position);
+            //currentAttackTime += Time.deltaTime;
+            //Vector3 bossPosition = BossManager.Instance.CurrentBoss.transform.position;
+            //bossPosition.y = 0.5f;
+            //Vector3 directionToBoss = Vector3.Normalize(bossPosition - transform.position);
             
-            transform.LookAt(bossPosition);
-            transform.position = Vector3.MoveTowards(transform.position, bossPosition - directionToBoss, runSpeed * Time.deltaTime);
-            float distanceToBoss = Vector3.Distance(bossPosition, transform.position);
+            //transform.LookAt(bossPosition);
+            //transform.position = Vector3.MoveTowards(transform.position, bossPosition - directionToBoss, runSpeed * Time.deltaTime);
+            //float distanceToBoss = Vector3.Distance(bossPosition, transform.position);
 
-            if(distanceToBoss < attackDistance)
-            {
-                if(currentAttackTime >= maxAttackTime)
-                {
-                    BossHealth bossHealth = BossManager.Instance.CurrentBoss.GetComponent<BossHealth>();
-                    if(bossHealth != null)
-                    {
-                        bossHealth.TakeDamage(damage);
-                        currentAttackTime = 0;
-                    }
-                }
-            }
+            //if(distanceToBoss < attackDistance)
+            //{
+            //    if(currentAttackTime >= maxAttackTime)
+            //    {
+            //        BossHealth bossHealth = BossManager.Instance.CurrentBoss.GetComponent<BossHealth>();
+            //        if(bossHealth != null)
+            //        {
+            //            bossHealth.TakeDamage(damage);
+            //            currentAttackTime = 0;
+            //        }
+            //    }
+            //}
         }
     }
 

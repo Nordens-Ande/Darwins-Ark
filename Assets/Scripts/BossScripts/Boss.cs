@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 using Assets.Scripts.Environment;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,9 +28,6 @@ public class Boss : MonoBehaviour, IBoatSpawning
     private float attackTime;
 
     private List<Tile> closestPlantTilePath; //used to cache the path to the closest plant, minimizes A star pathfinding calls #optimization
-
-    Tile currentTile; //?
-    public Tile CurrentTile => currentTile; //?
 
     public PathFinding PathFinder => pathFinder;
     public BossHealth HealthScript => healthScript;
@@ -160,11 +158,6 @@ public class Boss : MonoBehaviour, IBoatSpawning
             FindClosestPlantTile();
             List<BossAIState> statesOrdered = EvaluateStates();
 
-            //for (int i = 0; i < statesOrdered.Count; i++)
-            //{
-            //   Debug.Log("score: " +  statesOrdered[i].ToString());
-            //}
-
             for (int i = 0; i < statesOrdered.Count; i++)
             {
                 if (statesOrdered[i].OnEnterState())
@@ -190,10 +183,6 @@ public class Boss : MonoBehaviour, IBoatSpawning
 
         FindClosestPlantTile();
         List<BossAIState> statesOrderedByScore = EvaluateStates();
-        //for (int i = 0; i < statesOrderedByScore.Count; i++)
-        //{
-        //    Debug.Log("score: " + statesOrderedByScore[i].ToString());
-        //}
 
         for (int i = 0; i < statesOrderedByScore.Count; i++)
         {
@@ -225,7 +214,6 @@ public class Boss : MonoBehaviour, IBoatSpawning
             {
                 //Debug.Log("cant enter state " + statesOrderedByScore[i].ToString());
             }
-            
         }
     }
 }

@@ -137,7 +137,7 @@ namespace Assets.Scripts.Environment
                     return chunk;
             }
 
-            Debug.LogWarning($"No chunk found for world position ({x}, {z})");
+            //Debug.LogWarning($"No chunk found for world position ({x}, {z})");
             return null;
         }
         public Chunk GetChunk(Vector2 positionXZ) => GetChunk(positionXZ.x, positionXZ.y);
@@ -150,7 +150,10 @@ namespace Assets.Scripts.Environment
             int tileX = Mathf.RoundToInt(x);
             int tileZ = Mathf.RoundToInt(z);
 
-            return GetChunk(tileX, tileZ).GetTile(tileX, tileZ);
+            Chunk chunk = GetChunk(tileX, tileZ);
+            if (chunk == null) return null;
+
+            return chunk.GetTile(tileX, tileZ);
         }
         public Tile GetTile(Vector2 positionXZ) => GetTile(positionXZ.x, positionXZ.y);
         public Tile GetTile(Vector3 positionXZ) => GetTile(positionXZ.x, positionXZ.z);
@@ -176,7 +179,6 @@ namespace Assets.Scripts.Environment
             chunkObject.GetComponent<MeshFilter>().sharedMesh = mesh;
             chunkObject.GetComponent<MeshCollider>().sharedMesh = mesh;
         }
-
 
         private void GenerateGrid(Transform parent, float heightOffset, string name, Color color, HashSet<Vector2Int> tiles = null)
         {

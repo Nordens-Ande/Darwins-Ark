@@ -97,7 +97,10 @@ public class PathFinding
         List<Vector2Int> neighbours = new List<Vector2Int>();
         foreach(Vector2Int direction in directions)
         {
-            if(tileManager.GetTile(currentTile + direction) == null) continue;
+            Vector2Int neighbourPos = currentTile + direction;
+            Tile neighbourTile = tileManager.GetTile(neighbourPos);
+            if (neighbourTile == null) continue;
+           
             neighbours.Add(currentTile + direction);
         }
         return neighbours;
@@ -125,6 +128,8 @@ public class PathFinding
     /// <returns>A List<Tile> describing the path</returns>
     public List<Tile> GetPathAStar(Tile startTile, Tile targetTile, Func<Tile, bool> traversable, float maxHeightDifference, int maxIterations)
     {
+        if(tileManager == null) tileManager = TileManager.Instance;
+
         //Debug.Log("astar initiated");
         Dictionary<Vector2Int, TileNodeAStar> tileNodes = new Dictionary<Vector2Int, TileNodeAStar>();
         SortedSet<Vector2Int> openSet = new SortedSet<Vector2Int>(
@@ -246,6 +251,8 @@ public class PathFinding
 
     public List<Tile> GetPathDijkstra(Tile startTile, Tile targetTile, Func<Tile, bool> traversable, float maxHeightDifference)
     {
+        if (tileManager == null) tileManager = TileManager.Instance;
+
         Dictionary<Vector2Int, TileNodeDijkstra> tileNodes = new Dictionary<Vector2Int, TileNodeDijkstra>();
         SortedSet<Vector2Int> openSet = new SortedSet<Vector2Int>(
             Comparer<Vector2Int>.Create((a, b) =>
