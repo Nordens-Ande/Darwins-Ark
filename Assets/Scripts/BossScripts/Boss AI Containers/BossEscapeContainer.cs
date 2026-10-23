@@ -15,13 +15,13 @@ public class BossEscapeContainer : Container<Boss>
         //health
         //distance to closest animal, hmm
 
-        if (boss.ClosestPlantTilePath == null)
+        if (boss.ClosestAttackTilePath == null)
         {
             distanceTile = 0f;
         }
         else
         {
-            Tile plantTile = boss.ClosestPlantTilePath[boss.ClosestPlantTilePath.Count - 1];
+            Tile plantTile = boss.ClosestAttackTilePath[boss.ClosestAttackTilePath.Count - 1];
             if (plantTile == null)
             {
                 distanceTile = 0f;

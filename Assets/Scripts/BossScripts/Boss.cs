@@ -4,6 +4,7 @@ using Assets.Scripts.Environment;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Unity.VisualScripting;
 
 public class Boss : MonoBehaviour, IBoatSpawning
 {
@@ -27,7 +28,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
     private float sightDistanceToTiles;
     private float attackTime;
 
-    private List<Tile> closestPlantTilePath; //used to cache the path to the closest plant, minimizes A star pathfinding calls #optimization
+    private List<Tile> closestAttackTilePath; //used to cache the path to the closest plant, river or animal, minimizes A star pathfinding calls #optimization
 
     public PathFinding PathFinder => pathFinder;
     public BossHealth HealthScript => healthScript;
@@ -35,7 +36,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
     public float SightDistanceToAnimals => sightDistanceToAnimals;
     public float SightDistanceToTiles => sightDistanceToTiles;
     public float AttackTime => attackTime;
-    public List<Tile> ClosestPlantTilePath => closestPlantTilePath;
+    public List<Tile> ClosestAttackTilePath => closestAttackTilePath;
 
 
     public bool DebugScores => false;
@@ -97,7 +98,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
         List<Tile> tilesWithPlants = FindAllTilesWithPlants();
         if (tilesWithPlants.Count <= 0)
         {
-            closestPlantTilePath = null;
+            closestAttackTilePath = null;
             return;
         }
 
@@ -108,8 +109,45 @@ public class Boss : MonoBehaviour, IBoatSpawning
             float distance = Vector3.Distance(transform.position, tilesWithPlants[i].position);
             if (distance > sightDistanceToTiles) continue;
 
-            closestPlantTilePath = movementScript.PathFinder.GetPathAStar(tileManager.GetTile(transform.position), tilesWithPlants[i], movementScript.IsBossTraversable, 2f, (int)(sightDistanceToTiles * 2));
-            if (closestPlantTilePath != null)
+            closestAttackTilePath = movementScript.PathFinder.GetPathAStar(tileManager.GetTile(transform.position), tilesWithPlants[i], movementScript.IsBossTraversable, 2f, (int)(sightDistanceToTiles * 2));
+            if (closestAttackTilePath != null)
+            {
+                return;
+            }
+        }
+    }
+
+    public void FindClosestRiverTile()
+    {
+        List<Tile> riverTiles = new List<Tile>();
+
+        foreach(Chunk chunk in tileManager.chunks)
+        {
+            HashSet<Vector2Int> riverTilePositions = chunk.GetTiles(TileType.River);
+            foreach(Vector2Int riverTilePosition in riverTilePositions)
+            {
+                Tile tile = tileManager.GetTile(riverTilePosition);
+                if(tile == null) continue;
+
+                riverTiles.Add(tile);
+            }
+        }
+
+        if (riverTiles.Count <= 0)
+        {
+            closestAttackTilePath = null;
+            return;
+        }
+
+        riverTiles = riverTiles.OrderBy(tile => Vector3.Distance(transform.position, tile.position)).ToList();
+
+        for (int i = 0; i < riverTiles.Count; i++)
+        {
+            float distance = Vector3.Distance(transform.position, riverTiles[i].position);
+            if (distance > sightDistanceToTiles) continue;
+
+            closestAttackTilePath = movementScript.PathFinder.GetPathAStar(tileManager.GetTile(transform.position), riverTiles[i], movementScript.IsBossTraversable, 2f, (int)(sightDistanceToTiles * 2));
+            if (closestAttackTilePath != null)
             {
                 return;
             }
@@ -181,7 +219,22 @@ public class Boss : MonoBehaviour, IBoatSpawning
             return;
         }
 
-        FindClosestPlantTile();
+        foreach(BossAIState state in AIStates)
+        {
+            if(state is BossAttackPlantState)
+            {
+                FindClosestPlantTile();
+            }
+            else if(state is BossAttackRiverState)
+            {
+                FindClosestRiverTile();
+            }
+            //else if(state is BossAttackAnimalState) to be implemented
+            //{
+            //    FindClosestAnimalTile();
+            //}
+        }
+        
         List<BossAIState> statesOrderedByScore = EvaluateStates();
 
         for (int i = 0; i < statesOrderedByScore.Count; i++)

@@ -28,8 +28,8 @@ public class BossAttackPlantState : BossAIState
         CanBeInterupted = false;
         TaskCompleted = false;
 
-        if (boss.ClosestPlantTilePath == null) return false;
-        plantTile = boss.ClosestPlantTilePath[boss.ClosestPlantTilePath.Count - 1];
+        if (boss.ClosestAttackTilePath == null) return false;
+        plantTile = boss.ClosestAttackTilePath[boss.ClosestAttackTilePath.Count - 1];
         if (plantTile == null) return false;
 
         boss.MovementScript.SetPath(plantTile, boss.MovementScript.IsBossTraversable);
@@ -62,7 +62,6 @@ public class BossAttackPlantState : BossAIState
                 }
                 TaskCompleted = true;
                 CanBeInterupted = true;
-                //OnEnterState();
             }
             attackTimer += Time.deltaTime;
         }
