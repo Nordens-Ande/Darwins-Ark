@@ -29,7 +29,7 @@ public class AnimalManager : MonoBehaviour
     {
         animals = new List<AnimalAI>();
         bossManager = BossManager.Instance;
-        //SpawnAnimal();
+        SpawnAnimal();
     }
 
     Vector3 SpawnPosition()
@@ -104,11 +104,11 @@ public class AnimalManager : MonoBehaviour
 
     void Update()
     {
-        spawnTimer += Time.deltaTime;
-        if (spawnTimer >= spawnTimerThreshold)
-        {
-            SpawnAnimal();
-            spawnTimer = 0;
-        }
+        //spawnTimer += Time.deltaTime;
+        //if (spawnTimer >= spawnTimerThreshold)
+        //{
+        //    SpawnAnimal();
+        //    spawnTimer = 0;
+        //}
     }
 }

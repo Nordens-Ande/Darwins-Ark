@@ -224,6 +224,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
     public void BossSpawned(BossSpawnedEventData data)
     {
+        //Debug.Log("boss spawned");
         BossHealth bossHealth = data.Boss.gameObject.GetComponent<BossHealth>();
         bossHealth.OnBossDeath += BossDied;
         activeBosses.Add(data.Boss);
@@ -611,7 +612,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
     }
     //Prototype can only handle one enemy in the sceen, can be changed later
-    void BossFigth() //will fix later //Milton
+    void BossFigth() // commented out because BossManager now supports multiple bosses, the CurrentBoss property no longer exists.
     {
         if (health > 25)
         {
