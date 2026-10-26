@@ -34,7 +34,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 30, y: 45, z: 0}
 --- !u!20 &3449649526676584359
 Camera:
   m_ObjectHideFlags: 0
@@ -154,6 +154,7 @@ MonoBehaviour:
   acceleration: 12
   maxSpeed: 40
   zoomModifer: 3
+  cameraBoundsMargin: 10
   zoomSpeed: 40
   minZoom: 4
   maxZoom: 15
@@ -163,7 +164,7 @@ MonoBehaviour:
   allowAngleChange: 1
   angleSpeed: 40
   rotationLerpSpeed: 12
-  inputActionsAsset: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  inputActionsAsset: {fileID: -944628639613478452, guid: 5e85ea705d4f7a9418425642b2bf6270, type: 3}
   actionMapName: Camera
   movementAction:
     m_Name: Movement
@@ -192,3 +193,4 @@ MonoBehaviour:
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
+  testPanToPoint: 0

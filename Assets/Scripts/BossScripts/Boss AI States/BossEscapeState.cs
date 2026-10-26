@@ -3,15 +3,21 @@ using UnityEngine;
 using Assets.Scripts.Environment;
 using System;
 
-
+[Serializable]
 public class BossEscapeState : BossAIState
 {
     TileManager tileManager = TileManager.Instance;
-    static int escapeDistance = 5;
-    static int searchRange = 10;
+    static int escapeDistance = 3;
+    static int searchRange = 5;
 
     public BossEscapeState(Boss boss) : base(boss)
     {
+        container = new BossEscapeContainer();
+    }
+
+    public override void Initialize(Boss boss)
+    {
+        this.boss = boss;
         container = new BossEscapeContainer();
     }
 
@@ -62,7 +68,12 @@ public class BossEscapeState : BossAIState
             Tile tile = tileManager.GetTile(position);
             if (tile == null)
             {
+                Debug.Log("no escape tile found for boss");
                 continue;
+            }
+            else
+            {
+                Debug.Log("escape tile position for boss" + tile.position);
             }
             path = boss.MovementScript.PathFinder.GetPathAStar(tileManager.GetTile(boss.transform.position), tile, boss.MovementScript.IsBossTraversable, boss.MovementScript.MaxHeightDifference, (escapeDistance + searchRange) * 2);
             if (path != null)

@@ -1,4 +1,5 @@
 using NUnit.Framework.Internal;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -11,6 +12,7 @@ namespace Assets.Scripts.Environment
 
         [HideInInspector] public List<Chunk> chunks;
         [HideInInspector] public List<GameObject> chunkObjects;
+        //[HideInInspector] public List<>
 
         [SerializeField] private int chunkSize = 8; 
         [SerializeField] private Vector2Int chunkGridSize = Vector2Int.one;
@@ -19,11 +21,12 @@ namespace Assets.Scripts.Environment
         [SerializeField] private Material gridLineMaterial;
         // -----------------------------------------------
 
-        public int ChunkSize
-        { get { return chunkSize; } }
+        public int ChunkSize => chunkSize;
+        public Vector2Int ChunkGridSize => chunkGridSize;
 
-        public Vector2Int ChunkGridSize
-        { get { return chunkGridSize; } }
+        private string chunkGridName = "Chunk Grid";
+        private string selectionGridName = "Selection Grid";
+        private string heighlightGridName = "Highlight Grid";
 
         private void Awake()
         {
@@ -36,11 +39,6 @@ namespace Assets.Scripts.Environment
             chunks = new List<Chunk>();
             chunkObjects = new List<GameObject>();
 
-            //chunks.Add(new Chunk(Vector2.zero, 8));
-            //chunks.Add(new Chunk(new Vector2(-8, 0), 8));
-            //chunks.Add(new Chunk(new Vector2(-8, -8), 8));
-            //chunks.Add(new Chunk(new Vector2(0, -8), 8));
-
             for (int x = -chunkGridSize.x / 2; x < Mathf.Ceil(chunkGridSize.x / 2f); x++)
             {
                 for (int z = -chunkGridSize.y / 2; z < Mathf.Ceil(chunkGridSize.y / 2f); z++)
@@ -52,58 +50,28 @@ namespace Assets.Scripts.Environment
             for (int i = 0; i < chunks.Count; i++)
             {
                 Chunk chunk = chunks[i];
-                chunk.GenerateMeshData();
-                
-                GameObject chunkObject = new GameObject($"Chunk (x:{chunk.position.x}, z:{chunk.position.y})", typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider));
-                chunkObject.transform.parent = transform;
+
+                // Generate gameObject
+                Type[] components = new Type[]
+                {
+                    typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider)
+                };
+                GameObject chunkObject = new GameObject($"Chunk (x:{chunk.position.x}, z:{chunk.position.y})", components);
+                chunkObject.transform.SetParent(transform);
                 chunkObjects.Add(chunkObject);
-
-                chunkObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Shader Graphs/Lit Color"));
                 
-                Mesh mesh = new Mesh();
-
-                mesh.SetVertices(chunk.vertices);
-                mesh.SetTriangles(chunk.triangles, 0);
-                mesh.SetColors(chunk.colors);
-
-                mesh.RecalculateNormals();
-                mesh.RecalculateBounds();
-
-                chunkObject.GetComponent<MeshFilter>().sharedMesh = mesh;
-                chunkObject.GetComponent<MeshCollider>().sharedMesh = mesh;
-
-                // Grid for chunk and tiles in TerraformUI -------------
-                //  Chunk Grid
-                GameObject chunkGridObject = 
-                    new GameObject("ChunkGrid"
-                    );
-
-                chunkGridObject.transform.SetParent(
-                    chunkObject.transform, false
-                    );
-
-                ChunkGridOverlay chunkGrid =
-                    chunkGridObject.AddComponent<ChunkGridOverlay>();
-
-                chunkGrid.Setup(
-                    chunk,
-                    chunkSize, 
-                    gridLineMaterial
-                    );
-
-                chunkGridObject.SetActive(false);
-
-                //  Tile Grid
-                GameObject tileGridObject = new GameObject("TileGrid");
-                tileGridObject.transform.SetParent(chunkObject.transform, false);
-
-                TerraformTileGridOverlay tileGrid = 
-                    tileGridObject.AddComponent<TerraformTileGridOverlay>();
-
-                tileGrid.Setup(chunk, gridLineMaterial);
-                tileGridObject.SetActive(false);
-                //-------------------------------------------------------
+                // Generate mesh for chunk
+                GenerateMesh(chunk, chunkObject);
             }
+
+            for (int i = 0; i < chunks.Count; i++)
+            {
+                GenerateGrid(chunkObjects[i].transform, 0.001f, chunkGridName, Color.white, chunks[i][TileType.Grass]);
+            }
+            GenerateGrid(transform, 0.002f, selectionGridName, Color.red);
+            GenerateGrid(transform, 0.003f, heighlightGridName, Color.blue);
+
+            //SetChunkGridVisible(false);
         }
 
 
@@ -140,70 +108,102 @@ namespace Assets.Scripts.Environment
                 mesh.RecalculateBounds();
 
                 chunkObjects[i].GetComponent<MeshFilter>().sharedMesh = mesh;
+                chunkObjects[i].GetComponent<MeshCollider>().sharedMesh = mesh;
+
+                GetGridMesh(chunkObjects[i].transform, chunkGridName).Rebuild();
+                GetGridMesh(transform, heighlightGridName).Rebuild();
+                GetGridMesh(transform, selectionGridName).Rebuild();
             }
         }
 
+        //All Getters here can be refactored for more perfomance, currently they are not super efficient
         public Chunk GetChunk(float x, float z)
         {
-            foreach(Chunk chunk in chunks)
+            if (chunks == null)
             {
-                if (chunk.position / chunkSize == new Vector2(Mathf.Floor(x / chunkSize), Mathf.Floor(z / chunkSize)))
-                    return chunk;
+                Debug.LogError("TileManager.chunks is NULL");
+                return null;
             }
-            return null;
-        }
 
-        public Chunk GetChunk(Vector2 positionXZ)
-            => GetChunk(positionXZ.x, positionXZ.y);
+            int chunkX = Mathf.FloorToInt((float)x / chunkSize);
+            int chunkZ = Mathf.FloorToInt((float)z / chunkSize);
 
-        public Chunk GetChunk(Vector3 position)
-        {
-            return GetChunk(position.x, position.y);
-        }
-
-        public Tile GetTile(float x, float z) //new version with bug fixes
-        {
-            //coords of tile closest to parameter values
-            int tileX = Mathf.RoundToInt(x);
-            int tileZ = Mathf.RoundToInt(z);
-
-            //"index" of correct chunk, issues before that the wrong chunk was chosen if tile.pos / chunkSize = 8
-            int chunkX = Mathf.FloorToInt((float)tileX / chunkSize);
-            int chunkZ = Mathf.FloorToInt((float)tileZ / chunkSize);
-
-            foreach (Chunk chunk in chunks) // find that chunk
+            foreach (Chunk chunk in chunks)
             {
                 int existingX = Mathf.RoundToInt(chunk.position.x / chunkSize);
                 int existingZ = Mathf.RoundToInt(chunk.position.y / chunkSize);
 
                 if (existingX == chunkX && existingZ == chunkZ)
-                    return chunk.GetTile(tileX, tileZ);
+                    return chunk;
             }
 
+            //Debug.LogWarning($"No chunk found for world position ({x}, {z})");
             return null;
         }
+        public Chunk GetChunk(Vector2 positionXZ) => GetChunk(positionXZ.x, positionXZ.y);
+        public Chunk GetChunk(Vector3 positionXZ) => GetChunk(positionXZ.x, positionXZ.y);
 
-        //public Tile GetTile(float x, float z) // original version except Mathf.RoundToInt instead of (int)
-        //{
-        //    int tileX = Mathf.RoundToInt(x);
-        //    int tileZ = Mathf.RoundToInt(z);
-
-        //    foreach (Chunk chunk in chunks)
-        //    {
-        //        if (chunk.position / chunkSize == new Vector2(Mathf.Floor(x / chunkSize), Mathf.Floor(z / chunkSize)))
-        //            return chunk.GetTile(Mathf.RoundToInt(x), Mathf.RoundToInt(z));
-        //    }
-        //    return null;
-        //}
-
-        public Tile GetTile(Vector2 posXZ)
+        //public Tile GetTile(float x, float z) => GetChunk(x, z).GetTile((int)x, (int)z);
+        public Tile GetTile(float x, float z) //new version with bug fixes
         {
-            return GetTile(posXZ.x, posXZ.y);
+            // coords of tile closest to parameter values
+            int tileX = Mathf.RoundToInt(x);
+            int tileZ = Mathf.RoundToInt(z);
+
+            Chunk chunk = GetChunk(tileX, tileZ);
+            if (chunk == null) return null;
+
+            return chunk.GetTile(tileX, tileZ);
         }
-        public Tile GetTile(Vector3 posXZ)
+        public Tile GetTile(Vector2 positionXZ) => GetTile(positionXZ.x, positionXZ.y);
+        public Tile GetTile(Vector3 positionXZ) => GetTile(positionXZ.x, positionXZ.z);
+
+
+        private void GenerateMesh(Chunk chunk, GameObject chunkObject)
         {
-            return GetTile(posXZ.x, posXZ.z);
+            chunk.GenerateMeshData();
+            chunkObject.GetComponent<MeshRenderer>().material = new Material(Shader.Find("Shader Graphs/Lit Color"));
+
+            Mesh mesh = new Mesh() 
+            { 
+                name = "Chunk Mesh" 
+            };
+
+            mesh.SetVertices(chunk.vertices);
+            mesh.SetTriangles(chunk.triangles, 0);
+            mesh.SetColors(chunk.colors);
+
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+
+            chunkObject.GetComponent<MeshFilter>().sharedMesh = mesh;
+            chunkObject.GetComponent<MeshCollider>().sharedMesh = mesh;
         }
+
+        private void GenerateGrid(Transform parent, float heightOffset, string name, Color color, HashSet<Vector2Int> tiles = null)
+        {
+            Type[] components = new Type[]
+            {
+                typeof(MeshFilter), typeof(MeshRenderer), typeof(GridMesh)
+            };
+
+            GameObject chunkGridObject = new GameObject(name, components);
+            chunkGridObject.transform.SetParent(parent, false);
+
+            MeshRenderer meshRenderer = chunkGridObject.GetComponent<MeshRenderer>();
+            meshRenderer.material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            meshRenderer.material.color = color;
+
+            GridMesh gridMesh = chunkGridObject.GetComponent<GridMesh>();
+            gridMesh.heightOffset = heightOffset;
+            if (tiles != null)
+            {
+                gridMesh.NewTiles(tiles);
+
+                gridMesh.Rebuild();
+            }
+        }
+
 
         // Booleans for when chunk/tile grids are visible
         public void SetChunkGridVisible(bool visible)
@@ -226,6 +226,69 @@ namespace Assets.Scripts.Environment
                 if (grid != null)
                     grid.gameObject.SetActive(visible);
             }
+        }
+
+
+        private GridMesh GetGridMesh(Transform transform, string gameObjectName)
+        {
+            GameObject gridObject = transform.Find(gameObjectName).gameObject;
+            if (gridObject == null)
+            {
+                Debug.LogWarning($"Grid object {gameObjectName} could not be found.");
+                return null;
+            }
+
+            GridMesh gridMesh = gridObject.GetComponent<GridMesh>();
+            if (gridMesh == null)
+            {
+                Debug.LogWarning($"Grid Mesh in {gridObject.name} could not be found.");
+                return null;
+            }
+
+            return gridMesh;
+        }
+        public void SetSelectionGridTiles(HashSet<Vector2Int> tiles)
+        {
+            GridMesh gridMesh = GetGridMesh(transform, selectionGridName);
+
+            if (gridMesh != null)
+                gridMesh.NewTiles(tiles);
+        }
+        public void AddSelectionGridTile(Vector2Int tile)
+        {
+            GridMesh gridMesh = GetGridMesh(transform, selectionGridName);
+
+            if (gridMesh != null)
+                gridMesh.AddTile(tile);
+        }
+        public void RemoveSelectionGridTile(Vector2Int tile)
+        {
+            GridMesh gridMesh = GetGridMesh(transform, selectionGridName);
+
+            if (gridMesh != null)
+                gridMesh.RemoveTile(tile);
+        }
+
+        public void SetHighlightGridTiles(HashSet<Vector2Int> tiles)
+        {
+            GridMesh gridMesh = GetGridMesh(transform, heighlightGridName);
+
+            if (gridMesh != null)
+                gridMesh.NewTiles(tiles);
+        }
+        public void AddHeighlightGridTile(Vector2Int tile)
+        {
+            GridMesh gridMesh = GetGridMesh(transform, heighlightGridName);
+
+            if (gridMesh != null)
+                gridMesh.AddTile(tile);
+        }
+        public void RemoveHeighlightGridTile(Vector2Int tile)
+        {
+            GridMesh gridMesh = GetGridMesh(transform, heighlightGridName);
+
+            if (gridMesh != null)
+                gridMesh.RemoveTile(tile);
         }
     }
 

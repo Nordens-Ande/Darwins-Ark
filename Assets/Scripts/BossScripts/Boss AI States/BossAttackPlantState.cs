@@ -2,7 +2,7 @@ using UnityEngine;
 using Assets.Scripts.Environment;
 using System;
 
-
+[Serializable]
 public class BossAttackPlantState : BossAIState
 {
     Tile plantTile;
@@ -15,6 +15,12 @@ public class BossAttackPlantState : BossAIState
         container = new BossAttackPlantContainer();
         atPlantTile = false;
         attackTimer = 0;
+    }
+
+    public override void Initialize(Boss boss)
+    {
+        this.boss = boss;
+        container = new BossAttackPlantContainer();
     }
 
     public override bool OnEnterState()

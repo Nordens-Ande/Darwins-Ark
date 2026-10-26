@@ -29,7 +29,7 @@ namespace Assets.Scripts.Managers
             currentState = newState;
 
             OnGameStateChanged?.Invoke(new GameStateChangedData(source, previousState, newState));
-            Debug.Log($"New GameState has been changed by {source.name} to {newState.ToString()}");
+            Debug.Log($"GameState has been changed by {source.name} to {newState.ToString()}");
 
             return true;
         }
@@ -46,7 +46,7 @@ namespace Assets.Scripts.Managers
             currentMode = newMode;
 
             OnGameModeChanged?.Invoke(new GameModeChangedData(source, previousMode, newMode));
-            Debug.Log($"New GameMode has been changed by {source.name} to {newMode.ToString()}");
+            Debug.Log($"GameMode has been changed by {source.name} to {newMode.ToString()}");
 
             return true;
         }

@@ -12,6 +12,9 @@ public class BossAttackPlantContainer : Container<Boss>
         float distance = Vector3.Distance(boss.transform.position, plantTile.position);
         if(distance >= boss.SightDistanceToTiles) return 0f; // too far
 
+        if(boss.DebugScores)
+            Debug.Log("Boss attack score: " + (1 - distance / boss.SightDistanceToTiles));
+
         return 1 - distance / boss.SightDistanceToTiles; //should be 1 - distance / boss bla bla
     }
 }

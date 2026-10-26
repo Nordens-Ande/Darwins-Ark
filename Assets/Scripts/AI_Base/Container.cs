@@ -22,7 +22,9 @@ public class BossValueContainer : Container<AnimalAI>
         }
         else 
         {
-            return animal.BossThreat;
+            bool bosses = animal.ActiveBosses;
+            if (bosses) return 1;
+            else return 0;
         }
     }
 }
@@ -65,6 +67,13 @@ public class HungryContainer : Container<AnimalAI>
     public override float Evaluate(AnimalAI animal)
     {
         return animal.Hunger / 100;
+    }
+}
+public class ProcreationContrainer : Container<AnimalAI>
+{
+    public override float Evaluate(AnimalAI animal)
+    {
+        return animal.MatingSeason / 100;
     }
 }
 

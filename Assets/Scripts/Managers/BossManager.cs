@@ -1,68 +1,56 @@
 using Assets.Scripts.Environment;
 using UnityEngine;
+using System;
+using System.Collections.Generic;
 
-public class BossManager : MonoBehaviour
+public class BossManager : SingletonManager<BossManager>
 {
-    public static BossManager Instance = null;
-
     [SerializeField] GameObject bossPrefab;
-    GameObject currentBoss;
-
-    public GameObject CurrentBoss
-    {
-        get { return currentBoss; }
-    }
+    List<Boss> bossList;
 
     bool spawnedBoss = false;
 
-    private void Awake()
-    {
-        if(Instance == null)
-            BossManager.Instance = this;
-    }
+    public event Action<BossSpawnedEventData> OnBossSpawned;
+
+    public List<Boss> BossList => bossList;
 
     void Start()
     {
-        
+        bossList = new List<Boss>();
     }
 
     public void SpawnBoss()
     {
-        //if (currentBoss != null) return;
-
-        //get boat
         GameObject boat = BoatManager.Instance.SpawnBoat();
         
         Boat boatScript = boat.GetComponent<Boat>();
-        currentBoss = Instantiate(bossPrefab, new Vector3(0, 0, 0), Quaternion.identity, boatScript.LoadPos.transform);
-        boatScript.LoadObject = currentBoss.GetComponent<Boss>();
-        
+        GameObject boss = Instantiate(bossPrefab, new Vector3(0, 0, 0), Quaternion.identity, boatScript.LoadPos.transform);
+        if (boss == null) return;
+
+        BossHealth bossHealth = boss.GetComponent<BossHealth>();
+        Boss bossScript = boss.GetComponent<Boss>(); 
+        if (bossHealth != null)
+        {
+            bossHealth.OnBossDeath += BossDied;
+        }
+
+        OnBossSpawned?.Invoke(new BossSpawnedEventData(bossScript));
+        boatScript.LoadObject = bossHealth.gameObject.GetComponent<Boss>();
     }
     
-    void BossDied()
+    void BossDied(BossDeathEventData data)
     {
-        currentBoss.SetActive(false);
-        Destroy(currentBoss);
-        currentBoss = null;
+        data.Boss.OnBossDeath -= BossDied;
+        bossList.Remove(data.Boss.gameObject.GetComponent<Boss>());
+        Destroy(data.Boss.gameObject);
     }
 
     void Update()
     {
-        if (!spawnedBoss)
-        {
-            SpawnBoss();
-            spawnedBoss = true;
-        }
-
-        if (currentBoss != null)
-        {
-            //if (currentBoss.GetComponent<BossHealth>())
-            //{
-            //    if (currentBoss.GetComponent<BossHealth>().IsAlive == false)
-            //    {
-            //        BossDied();
-            //    }
-            //}
-        }
+        //if (!spawnedBoss)
+        //{
+        //    SpawnBoss();
+        //    spawnedBoss = true;
+        //}
     }
 }

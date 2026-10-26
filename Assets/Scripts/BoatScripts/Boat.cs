@@ -338,7 +338,7 @@ public class Boat : MonoBehaviour
 
     bool CheckIfReachedRotation(Quaternion rotation)
     {
-        return Quaternion.Angle(transform.rotation, rotation) < 1f;
+        return Quaternion.Angle(transform.rotation, rotation) < 0.03f;
     }
 
     void BoatRotate()

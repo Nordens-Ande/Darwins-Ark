@@ -29,23 +29,25 @@ public class BossEscapeContainer : Container<Boss>
             else
             {
                 float distance = Vector3.Distance(boss.transform.position, plantTile.position);
-                distanceTile = distance / boss.SightDistanceToTiles;
+                distanceTile = Mathf.Clamp01(distance / boss.SightDistanceToTiles);
             }
         }
 
-        health = boss.HealthScript.Health / boss.HealthScript.MaxHealth;
+        health = 1 - boss.HealthScript.Health / boss.HealthScript.MaxHealth;
 
         List<AnimalAI> animal = boss.FindClosestAnimals(1);
         if (animal.Count == 0)
         {
-            distanceAnimal = 1f;
+            distanceAnimal = 0f;
         }
         else
         {
             float distance = Vector3.Distance(boss.transform.position, animal[0].transform.position);
-            distanceAnimal = distance / boss.SightDistanceToAnimals;
+            distanceAnimal = Mathf.Clamp01(1 - distance / boss.SightDistanceToAnimals);
         }
+        if (boss.DebugScores)
+            Debug.Log("Boss escape score: " + Mathf.Clamp01(0.3f * distanceTile + 0.2f * health + 0.6f * distanceAnimal));
 
-        return Mathf.Clamp01(1 - distanceTile - health + distanceAnimal);
+        return Mathf.Clamp01(0.3f * distanceTile + 0.2f * health + 0.6f * distanceAnimal);
     }
 }

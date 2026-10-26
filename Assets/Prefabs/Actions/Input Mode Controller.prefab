@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &8198732403678017512
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2786259702362899933}
+  - component: {fileID: 3397241163205199853}
+  m_Layer: 0
+  m_Name: Input Mode Controller
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2786259702362899933
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8198732403678017512}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3397241163205199853
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8198732403678017512}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 060a481751e2a16418f106646d76aac4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputModeController
+  inputActions: {fileID: -944628639613478452, guid: 5e85ea705d4f7a9418425642b2bf6270, type: 3}
+  alternativeOverrides:
+  - overrideAction: {fileID: -7410126907334513166, guid: 5e85ea705d4f7a9418425642b2bf6270, type: 3}
+    mode: 2
+    activeUnderOverride: 1
+  - overrideAction: {fileID: -8212808267436129237, guid: 5e85ea705d4f7a9418425642b2bf6270, type: 3}
+    mode: 2
+    activeUnderOverride: 1

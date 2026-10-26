@@ -2,10 +2,8 @@ using System.Collections.Generic;
 using Assets.Scripts.Environment;
 using UnityEngine;
 
-public class BoatManager : MonoBehaviour
+public class BoatManager : SingletonManager<BoatManager>
 {
-    public static BoatManager Instance;
-
     private TileManager tileManager;
     private IslandNoise islandNoise;
 
@@ -14,14 +12,6 @@ public class BoatManager : MonoBehaviour
     List<Boat> boats = new List<Boat>();
 
     float spawnDistanceFromCenter;
-
-    private void Awake()
-    {
-        if(Instance == null)
-            Instance = this;
-        else
-            Destroy(this);
-    }
 
     void Start()
     {
@@ -36,6 +26,7 @@ public class BoatManager : MonoBehaviour
         Vector3 direction = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
         Vector3 spawnPos = direction.normalized * spawnDistanceFromCenter;
         //spawnPos = new Vector3((int)spawnPos.x, 0, (int)spawnPos.z);
+        Debug.Log("boat spawn: " + spawnPos);
         Tile spawnTile = tileManager.GetTile(spawnPos);
         return spawnTile;
     }
@@ -75,7 +66,7 @@ public class BoatManager : MonoBehaviour
         {
             return possibleTiles[Random.Range(0, possibleTiles.Count)];
         }
-        return tileManager.GetTile(-10, -40);
+        return null;
     }
 
     public GameObject SpawnBoat()
