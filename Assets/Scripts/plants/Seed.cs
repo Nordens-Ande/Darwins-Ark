@@ -6,9 +6,9 @@ using UnityEngine;
 /// </summary>
 
 
-public class Seed
+[CreateAssetMenu(fileName = "NewSeed", menuName = "Inventory/Seed")] // we cab access this in the unity menu
+public class Seed : ScriptableObject
 {
-
     [Header("Basic Info")]
     [SerializeField] public string seedName = "name";
     [SerializeField] private Sprite icon; // the picture in the inventory
@@ -17,13 +17,8 @@ public class Seed
     [SerializeField] private int maxStackSize = 99; // how many of one seed we can have in one slot
     [Space]
 
-
-
-
     [Header("Planting Reference")]
-    public Plant plantPrefab; // Prefaben från PlantManager/Plant som ska gro
-
-
+    public Plant plantPrefab; // Prefaben from PlantManager, the Plant which will grow from this seed
 
 
     // getters and setters
@@ -34,6 +29,21 @@ public class Seed
 
 
 
+
+    // public method to add the seed to inventory
+    // is supposed to be used when the poop is picked up to add a seed to the inventory
+    // returns false if it couldn't and returns true if it was able to
+    public bool AddToInventory(int amount = 1)
+    {
+        // we check if the inventoryManangewr and playerInventory exists
+        if (InventoryManager.Instance != null && InventoryManager.Instance.playerInventory != null)
+        {
+            return InventoryManager.Instance.playerInventory.AddSeed(this, amount);
+           
+        }
+
+        return false;
+    }
 
 
 }
