@@ -22,8 +22,8 @@ public class Boss : MonoBehaviour, IBoatSpawning
     //ai
     [SerializeReference]
     private List<BossAIState> AIStates;
-    private BossAIState currentState;
-    private BossAIState beachState;
+    [SerializeField, ReadOnly] private BossAIState currentState;
+    
     private float sightDistanceToAnimals;
     private float sightDistanceToTiles;
     private float attackTime;

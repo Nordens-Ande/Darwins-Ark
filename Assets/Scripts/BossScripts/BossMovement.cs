@@ -35,7 +35,7 @@ public class BossMovement : MonoBehaviour
     {
         currentPath = new List<Tile>();
         movementSpeed = 2;
-        maxHeightDifference = 2;
+        maxHeightDifference = 0.5f;
         pathStage = 0;
     }
 

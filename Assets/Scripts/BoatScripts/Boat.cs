@@ -302,7 +302,7 @@ public class Boat : MonoBehaviour
         float movementSpeed = DecideSpeed();
 
         //move and rotate
-        Vector3 direction = nextTile.position - currentTile.position;
+        Vector3 direction = nextTile.position - transform.position;
         direction.Normalize();
 
         Vector3 moveDirection = transform.forward;

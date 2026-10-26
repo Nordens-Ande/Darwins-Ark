@@ -9,12 +9,13 @@ public class AnimalManager : MonoBehaviour
 
     //fields
     private BossManager bossManager = BossManager.Instance;
+    private BoatManager boatManager = BoatManager.Instance;
     [SerializeField] GameObject animalPrefab;
     List<AnimalAI> animals;
 
     //timer
-    float spawnTimer = 0;
-    int spawnTimerThreshold = 10;
+    float spawnTimer = 10000;
+    int spawnTimerThreshold = 10000;
 
     public List<AnimalAI> Animals => animals;
 
@@ -29,7 +30,9 @@ public class AnimalManager : MonoBehaviour
     {
         animals = new List<AnimalAI>();
         bossManager = BossManager.Instance;
-        SpawnAnimal();
+        boatManager = BoatManager.Instance;
+        
+        //SpawnAnimal();
     }
 
     Vector3 SpawnPosition()
@@ -72,7 +75,7 @@ public class AnimalManager : MonoBehaviour
     {
         if(animalPrefab != null)
         {
-            GameObject boat = BoatManager.Instance.SpawnBoat();
+            GameObject boat = boatManager.SpawnBoat();
             Boat boatScript = boat.GetComponent<Boat>();
 
             GameObject spawnedAnimal = Instantiate(animalPrefab, new Vector3(0, 0, 0), Quaternion.identity, boatScript.LoadPos.transform);
@@ -104,11 +107,11 @@ public class AnimalManager : MonoBehaviour
 
     void Update()
     {
-        //spawnTimer += Time.deltaTime;
-        //if (spawnTimer >= spawnTimerThreshold)
-        //{
-        //    SpawnAnimal();
-        //    spawnTimer = 0;
-        //}
+        spawnTimer += Time.deltaTime;
+        if (spawnTimer >= spawnTimerThreshold)
+        {
+            SpawnAnimal();
+            spawnTimer = 0;
+        }
     }
 }

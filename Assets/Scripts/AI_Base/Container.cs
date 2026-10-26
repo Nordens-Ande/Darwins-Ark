@@ -22,8 +22,7 @@ public class BossValueContainer : Container<AnimalAI>
         }
         else 
         {
-            bool bosses = animal.ActiveBosses;
-            if (bosses) return 1;
+            if (animal.ActiveBosses) return 1;
             else return 0;
         }
     }

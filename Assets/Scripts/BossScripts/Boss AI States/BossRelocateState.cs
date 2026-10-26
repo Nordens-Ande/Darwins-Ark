@@ -20,6 +20,7 @@ public class BossRelocateState : BossAIState
     {
         this.boss = boss;
         container = new BossRelocateContainer();
+        tileManager = TileManager.Instance;
     }
 
     public override bool OnEnterState()
@@ -45,6 +46,12 @@ public class BossRelocateState : BossAIState
         List<Tile> path = new List<Tile>();
 
         List<Tile> possibleTiles = new List<Tile>();
+
+        if(tileManager == null)
+        {
+            Debug.Log("BossRelocateState: tileManager null");
+        }
+
         foreach(Chunk chunk in tileManager.chunks)
         {
             foreach(Tile tile in chunk.Tiles)
