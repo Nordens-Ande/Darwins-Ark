@@ -29,7 +29,8 @@ public class AnimalGUIInfo
 
     public float Happiness => happiness;
 
-    public AnimalGUIInfo(
+    public AnimalGUIInfo
+        (
         float walkspeed, 
         float runspeed,
         float dmg,
