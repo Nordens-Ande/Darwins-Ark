@@ -6,7 +6,8 @@ using UnityEngine;
 /// </summary>
 
 
-public class Seed
+[CreateAssetMenu(fileName = "NewSeed", menuName = "Inventory/Seed")] // we cab access this in the unity menu
+public class Seed : ScriptableObject
 {
 
     [Header("Basic Info")]
@@ -17,13 +18,8 @@ public class Seed
     [SerializeField] private int maxStackSize = 99; // how many of one seed we can have in one slot
     [Space]
 
-
-
-
     [Header("Planting Reference")]
-    public Plant plantPrefab; // Prefaben från PlantManager/Plant som ska gro
-
-
+    public Plant plantPrefab; // Prefaben from PlantManager, the Plant which will grow from this seed
 
 
     // getters and setters
