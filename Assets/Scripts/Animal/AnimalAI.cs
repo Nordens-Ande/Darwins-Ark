@@ -200,6 +200,12 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         set => hasProcreated = value;
     }
 
+    public float MutationRatefloat 
+    { 
+        get => MutationRate; 
+        set => MutationRate = value;
+    }
+
     void Start()
     {
         transform.localPosition = Vector3.zero;
@@ -742,6 +748,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
                 chiildLogic.ChildWalkSpeed = walkSpeed;
                 childAi.enabled = false;
                 child.transform.localScale *= 0.3f;
+                chiildLogic.Parent1 = this;
+                chiildLogic.Parent2 = assignedMate;
                 //child.transform.SetParent(transform); //Will be fixed in childscript
 
                 //Reset mating values
@@ -807,6 +815,13 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
             transform.position -= new Vector3(0, 0.5f, 0) * Time.deltaTime;
         }
 
+    }
+
+    //Information given to a GUI, can be called to populate the UI with information of the animal
+    public AnimalGUIInfo GetAnimalGUIInformation() 
+    {
+        AnimalGUIInfo info = new AnimalGUIInfo(walkSpeed, runSpeed, damage, health, hungerDeteration, MutationRate, hunger, bossThreat, Happiness, matingSeason, tired);
+        return info;
     }
 
     //If we decide to have animals lose health

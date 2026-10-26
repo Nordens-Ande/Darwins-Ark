@@ -5752,14 +5752,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9ec3c0b88bfe8b4a98818505bf079c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlantManager
-  SecondsForPlantToGrow: 10
+  secondsForPlantToGrow: 10
+  closeToWaterModifier: 1
+  waterModiferFastGrowth: 1.25
+  waterModiferSlowGrowth: 1
   plantPrefabToSpawn: []
   spawnPlantAllTiles: 0
   spawnPlantAllTilesChance: 20
   useRandomGrowthSpeed: 1
+  minGrowthSpeed: 0.5
+  maxGrowthSpeed: 2
   useRandomPlants: 1
   useRandomPlantRotation: 1
+  minPlantRotation: 0
+  maxPlantRotation: 360
   useRandomPlantScale: 1
+  minPlantScale: 0.75
+  maxPlantScale: 1.35
+  useRandomOffsetsFromTile: 1
+  maxTileOffset: 0.25
+  massPlantPlantsAsGrown: 1
   plants: []
 --- !u!4 &959530858
 Transform:

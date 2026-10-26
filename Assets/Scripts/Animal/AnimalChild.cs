@@ -10,6 +10,10 @@ public class AnimalChild : MonoBehaviour
     private float childWalkSpeed;
     private Vector3 tempPosition;
     private bool resetJump;
+    private float mutationOffset = 1;
+
+    private AnimalAI parent1;
+    private AnimalAI parent2;
 
     public GameObject Parent 
     { 
@@ -20,6 +24,17 @@ public class AnimalChild : MonoBehaviour
     { 
         get => childWalkSpeed;
         set => childWalkSpeed = value;
+    }
+
+    public AnimalAI Parent1 
+    { 
+        get => parent1;
+        set => parent1 = value;
+    }
+    public AnimalAI Parent2 
+    {
+        get => parent2;
+        set => parent2 = value;
     }
 
     private void Start()
@@ -81,9 +96,22 @@ public class AnimalChild : MonoBehaviour
     void GrowUp() 
     { 
         AnimalAI childAI = transform.GetComponent<AnimalAI>();
+        childAI = MixParentStats(parent1, parent2);
         childAI.enabled = true;
         transform.localScale *= 3;
         Destroy(this);
+    }
+
+    //Simulate mutations from the parents with offset for randomazation
+    AnimalAI MixParentStats(AnimalAI father, AnimalAI mother) 
+    { 
+        AnimalAI temp = new AnimalAI();
+        temp.DMG = (father.DMG - mother.DMG + Random.Range(-mutationOffset, mutationOffset)) / 2;
+        temp.HungerDeteration = (father.HungerDeteration - mother.HungerDeteration + Random.Range(-mutationOffset, mutationOffset)) / 2;
+        temp.MutationRatefloat = (father.MutationRatefloat - mother.MutationRatefloat + Random.Range(-mutationOffset, mutationOffset)) / 2;
+        temp.WalkSpeed = (father.WalkSpeed - mother.WalkSpeed + Random.Range(-mutationOffset, mutationOffset)) / 2;
+        temp.RunSpeed = (father.WalkSpeed - mother.WalkSpeed + Random.Range(-mutationOffset, mutationOffset)) / 2;
+        return temp;
     }
 
     bool CheckDistanceToParent() 
