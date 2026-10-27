@@ -55,6 +55,9 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     [Header("Seeds that can spawn")]
     [SerializeField] private List<GameObject> poop;
 
+    [Header("Seeds that can spawn")]
+    [SerializeField] private GameObject poopPrefab;
+
     [Header("DebugMode")]
     [SerializeField] private bool TestMutation = false;
 
@@ -591,11 +594,14 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     //Will spawn plantseeds
     void Poop()
     {
-        if (poop.Count > 0)
-        {
-            int choosenPoop = Random.Range(0, poop.Count);
-            GameObject waste = Instantiate(poop[choosenPoop], transform.position, Quaternion.identity);
-        }
+        GameObject poopObj = Instantiate(poopPrefab, transform.position, Quaternion.identity);
+        return;
+
+        //if (poop.Count > 0)
+        //{
+        //    int choosenPoop = Random.Range(0, poop.Count);
+        //    GameObject waste = Instantiate(poop[choosenPoop], transform.position, Quaternion.identity);
+        //}
     }
 
 

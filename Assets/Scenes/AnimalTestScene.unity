@@ -418,6 +418,7 @@ MonoBehaviour:
   poop:
   - {fileID: 7206990565552924369, guid: 9d83281e4b6364a4bbce31d9758ccd88, type: 3}
   - {fileID: 5212644513495774897, guid: a7db1c59c01addb40b02cf2d8d146946, type: 3}
+  poopPrefab: {fileID: 0}
   TestMutation: 0
 --- !u!135 &252306909
 SphereCollider:
@@ -5975,6 +5976,7 @@ MonoBehaviour:
   poop:
   - {fileID: 7206990565552924369, guid: 9d83281e4b6364a4bbce31d9758ccd88, type: 3}
   - {fileID: 5212644513495774897, guid: a7db1c59c01addb40b02cf2d8d146946, type: 3}
+  poopPrefab: {fileID: 0}
   TestMutation: 0
 --- !u!135 &1952803388
 SphereCollider:
