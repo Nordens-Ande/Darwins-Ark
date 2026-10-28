@@ -116,6 +116,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     private PathFinding pathFinder;
     private List<Tile> activePath;
     private Vector3 activePathTarget;
+    private int pathStage = 0;
 
 
     //Properties
@@ -220,6 +221,9 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         tileCheckSize = 1;
         BossThreat = 0;
         matingSeason = 0;
+        //pathFinder = new PathFinding();
+        activePath = new List<Tile>();
+        pathFinder = new PathFinding();
         InstantiateUtilityBrain();
     }
 
@@ -262,7 +266,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         procreateAction = () => { Procreate(); };
         leaveIslandAction = () => { LeaveIsland(); };
         searchForFoodAction = () => { SearchForFood(); };
-        walkAroundAction = () => { WalkAround(); };
+        //walkAroundAction = () => { WalkAround(); };
+        walkAroundAction = () => { PathfindingWalk(); };
         sleepAction = () => {Sleep(); };
 
         //UtilityActions with its containers 
@@ -328,7 +333,11 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         {
             currentIdleTime = 0;
             isIdle = false;
-            WalkAround();
+            //Vector3 temp = FindWalkPoint();
+            //activePath = PathfindingMovement(temp);
+            pathStage = 0;
+            PathfindingWalk();
+            //WalkAround();
         }
     }
 
@@ -371,48 +380,76 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     }
 
     //Method to decide which tile is traversable, used in pathfinding
-    bool TravesableTile(Tile tile) 
-    { 
-        if(tile.Type == TileType.Grass) 
-        {
-            return true;
-        }
-        else 
-        {
-            return false;
-        }
+    public bool TravesableTile(Tile tile) 
+    {
+        if (tile.Type == TileType.Ocean) return false;
+        return true;
     }
+
     //Method to get a path from pathfining script. 
     List<Tile> PathfindingMovement(Vector3 target) 
     {
         Tile currentPos = tileManager.GetTile(transform.position);
         Tile targetPos = tileManager.GetTile(target);
-        float maxHeightDifference = 3;
-        int iterations = 5;
-        List<Tile> path = pathFinder.GetPathAStar(currentPos, targetPos, TravesableTile, maxHeightDifference, iterations);
+        float maxHeightDifference = 4;
+        int iterations = 0;
+        List<Tile> path = new List<Tile>();
+        path = pathFinder.GetPathAStar(currentPos, targetPos, TravesableTile, maxHeightDifference, iterations);
         return path;
     }
 
-    //Beginning to method for pathfinding walking with AStar, Will be used instead of animalWalkMoveTowards in WalkAround method
+    //Upgraded walk method, with pathfinding 
     void PathfindingWalk() 
     {
-        if (activePath[0] != null) 
+        //If animal is idle then idle and return
+        if (isIdle)
         {
-            AnimalWalkMoveTowards(activePathTarget);
-        }
-        else if (activePath[0] == null) 
-        {
-            hasSetPath = false;
-            isIdle = true;
             Idle();
-            return;
         }
-        float distance = Vector3.Distance(tileManager.GetTile(transform.position).position, activePath[0].position);
-        if(distance < 1) 
+        else
         {
-            activePath.Remove(activePath[0]);
-            Vector3 updatepath = new Vector3(activePath[0].position.x, activePath[0].GetHeight() + transform.localScale.y / 2, activePath[0].position.z);
-            activePathTarget = updatepath; 
+            //Sets a new path if none is found
+            if (!hasSetPath)
+            {
+                Vector3 temp = FindWalkPoint();
+                activePath = PathfindingMovement(temp);
+                if (activePath != null)
+                {
+                    pathStage = 0;
+                    activePathTarget = activePath[pathStage].position;
+                    hasSetPath = true;
+                }
+            }
+            //Checks distance between position and target in the list
+            float distance = Vector3.Distance(tileManager.GetTile(transform.position).position, activePath[pathStage].position);
+
+            if (distance < 1)
+            {
+                //If next in the list is the last then idle
+                if (pathStage + 1 == activePath.Count)
+                {
+                    hasSetPath = false;
+                    isIdle = true;
+                    pathStage = 0;
+                    Idle();
+                    return;
+                }
+                //Otherwise go to next position
+                else
+                {
+                    pathStage++;
+                    Vector3 updatepath = new Vector3(activePath[pathStage].position.x, activePath[pathStage].GetHeight() + transform.localScale.y / 2, activePath[pathStage].position.z);
+                    activePathTarget = updatepath;
+                }
+            }
+            //lastly just move towards the tileposition in the list
+            else
+            {
+                if (activePath[pathStage] != null && hasSetPath)
+                {
+                    AnimalWalkMoveTowards(activePathTarget);
+                }
+            }
         }
     }
 
