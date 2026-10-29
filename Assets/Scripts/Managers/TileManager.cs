@@ -23,6 +23,7 @@ namespace Assets.Scripts.Environment
         [SerializeField] private bool createWater = true;
         [SerializeField] private float waterLevel = 0.5f;
         [SerializeField] private Material waterMaterial;
+        [SerializeField, ReadOnly] private GameObject waterObject;
 
         // -----------------------------------------------
         //[SerializeField] private Material gridLineMaterial;
@@ -230,15 +231,68 @@ namespace Assets.Scripts.Environment
             if (!createWater)
                 return;
 
-            GameObject waterObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            waterObject.name = "Water Quad";
+            if (waterObject != null)
+                Destroy(waterObject);
+
+            List<Vector3> vertices = new List<Vector3>();
+            List<int> triangles = new List<int>();
+
+            void AddFace(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+            {
+                int index = vertices.Count;
+
+                vertices.Add(a);
+                vertices.Add(b);
+                vertices.Add(c);
+                vertices.Add(d);
+
+                triangles.Add(index + 0);
+                triangles.Add(index + 1);
+                triangles.Add(index + 2);
+
+                triangles.Add(index + 0);
+                triangles.Add(index + 2);
+                triangles.Add(index + 3);
+            }
+
+            foreach (Chunk chunk in chunks)
+            {
+                foreach (Vector2Int tile in chunk[TileType.Ocean])
+                {
+                    Vector3 tilePos = new Vector3(tile.x, 0/*waterLevel*/, tile.y);
+                    AddFace(
+                        new Vector3(-0.5f, 0, 0.5f) + tilePos,  // top-left
+                        new Vector3(+0.5f, 0, 0.5f) + tilePos,  // top-right
+                        new Vector3(+0.5f, 0, -0.5f) + tilePos, // bottom-right
+                        new Vector3(-0.5f, 0, -0.5f) + tilePos  // bottom-left
+                    );
+                }
+            }
+
+            //waterObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            waterObject = new GameObject("Water Object", typeof(MeshRenderer), typeof(MeshFilter));
             waterObject.transform.parent = transform;
-            
+
             waterObject.transform.localPosition = waterObject.transform.localPosition + new Vector3(0, waterLevel, 0);
-            waterObject.transform.localScale = new Vector3(chunkGridSize.x * chunkSize, chunkGridSize.y * chunkSize, 1f);
-            waterObject.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
-            
+            //waterObject.transform.localScale = new Vector3(chunkGridSize.x * chunkSize, chunkGridSize.y * chunkSize, 1f);
+            //waterObject.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+
+
+            // Water Object mesh and material
             waterObject.GetComponent<MeshRenderer>().material = waterMaterial;
+
+            Mesh mesh = new Mesh()
+            {
+                name = "Chunk Mesh"
+            };
+
+            mesh.SetVertices(vertices);
+            mesh.SetTriangles(triangles, 0);
+
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+
+            waterObject.GetComponent<MeshFilter>().sharedMesh = mesh;
         }
 
 

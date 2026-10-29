@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Environment
 {
-    public class IslandNoise : MonoBehaviour
+    public class IslandNoise : SingletonManager<IslandNoise>
     {
         [Serializable]
         private struct NoiseDetailLevels
@@ -37,7 +37,6 @@ namespace Assets.Scripts.Environment
             }
         }
 
-        public static IslandNoise Instance = null;
         private TileManager tileManager;
 
         [SerializeField] private int seed = -1;
@@ -66,13 +65,12 @@ namespace Assets.Scripts.Environment
         [Header("Terrain")]
         [SerializeField] private NoiseDetailLevels terrainNoiseLevels = new NoiseDetailLevels(0.01f, 0, 0.03f, 100f, 0.08f, 200f);
 
-        public float MaxIslandRadius => islandRadius * (1 + coastlineVariation);
+        [Space]
 
-        private void Awake()
-        {
-            if (Instance == null)
-                IslandNoise.Instance = this;
-        }
+        [Header("Ocean")]
+        [SerializeField] private bool slopeOceanFloor = true;
+
+        public float MaxIslandRadius => islandRadius * (1 + coastlineVariation);
 
         void Start()
         {
@@ -217,6 +215,9 @@ namespace Assets.Scripts.Environment
             else
             {
                 type = TileType.Ocean;
+                //heightResult = coastlineRadius / distance;
+                if (slopeOceanFloor)
+                    heightResult = - (distance - coastlineRadius) / coastlineRadius;
             }
 
             return heightResult;
