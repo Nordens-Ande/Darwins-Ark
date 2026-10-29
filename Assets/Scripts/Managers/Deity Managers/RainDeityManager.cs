@@ -18,6 +18,8 @@ public class RainDeityManager : SingletonManager<RainDeityManager>
     public event Action OnRainStarted;
     public event Action OnRainStopped;
 
+    [SerializeField] public bool triggerRain = false; // for testing
+
     public string GetCostString => baseCost.ToString(); //for ui?
 
     private void Start()
@@ -32,7 +34,10 @@ public class RainDeityManager : SingletonManager<RainDeityManager>
     public void TriggerRain() // on button press
     {
         if (isRaining) return;
-        if (!currencyManager.SpendDeityPoints(baseCost)) return;
+        
+        //uncomment this later after testing
+        //if (!currencyManager.SpendDeityPoints(baseCost)) return;
+
 
         OnRainStarted?.Invoke();
         isRaining = true;
@@ -40,6 +45,11 @@ public class RainDeityManager : SingletonManager<RainDeityManager>
 
     private void Update()
     {
+        if (triggerRain)
+        {
+            TriggerRain();
+            triggerRain = false;
+        }
         if (!isRaining) return;
 
         if(rainTimer < rainDuration)

@@ -3,6 +3,7 @@ using UnityEngine;
 using Assets.Scripts.Environment;
 using System.Collections.Generic;
 using UnityEditor;
+using static UnityEngine.InputManagerEntry;
 
 public class WindDeityManager : SingletonManager<WindDeityManager>
 {
@@ -31,7 +32,7 @@ public class WindDeityManager : SingletonManager<WindDeityManager>
 
         baseCost = 10;
 
-        windWidth = 0.5f;
+        windWidth = 20f;
         windHeight = 2;
         maxWindStrength = 10;
         windOffset = 0.5f;
@@ -159,12 +160,22 @@ public class WindDeityManager : SingletonManager<WindDeityManager>
     {
         if(triggerWind == true)
         {
-            TriggerWind(tileManager.GetTile(new Vector2(0, 0)), new Vector3(0, 0, 1));
-            TriggerWind(tileManager.GetTile(new Vector2(0, 0)), new Vector3(1, 0, 0));
+            TriggerWind(tileManager.GetTile(new Vector2(0, 0)), new Vector3(0.5f, 0, 1).normalized);
+            //TriggerWind(tileManager.GetTile(new Vector2(0, 0)), new Vector3(1, 0, 0));
             triggerWind = false;
         }
-        foreach(Wind wind in activeWindInstances)
+        
+        for(int i = activeWindInstances.Count - 1;  i >= 0; i--)
         {
+            Wind wind = activeWindInstances[i];
+            if (wind == null) continue;
+
+            if (wind.WindComplete == true)
+            {
+                activeWindInstances.RemoveAt(i);
+                continue;
+            }
+
             wind.Update(Time.deltaTime);
         }
     }

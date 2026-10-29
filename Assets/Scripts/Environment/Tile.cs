@@ -97,7 +97,7 @@ namespace Assets.Scripts.Environment
             this.windDirection = totalWind.normalized;
             this.windStrength = totalWind.magnitude;
             this.windStrength = Mathf.Min(maxWindStrength, this.windStrength);
-            Debug.Log($"Tile {position.x}, {position.y}, {position.z}; wind strength: {this.windStrength}, dir = {this.windDirection}");
+            //Debug.Log($"Tile {position.x}, {position.y}, {position.z}; wind strength: {this.windStrength}, dir = {this.windDirection}");
         }
 
         public void Update(float dt)

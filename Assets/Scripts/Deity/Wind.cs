@@ -3,9 +3,12 @@ using Assets.Scripts.Environment;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 public class Wind
 {
+    private bool windComplete = false;
+
     private Dictionary<int, List<Tile>> windStrips;
 
     private Vector2 direction;    
@@ -19,6 +22,8 @@ public class Wind
     private int currentIndexToUpdate;
     private const float timeBetweenTile = 0.05f;
     private float updateTimer = 0;
+
+    public bool WindComplete => windComplete;
 
     public Wind(Dictionary<int, List<Tile>> windStrips, Vector2 direction, float maxWindHeight, float maxWindStrength, float windOffset)
     {
@@ -59,7 +64,7 @@ public class Wind
                 result = list.OrderByDescending((tile => tile.position.z)).ToList();
             }
         }
-        Debug.Log("wind list count" + result.Count);
+        //Debug.Log("wind list count" + result.Count);
         return result;
     }
 
@@ -139,6 +144,8 @@ public class Wind
 
     public void Update(float dt)
     {
+        if (windComplete) return;
+
         if(updateTimer < timeBetweenTile)
         {
             updateTimer += dt;
@@ -146,6 +153,7 @@ public class Wind
         }
         updateTimer = 0;
 
+        int amountUpdated = 0;
         for(int i = 0; i < windStrips.Count; i++)
         {
             if (!windStrips.ContainsKey(i)) continue;
@@ -153,7 +161,15 @@ public class Wind
             if(windStrips[i].Count - 1 >= currentIndexToUpdate)
             {
                 ApplyWindEffect(windStrips[i][currentIndexToUpdate]);
+                amountUpdated++;
             }
+        }
+        //Debug.Log("amount updwted" + amountUpdated);
+        if(amountUpdated == 0)
+        {
+            //Debug.Log("wind complete");
+            windComplete = true;
+            return;
         }
         currentIndexToUpdate++;
     }
