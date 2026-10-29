@@ -41,27 +41,27 @@ public class VisualPhoneDebugger : SingletonManager<VisualPhoneDebugger>
     public bool showTouchMarker = true;
     public float axisArrowLength = 0.85f;
 
-    [Serializable]
-    private class ControllerPacket
-    {
-        public string type;
-        public string phase;
-        public long id;
-        public double timestamp;
+    //[Serializable]
+    //private class ControllerPacket
+    //{
+    //    public string type;
+    //    public string phase;
+    //    public long id;
+    //    public double timestamp;
 
-        public float x;
-        public float y;
+    //    public float x;
+    //    public float y;
 
-        public float pitch;
-        public float roll;
-        public float yaw;
-        public float gx;
-        public float gy;
-        public float gz;
-        public float ax;
-        public float ay;
-        public float az;
-    }
+    //    public float pitch;
+    //    public float roll;
+    //    public float yaw;
+    //    public float gx;
+    //    public float gy;
+    //    public float gz;
+    //    public float ax;
+    //    public float ay;
+    //    public float az;
+    //}
 
     private bool hasMotion;
     private bool hasTouch;
