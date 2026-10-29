@@ -3,6 +3,11 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+/// <summary>
+/// This script is a plant generator using L-systems
+/// </summary>
+
+
 public class PlantLSystemGenerator : MonoBehaviour
 {
     [Header("Controls")]
