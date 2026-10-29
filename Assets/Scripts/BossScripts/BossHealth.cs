@@ -3,12 +3,19 @@ using UnityEngine;
 
 public class BossHealth : MonoBehaviour
 {
+    private int deityPoints; //how much deity points will be rewarded on kill.
+
     [SerializeField] float maxHealth;
-    float health;
-    bool isAlive;
+    private float health;
+    private bool isAlive;
 
     public event Action<BossDeathEventData> OnBossDeath;
 
+    public int DeityPoints
+    {
+        get { return deityPoints; }
+        set { deityPoints = value; }
+    }
     public float MaxHealth => maxHealth;
     public float Health => health;
     public bool IsAlive => isAlive;
@@ -25,7 +32,7 @@ public class BossHealth : MonoBehaviour
 
         if (health < 0)
         {
-            OnBossDeath?.Invoke(new BossDeathEventData(this));
+            OnBossDeath?.Invoke(new BossDeathEventData(this, deityPoints));
         }
     }
 }

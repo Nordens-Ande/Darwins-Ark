@@ -32,6 +32,7 @@ public class BossManager : SingletonManager<BossManager>
         if (bossHealth != null)
         {
             bossHealth.OnBossDeath += BossDied;
+            bossHealth.DeityPoints = 10; //////// randomize later?
         }
 
         OnBossSpawned?.Invoke(new BossSpawnedEventData(bossScript));

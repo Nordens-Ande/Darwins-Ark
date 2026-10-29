@@ -1,14 +1,15 @@
 using NUnit.Framework.Internal;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Environment
 {
-    public class TileManager : MonoBehaviour
+    public class TileManager : SingletonManager<TileManager>
     {
-        public static TileManager Instance = null;
+        private RainDeityManager rainDeityManager;
 
         [HideInInspector] public List<Chunk> chunks;
         [HideInInspector] public List<GameObject> chunkObjects;
@@ -17,8 +18,14 @@ namespace Assets.Scripts.Environment
         [SerializeField] private int chunkSize = 8; 
         [SerializeField] private Vector2Int chunkGridSize = Vector2Int.one;
 
+        [Space]
+
+        [SerializeField] private bool createWater = true;
+        [SerializeField] private float waterLevel = 0.5f;
+        [SerializeField] private Material waterMaterial;
+
         // -----------------------------------------------
-        [SerializeField] private Material gridLineMaterial;
+        //[SerializeField] private Material gridLineMaterial;
         // -----------------------------------------------
 
         public int ChunkSize => chunkSize;
@@ -28,14 +35,10 @@ namespace Assets.Scripts.Environment
         private string selectionGridName = "Selection Grid";
         private string heighlightGridName = "Highlight Grid";
 
-        private void Awake()
-        {
-            if (Instance == null)
-                TileManager.Instance = this;
-        }
-
         void Start()
         {
+            rainDeityManager = RainDeityManager.Instance;
+
             chunks = new List<Chunk>();
             chunkObjects = new List<GameObject>();
 
@@ -72,6 +75,9 @@ namespace Assets.Scripts.Environment
             GenerateGrid(transform, 0.003f, heighlightGridName, Color.blue);
 
             //SetChunkGridVisible(false);
+            SubscribeToRainDeity();
+
+            GenerateWater();
         }
 
 
@@ -158,6 +164,21 @@ namespace Assets.Scripts.Environment
         public Tile GetTile(Vector2 positionXZ) => GetTile(positionXZ.x, positionXZ.y);
         public Tile GetTile(Vector3 positionXZ) => GetTile(positionXZ.x, positionXZ.z);
 
+        public (int min, int max) GetTilePositionRangeX()
+        {
+            float minX = chunks.Min(chunk => chunk.position.x);
+            float maxX = chunks.Max(chunk => chunk.position.x + chunk.Size);
+
+            return ((int)minX, (int)maxX);
+        }
+
+        public (int min, int max) GetTilePositionRangeZ()
+        {
+            float minZ = chunks.Min(chunk => chunk.position.y);
+            float maxZ = chunks.Max(chunk => chunk.position.y + chunk.Size);
+
+            return ((int)minZ, (int)maxZ);
+        }
 
         private void GenerateMesh(Chunk chunk, GameObject chunkObject)
         {
@@ -202,6 +223,22 @@ namespace Assets.Scripts.Environment
 
                 gridMesh.Rebuild();
             }
+        }
+
+        private void GenerateWater()
+        {
+            if (!createWater)
+                return;
+
+            GameObject waterObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            waterObject.name = "Water Quad";
+            waterObject.transform.parent = transform;
+            
+            waterObject.transform.localPosition = waterObject.transform.localPosition + new Vector3(0, waterLevel, 0);
+            waterObject.transform.localScale = new Vector3(chunkGridSize.x * chunkSize, chunkGridSize.y * chunkSize, 1f);
+            waterObject.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+            
+            waterObject.GetComponent<MeshRenderer>().material = waterMaterial;
         }
 
 
@@ -289,6 +326,31 @@ namespace Assets.Scripts.Environment
 
             if (gridMesh != null)
                 gridMesh.RemoveTile(tile);
+        }
+
+        private void SubscribeToRainDeity()
+        {
+            if (rainDeityManager == null) return;
+
+            foreach (Chunk chunk in chunks)
+            {
+                foreach (Tile tile in chunk.Tiles)
+                {
+                    rainDeityManager.OnRainStarted += tile.RainStarted;
+                    rainDeityManager.OnRainStopped += tile.RainStopped;
+                }
+            }
+        }
+
+        private void Update()
+        {
+            foreach(Chunk chunk in chunks)
+            {
+                foreach(Tile tile in chunk.Tiles)
+                {
+                    tile.Update(Time.deltaTime);
+                }
+            }
         }
     }
 
