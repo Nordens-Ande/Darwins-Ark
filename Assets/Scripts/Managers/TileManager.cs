@@ -9,8 +9,6 @@ namespace Assets.Scripts.Environment
 {
     public class TileManager : SingletonManager<TileManager>
     {
-        public static TileManager Instance = null;
-
         private RainDeityManager rainDeityManager;
 
         [HideInInspector] public List<Chunk> chunks;
