@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class CurrencyManager : MonoBehaviour
+public class CurrencyManager : SingletonManager<CurrencyManager>
 {
-    public static CurrencyManager Instance;
+    private BossManager bossManager;
 
     [SerializeField] private int deityPoints = 100;
     [SerializeField] private int dnaPoints = 100;
@@ -10,19 +10,34 @@ public class CurrencyManager : MonoBehaviour
     public int DeityPoints => deityPoints;
     public int DnaPoints => dnaPoints;
 
-    private void Awake()
+    private void Start()
     {
-        if (Instance == null)
-            Instance = this;
+        bossManager = BossManager.Instance;
+        if(bossManager != null)
+        {
+            bossManager.OnBossSpawned += BossSpawned;
+        }
+    }
 
-        else
-            Destroy(gameObject);
+    public void BossSpawned(BossSpawnedEventData data)
+    {
+        BossHealth bossHealth = data.Boss.HealthScript;
+        if(bossHealth != null)
+        {
+            bossHealth.OnBossDeath += BossDied;
+        }
+    }
+
+    void BossDied(BossDeathEventData data)
+    {
+        AddDeityPoints(data.DeityPoints);
     }
 
     public void AddDeityPoints(int amount)
     {
         deityPoints += amount;
     }
+    
     public bool SpendDeityPoints(int amount)
     {
         if (deityPoints < amount)

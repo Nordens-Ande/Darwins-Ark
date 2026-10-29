@@ -1,6 +1,7 @@
 using NUnit.Framework.Internal;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,6 +10,8 @@ namespace Assets.Scripts.Environment
     public class TileManager : MonoBehaviour
     {
         public static TileManager Instance = null;
+
+        private RainDeityManager rainDeityManager;
 
         [HideInInspector] public List<Chunk> chunks;
         [HideInInspector] public List<GameObject> chunkObjects;
@@ -36,6 +39,8 @@ namespace Assets.Scripts.Environment
 
         void Start()
         {
+            rainDeityManager = RainDeityManager.Instance;
+
             chunks = new List<Chunk>();
             chunkObjects = new List<GameObject>();
 
@@ -72,6 +77,7 @@ namespace Assets.Scripts.Environment
             GenerateGrid(transform, 0.003f, heighlightGridName, Color.blue);
 
             //SetChunkGridVisible(false);
+            SubscribeToRainDeity();
         }
 
 
@@ -158,6 +164,21 @@ namespace Assets.Scripts.Environment
         public Tile GetTile(Vector2 positionXZ) => GetTile(positionXZ.x, positionXZ.y);
         public Tile GetTile(Vector3 positionXZ) => GetTile(positionXZ.x, positionXZ.z);
 
+        public (int min, int max) GetTilePositionRangeX()
+        {
+            float minX = chunks.Min(chunk => chunk.position.x);
+            float maxX = chunks.Max(chunk => chunk.position.x + chunk.Size);
+
+            return ((int)minX, (int)maxX);
+        }
+
+        public (int min, int max) GetTilePositionRangeZ()
+        {
+            float minZ = chunks.Min(chunk => chunk.position.y);
+            float maxZ = chunks.Max(chunk => chunk.position.y + chunk.Size);
+
+            return ((int)minZ, (int)maxZ);
+        }
 
         private void GenerateMesh(Chunk chunk, GameObject chunkObject)
         {
@@ -289,6 +310,31 @@ namespace Assets.Scripts.Environment
 
             if (gridMesh != null)
                 gridMesh.RemoveTile(tile);
+        }
+
+        private void SubscribeToRainDeity()
+        {
+            if (rainDeityManager == null) return;
+
+            foreach (Chunk chunk in chunks)
+            {
+                foreach (Tile tile in chunk.Tiles)
+                {
+                    rainDeityManager.OnRainStarted += tile.RainStarted;
+                    rainDeityManager.OnRainStopped += tile.RainStopped;
+                }
+            }
+        }
+
+        private void Update()
+        {
+            foreach(Chunk chunk in chunks)
+            {
+                foreach(Tile tile in chunk.Tiles)
+                {
+                    tile.Update(Time.deltaTime);
+                }
+            }
         }
     }
 

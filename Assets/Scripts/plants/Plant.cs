@@ -251,29 +251,29 @@ public class Plant : MonoBehaviour
         if (WindDeityManager.Instance == null)
             return normalStrength;
 
-        Vector2Int windDirection =
-            WindDeityManager.Instance.GetWindDirection();
+        Vector3 windDirection =
+            currentTile.WindDirection;
 
-        int windLength =
-            WindDeityManager.Instance.WindLength;
+        //int windLength =
+        //    WindDeityManager.Instance.WindLength;
 
         float windStrength = 0f;
 
         // Check every tile along the wind path
 
-        for (int i = 1; i <= windLength; i++)
-        {
-            Vector2Int windTile =
-                plantPos + windDirection * i;
+        //for (int i = 1; i <= windLength; i++)
+        //{
+        //    Vector2Int windTile =
+        //        plantPos + windDirection * i;
 
-            if (targetPos == windTile)
-            {
-                windStrength =
-                    1f - ((float)i / (windLength + 1));
+        //    if (targetPos == windTile)
+        //    {
+        //        windStrength =
+        //            1f - ((float)i / (windLength + 1));
 
-                break;
-            }
-        }
+        //        break;
+        //    }
+        //}
 
         return Mathf.Max(
             normalStrength,
