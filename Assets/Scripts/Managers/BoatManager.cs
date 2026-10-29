@@ -89,6 +89,16 @@ public class BoatManager : SingletonManager<BoatManager>
 
     void Update()
     {
+        for(int i = boats.Count - 1; i >= 0; i--)
+        {
+            Boat boat = boats[i];
+            if (boat == null) continue;
 
+            if(boat.BoatFinished)
+            {
+                Destroy(boat.gameObject);
+                boats.RemoveAt(i);
+            }
+        }
     }
 }
