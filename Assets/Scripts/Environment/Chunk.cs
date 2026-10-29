@@ -21,6 +21,8 @@ namespace Assets.Scripts.Environment
         public List<Color> colors;
         public List<int> triangles;
 
+        public LineMeshData gridMeshData;
+
         public int Size => size; 
         public Tile[,] Tiles => tiles;
 
@@ -42,6 +44,8 @@ namespace Assets.Scripts.Environment
             //Create tileType hashsets
             tileTypes = new Dictionary<TileType, HashSet<Vector2Int>>();
             InitializeTileHashsets();
+
+            gridMeshData = new LineMeshData();
 
             //Creates all the tiles (and assigns to tile hashsets)
             tiles = new Tile[size, size];
@@ -87,14 +91,24 @@ namespace Assets.Scripts.Environment
 
         public Tile GetTile(int x, int z, Space space = Space.World)
         {
+            if (tiles == null)
+            {
+                Debug.LogError($"Chunk at {position} has a null tiles array!");
+                return null;
+            }
+
             if (space == Space.World)
             {
                 x -= (int)position.x;
                 z -= (int)position.y;
             }
 
-            if (x > tiles.GetLength(0) - 1 || z > tiles.GetLength(1) - 1 || x < 0 || z < 0)
+            if (x >= tiles.GetLength(0) || z >= tiles.GetLength(1) || x < 0 || z < 0)
+            {
+                Debug.LogWarning($"Out of bounds: local ({x}, {z}), array ({tiles.GetLength(0)}, {tiles.GetLength(1)}), chunk position {position}");
+
                 return null;
+            }
 
             return tiles[x, z];
         }
@@ -130,16 +144,35 @@ namespace Assets.Scripts.Environment
                         GetTileHeight(x, z - 1, Space.Self), // South
                         GetTileHeight(x + 1, z, Space.Self)  // East
                     };
-                    Color tileColor = useNoise ? IslandNoise.Instance.GetColor(new Vector2(tilePos.x, tilePos.z)) : Color.white;
+
+                    //Color tileColor = useNoise ? IslandNoise.Instance.GetColor(new Vector2(tilePos.x, tilePos.z)) : Color.white;
+                    // we want to get the color from the BiomeManager instead of the IslandNoise
+                    Color tileColor = Color.white;
+                    if (BiomeManager.Instance != null)
+                    {
+                        // If BiomeManager is available, we get the color from it based on the tile type
+                        tileColor = BiomeManager.Instance.GetTileColor(tiles[x, z]);
+                    }
+                    else
+                    {
+                        // If BiomeManager is not available, we fall back to white color
+                        tileColor = Color.white;
+                    }
 
                     //Top face
                     AddFace(
-                        new Vector3(-0.5f, 0, 0.5f) + tilePos,      // top-left
-                        new Vector3(+0.5f, 0, 0.5f) + tilePos,      // top-right
-                        new Vector3(+0.5f, 0, -0.5f) + tilePos,     // bottom-right
-                        new Vector3(-0.5f, 0, -0.5f) + tilePos,     // bottom-left
+                        new Vector3(-0.5f, 0, 0.5f) + tilePos,  // top-left
+                        new Vector3(+0.5f, 0, 0.5f) + tilePos,  // top-right
+                        new Vector3(+0.5f, 0, -0.5f) + tilePos, // bottom-right
+                        new Vector3(-0.5f, 0, -0.5f) + tilePos, // bottom-left
                         tileColor
                     );
+                    //gridMeshData.AddFace(
+                    //    new Vector3(-0.5f, 0.01f, 0.5f) + tilePos,  // top-left
+                    //    new Vector3(+0.5f, 0.01f, 0.5f) + tilePos,  // top-right
+                    //    new Vector3(+0.5f, 0.01f, -0.5f) + tilePos, // bottom-right
+                    //    new Vector3(-0.5f, 0.01f, -0.5f) + tilePos  // bottom-left
+                    //);
 
                     float tileHeight = tilePos.y;
 
@@ -225,6 +258,20 @@ namespace Assets.Scripts.Environment
             triangles.Add(index + 3);
         }
 
+
+        // Returns true if the position is within the chunk, false if not
+        private bool LocalizePositions(ref int x, ref int z, Space space = Space.World)
+        {
+            if (space == Space.World)
+            {
+                x -= (int)position.x;
+                z -= (int)position.y;
+            }
+
+            return !(x > size - 1 || z > size - 1 || x < 0 || z < 0);
+        }
+
+
         public void ModifyTile(int x, int z, float newY, Space space = Space.World)
         {
             if (space == Space.World)
@@ -245,8 +292,17 @@ namespace Assets.Scripts.Environment
         public void ModifyTile(Vector2Int positionXZ, float newY, Space space = Space.World) => ModifyTile(positionXZ.x, positionXZ.y, newY, space);
 
 
+        public void IncreaseTileHeight(int x, int z, float yIncrement, Space space = Space.World)
+        {
+            if (!LocalizePositions(ref x, ref z, space))
+                return;
 
+            isDirty = true;
 
+            tiles[x, z].position.y += yIncrement;
+            tiles[x, z].localPosition.y += yIncrement;
+        }
+        public void IncreaseTileHeight(Vector2Int positionXZ, float yIncrement, Space space = Space.World) => IncreaseTileHeight(positionXZ.x, positionXZ.y, yIncrement, space);
 
     }
 }

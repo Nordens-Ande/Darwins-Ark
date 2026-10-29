@@ -1,97 +1,56 @@
 using Assets.Scripts.Environment;
 using UnityEngine;
+using System;
+using System.Collections.Generic;
 
-public class BossManager : MonoBehaviour
+public class BossManager : SingletonManager<BossManager>
 {
-    public static BossManager Instance = null;
-
     [SerializeField] GameObject bossPrefab;
-    GameObject currentBoss;
+    List<Boss> bossList;
 
-    public GameObject CurrentBoss
-    {
-        get { return currentBoss; }
-    }
+    bool spawnedBoss = false;
 
-    private void Awake()
-    {
-        if(Instance == null)
-            BossManager.Instance = this;
-    }
+    public event Action<BossSpawnedEventData> OnBossSpawned;
+
+    public List<Boss> BossList => bossList;
 
     void Start()
     {
-        //SpawnBoss();
-    }
-
-    Vector2 GetSpawnLocation() //only works for square maps
-    {
-        int maxSpawn = TileManager.Instance.ChunkGridSize.x * TileManager.Instance.ChunkSize / 2;
-        maxSpawn = Mathf.RoundToInt(maxSpawn);
-        int minSpawn = -maxSpawn;
-        maxSpawn--;
-
-        if (TileManager.Instance.ChunkGridSize.x % 2 != 0) // ojämnt med chunks
-        {
-            maxSpawn += TileManager.Instance.ChunkSize / 2;
-            minSpawn += TileManager.Instance.ChunkSize / 2;
-            if (TileManager.Instance.ChunkSize % 2 != 0) // ojämnt med antal tiles i chunk
-            {
-                maxSpawn++;
-            }
-        }
-        
-
-
-        int x = Random.Range(minSpawn, maxSpawn);
-        int side = Random.Range(1, 5);
-        switch(side)
-        {
-            case 1:
-                return new Vector2(x, minSpawn);
-                
-            case 2:
-                return new Vector2(x, maxSpawn);
-                
-            case 3:
-                return new Vector2(minSpawn, x);
-                
-            case 4:
-                return new Vector2(maxSpawn, x);
-        }
-        return new Vector2(0, 0);
+        bossList = new List<Boss>();
     }
 
     public void SpawnBoss()
     {
-        if (currentBoss != null) return;
-        Vector2 spawnLocation = GetSpawnLocation();
-        Vector3 spawnLocation3D = new Vector3(spawnLocation.x, 0, spawnLocation.y);
-        currentBoss = Instantiate(bossPrefab, spawnLocation3D, Quaternion.identity);
-        if (AnimalManager.Instance != null)
-            AnimalManager.Instance.BossSpawned();
+        GameObject boat = BoatManager.Instance.SpawnBoat();
+        
+        Boat boatScript = boat.GetComponent<Boat>();
+        GameObject boss = Instantiate(bossPrefab, new Vector3(0, 0, 0), Quaternion.identity, boatScript.LoadPos.transform);
+        if (boss == null) return;
+
+        BossHealth bossHealth = boss.GetComponent<BossHealth>();
+        Boss bossScript = boss.GetComponent<Boss>(); 
+        if (bossHealth != null)
+        {
+            bossHealth.OnBossDeath += BossDied;
+        }
+
+        OnBossSpawned?.Invoke(new BossSpawnedEventData(bossScript));
+        boatScript.LoadObject = bossHealth.gameObject.GetComponent<Boss>();
     }
     
-    void BossDied()
+    void BossDied(BossDeathEventData data)
     {
-        if(AnimalManager.Instance != null)
-            AnimalManager.Instance.BossDied();
-        currentBoss.SetActive(false);
-        Destroy(currentBoss);
-        currentBoss = null;
+        data.Boss.OnBossDeath -= BossDied;
+        bossList.Remove(data.Boss.gameObject.GetComponent<Boss>());
+        Destroy(data.Boss.gameObject);
     }
 
     void Update()
     {
-        if (currentBoss != null)
-        {
-            if (currentBoss.GetComponent<BossHealth>())
-            {
-                if (currentBoss.GetComponent<BossHealth>().IsAlive == false)
-                {
-                    BossDied();
-                }
-            }
-        }
+        //if (!spawnedBoss)
+        //{
+        //    SpawnBoss();
+        //    spawnedBoss = true;
+        //}
     }
 }

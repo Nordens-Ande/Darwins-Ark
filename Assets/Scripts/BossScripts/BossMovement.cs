@@ -7,174 +7,113 @@ using UnityEditor.Experimental.GraphView;
 
 public class BossMovement : MonoBehaviour
 {
-    Vector2Int[] directions =
-    {
-        Vector2Int.right,
-        Vector2Int.left,
-        Vector2Int.up,
-        Vector2Int.down,
-    };
+    TileManager tileManager = TileManager.Instance;
+
+    PathFinding pathFinder;
+    List<Tile> currentPath;
 
     [SerializeField] float movementSpeed;
-    [SerializeField, ReadOnly] Tile targetTile;
-    int maxDistanceToNewTile;
-    Tile currentTile;
-    Tile nextTile;
-    Vector3 moveDirection; //used to check what direction we moved last frame, when selecting new target tile we dont want to go in the negative of this direction
+    [SerializeField] float maxHeightDifference;
+
+    int pathStage;
+
+    public PathFinding PathFinder
+    {
+        get { return pathFinder; }
+        set { pathFinder = value; }
+    }
+
+    public List<Tile> CurrentPath
+    {
+        get { return currentPath; }
+        set { currentPath = value;  pathStage = 0; } //Debug.Log("currentPath boss: " + currentPath.Count);
+    }
+    
+    public float MaxHeightDifference => maxHeightDifference;
 
     void Start()
     {
+        currentPath = new List<Tile>();
         movementSpeed = 2;
-        maxDistanceToNewTile = 10;
-        targetTile = NewTargetTile();
-
-        Vector3 direction = targetTile.position - transform.position;
-        direction.y = 0;
-        direction.Normalize();
-
-        nextTile = GetNextTile(direction);
-        moveDirection = Vector3.zero;
+        maxHeightDifference = 0.5f;
+        pathStage = 0;
     }
 
-    List<Chunk> FindAvailableChunks(Chunk currentChunk)
+    public bool IsBossTraversableBeach(Tile tile) //allows traversing beach tiles
     {
-        List<Chunk> availableChunks = new List<Chunk>();
-
-        Vector3 pos = currentChunk.position;
-        int chunkSize = TileManager.Instance.ChunkSize;
-
-        foreach(Vector2Int direction in directions)
-        {
-            for(int i = 0; i < 3; i++)
-            {
-                float x = pos.x + direction.x * i * chunkSize;
-                float z = pos.z + direction.y * i * chunkSize;
-
-                Chunk chunkToCheck = TileManager.Instance.GetChunk(x, z);
-                if(chunkToCheck == null)
-                {
-                    break;
-                }
-                availableChunks.Add(chunkToCheck);
-            }
-        }
-
-        return availableChunks;
+        if (tile.Type == TileType.Ocean) return false;
+        return true;
     }
 
-    Tile NewTargetTile()
+    public bool IsBossTraversable(Tile tile)
     {
-        if (TileManager.Instance.chunks.Count == 0) return null;
-
-        Debug.Log("choosing new target tile");
-
-        //find what chunk the boss is in now
-        Chunk currentChunk = TileManager.Instance.GetChunk(transform.position.x, transform.position.z);
-        if(currentChunk == null)
-        {
-            Debug.Log("BossMovement: NewTargetTile(): currentChunk not set");
-            return null;
-        }
-
-        List<Chunk> availableChunks = FindAvailableChunks(currentChunk);
-        availableChunks.Add(currentChunk);
-
-        if(availableChunks.Count == 0)
-        {
-            Debug.Log("BossMovement: NewTargetTile(): no chunks available");
-            return null;
-        }
-
-        List<Tile> possibleTiles = new List<Tile>();
-        int currentX = Mathf.RoundToInt(transform.position.x);
-        int currentZ = Mathf.RoundToInt(transform.position.z);
-        foreach (Chunk chunk in availableChunks)
-        {
-            foreach (Tile tile in chunk.Tiles)
-            {
-                int x = Mathf.RoundToInt(tile.position.x);
-                int z = Mathf.RoundToInt(tile.position.z);
-
-                Vector3 tileDirection = tile.position - transform.position;
-                tileDirection.Normalize();
-                if (tileDirection == -moveDirection) continue; //dont move backwards
-
-                if (z == currentZ && x != currentX)
-                {
-                    possibleTiles.Add(tile);
-                }
-
-                if (x == currentX && z != currentZ)
-                {
-                    possibleTiles.Add(tile);
-                }
-            }
-        }
-
-        //safeguard if only backtracking tiles are available
-        if (possibleTiles.Count <= 0)
-        {
-            foreach (Chunk chunk in availableChunks)
-            {
-                foreach (Tile tile in chunk.Tiles)
-                {
-                    Vector3 direction = tile.position - transform.position;
-                    direction.Normalize();
-                    if (direction == moveDirection)
-                    {
-                        possibleTiles.Add(tile);
-                    }
-                }
-            }
-        }
-
-        Tile chosenTile = possibleTiles[Random.Range(0, possibleTiles.Count)];
-        return chosenTile;
+        if (tile.Type == TileType.Ocean) return false;
+        if (tile.Type == TileType.Beach) return false;
+        return true;
     }
 
-    Tile GetNextTile(Vector3 direction)
+    public bool SetPath(Tile targetTile, System.Func<Tile, bool> traversable)
     {
-        Tile tile = TileManager.Instance.GetTile(transform.position + direction);
-        if(tile != null)
+        currentPath = pathFinder.GetPathAStar(tileManager.GetTile(transform.position), targetTile, traversable, maxHeightDifference, 0);
+        if(currentPath == null) return false;
+        //Debug.Log("currentPath boss: " + currentPath.Count);
+        pathStage = 0;
+        return true;
+    }
+
+    public bool SetPathFromBeachToGrass()
+    {
+        currentPath = pathFinder.GetPathFromBeachToGrass(tileManager.GetTile(transform.position), IsBossTraversableBeach, maxHeightDifference);
+        if (currentPath == null) return false;
+        pathStage = 0;
+        return true;
+    }
+
+    bool CheckIfReachedNextTile(Tile nextTile)
+    {
+        return Vector3.Distance(transform.position, nextTile.position) < 0.03f;
+    }
+
+    bool CheckIfNextTileIsTargetTile(Tile nextTile)
+    {
+        return nextTile == currentPath[currentPath.Count - 1];
+    }
+
+    public (bool, bool) BossMove()
+    {
+        if(currentPath == null) return (false, false);
+        if(currentPath.Count == 0) return (false, false);
+
+        Tile target = null;
+        if(currentPath.Count <= 1)
         {
-            //Debug.Log("returned next tile");
-            return tile;
+            return (true, true);
         }
         else
         {
-            //Debug.Log("didnt find next tile");
-            return null;
+            target = currentPath[pathStage + 1];
         }
-    }
+        
+        transform.position = Vector3.MoveTowards(transform.position, target.position, movementSpeed * Time.deltaTime);
 
-    bool CheckIfReachedTargetTile(Tile tile)
-    {
-        if (tile == targetTile) return true;
-        else return false;
-    }
+        Rotate((target.position - currentPath[pathStage].position).normalized);
 
-    (bool, bool) ReachedNextTile()
-    {
-        float distance = Vector3.Distance(nextTile.position, transform.position);
-        if (distance < 0.01f)
+        if(CheckIfReachedNextTile(target))
         {
-            if (CheckIfReachedTargetTile(nextTile))
+            transform.position = target.position;
+            if(CheckIfNextTileIsTargetTile(target))
             {
-                //Debug.Log("reached target tile");
+                //Debug.Log("Reached target tile");
                 return (true, true);
             }
-            else
-            {
-                //Debug.Log("reached tile");
-                return (true, false);
-            }
+            pathStage++;
+            return (false, true);
         }
         return (false, false);
     }
 
     void Rotate(Vector3 direction)
     {
-        direction.y = 0f;
         if (direction != Vector3.zero)
         {
             transform.rotation = Quaternion.LookRotation(direction);
@@ -183,33 +122,6 @@ public class BossMovement : MonoBehaviour
 
     void Update()
     {
-        if(nextTile != null)
-        {
-            moveDirection = targetTile.position - transform.position;
-            moveDirection.Normalize();
 
-            (bool reachedNextTile, bool reachedTargetTile) = ReachedNextTile();
-            
-            if(reachedNextTile)
-            {
-                
-                if(nextTile.HasPlant)
-                {
-                    nextTile.CurrentPlant.DamagePlant(101.0f);
-                }
- 
-                transform.position = nextTile.position;
-                if (reachedTargetTile)
-                {
-                    targetTile = NewTargetTile();
-                    return;
-                }
-                nextTile = GetNextTile(moveDirection);
-            }
-            
-            transform.position = Vector3.MoveTowards(transform.position, nextTile.position, movementSpeed * Time.deltaTime);
-            transform.position = new Vector3(transform.position.x, 0.0f, transform.position.z);
-            Rotate(moveDirection);
-        }
     }
 }

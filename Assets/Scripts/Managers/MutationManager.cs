@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using UnityEngine;
+
 using System.Collections.Generic;
 using System.Collections;
 
@@ -11,8 +12,8 @@ public class MutationManager : MonoBehaviour
 
     public List<SO_AnimalMutation> MutationList 
     {
-        get { return mutationsList; }
-        set { mutationsList = value; }
+        get => mutationsList;
+        set => mutationsList = value;
     }
     
     private void Awake()

@@ -1,61 +1,84 @@
+using Assets.Enums.GameTransitions;
+using Assets.Scripts.Events.Data;
+using Assets.Scripts.Managers;
+using System.Collections.Generic;
+using System.ComponentModel;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class TileGridOverlay : MonoBehaviour
+namespace Assets.Scripts.Environment
 {
-    [SerializeField] private float lineHeight = 0.02f;
-    [SerializeField] private float lineWidth = 0.025f;
-
-    private Material lineMaterial;
-
-    public void Setup(int chunkSize, Material material)
+    public class TerraformManager : SingletonManager<TerraformManager>
     {
-        lineMaterial = material;
-        CreateGrid(chunkSize);
-    }
+        private TileManager tileManager;
+        private TileSelectionManager tileSelectionManager;
 
-    private void CreateGrid(int size)
-    {
-        // Vertical lines
-        for (int x = 0; x <= size; x++)
+        private HashSet<Vector2Int> selectedTiles;
+
+        [SerializeField, ReadOnly] private bool isActive = false;
+        [SerializeField, ReadOnly] private bool modifySelectionEnabled = false;
+
+        void Start()
         {
-            CreateLine(
-                new Vector3(x, lineHeight, 0),
-                new Vector3(x, lineHeight, size)
-            );
+            tileManager = TileManager.Instance;
+            tileSelectionManager = TileSelectionManager.Instance;
+            GameManager gameManager = GameManager.Instance;
+
+            gameManager.OnGameModeChanged += HandleModeChanged;
+
+            HandleModeChanged(new GameModeChangedData(gameObject, GameMode.Game, gameManager.CurrentMode));
         }
 
-        // Horizontal lines
-        for (int z = 0; z <= size; z++)
+        // Update is called once per frame
+        void Update()
         {
-            CreateLine(
-                new Vector3(0, lineHeight, z),
-                new Vector3(size, lineHeight, z)
-            );
-        }
-    }
-
-    private void CreateLine(Vector3 start, Vector3 end)
-    {
-        GameObject lineObject = new GameObject("TileLine");
-        lineObject.transform.SetParent(transform, false);
-
-        LineRenderer line = lineObject.AddComponent<LineRenderer>();
-
-        line.positionCount = 2;
-        line.useWorldSpace = false;
-
-        line.SetPosition(0, start);
-        line.SetPosition(1, end);
-
-        line.startWidth = lineWidth;
-        line.endWidth = lineWidth;
-
-        if (lineMaterial != null)
-        {
-            line.material = lineMaterial;
+            if (!isActive)
+                return;
         }
 
-        line.startColor = Color.white;
-        line.endColor = Color.white;
+
+        private void HandleModeChanged(GameModeChangedData data)
+        {
+            isActive = data.NewValue switch
+            {
+                GameMode.Terraform => true,
+                _ => false
+            };
+        }
+
+
+        public void OnModifySelection(InputAction.CallbackContext context)
+        {
+            //Debug.Log($"OnModifySelection called: {context.phase}");
+            
+
+            if (context.performed)
+            {
+                selectedTiles = tileSelectionManager.SelectedTiles;
+                modifySelectionEnabled = true;
+            }
+            else
+            {
+                modifySelectionEnabled = false;
+            }
+
+        }
+
+        public void OnTerraformSelection(InputAction.CallbackContext context)
+        {
+            //Debug.Log($"OnTerraformSelection called: {context.phase}");
+
+            if (!modifySelectionEnabled)
+                return;
+
+            //Debug.Log("We are terraforming");
+            Vector2 mouseDelta = context.ReadValue<Vector2>();
+            float increment = 10.0f * mouseDelta.y > 0 ? 1f : -1f;
+
+            foreach (Vector2Int tile in selectedTiles)
+            {
+                tileManager.GetChunk(tile).IncreaseTileHeight(tile, mouseDelta.y * Time.deltaTime);
+            }
+        }
     }
 }

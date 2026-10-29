@@ -529,6 +529,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::TileSelectionManager
   uiStateManager: {fileID: 1939103904}
   visibilityMode: 1
+  mouseMoveThreshold: 20
+  selectHeld: 0
+  isAddingTiles: 0
 --- !u!1001 &191649712
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1711,7 +1714,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Environment.TileManager
   chunkObjects: []
   chunkSize: 8
-  chunkGridSize: {x: 1, y: 1}
+  chunkGridSize: {x: 2, y: 2}
   gridLineMaterial: {fileID: 2100000, guid: bcc9cd91fc90fe04db0dcf1a03ca49de, type: 2}
 --- !u!114 &767341235
 MonoBehaviour:
@@ -3526,6 +3529,52 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1665740386}
   m_CullTransparentMesh: 1
+--- !u!1 &1676804156
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1676804157}
+  - component: {fileID: 1676804158}
+  m_Layer: 0
+  m_Name: DeityWind
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1676804157
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1676804156}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1676804158
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1676804156}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5ce1e62b8926c64499e3ddacbfef85ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WindDeityManager
+  windDirection: 0
+  windLength: 4
 --- !u!1 &1679775735
 GameObject:
   m_ObjectHideFlags: 0
@@ -4831,5 +4880,6 @@ SceneRoots:
   - {fileID: 63541081}
   - {fileID: 388359292}
   - {fileID: 191649712}
+  - {fileID: 1676804157}
   - {fileID: 983742617}
   - {fileID: 1459698151}

@@ -1,33 +1,31 @@
+using System;
 using UnityEngine;
 
 public class BossHealth : MonoBehaviour
 {
+    [SerializeField] float maxHealth;
     float health;
     bool isAlive;
 
-    public bool IsAlive 
-    { 
-        get { return isAlive; }
-        set { isAlive = value; } 
-    }
+    public event Action<BossDeathEventData> OnBossDeath;
 
-    private void Awake()
-    {
-        health = 100;
-        isAlive = true;
-    }
+    public float MaxHealth => maxHealth;
+    public float Health => health;
+    public bool IsAlive => isAlive;
 
-    void Start()
+    private void Start()
     {
-        
+        maxHealth = 100;
+        health = maxHealth;
     }
 
     public void TakeDamage(float damage)
     {
         health -= damage;
-        if(health < 0)
+
+        if (health < 0)
         {
-            isAlive = false;
+            OnBossDeath?.Invoke(new BossDeathEventData(this));
         }
     }
 }

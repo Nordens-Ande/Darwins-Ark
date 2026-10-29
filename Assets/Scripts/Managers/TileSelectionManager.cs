@@ -1,378 +1,313 @@
+using Assets.Enums.GameTransitions;
 using Assets.Scripts.Environment;
+using Assets.Scripts.Events.Data;
+using Assets.Scripts.Managers;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class TileSelectionManager : MonoBehaviour
+// This class currenlty lacks the ability to change the color of selected tiles, this should be addressed and fixed in future.
+// Curently you can find the colors of the grids in TileManager where the grids are instansiated.
+public class TileSelectionManager : SingletonManager<TileSelectionManager>
 {
-    [SerializeField] private UIStateManager uiStateManager;
+    //[SerializeField] private UIStateManager uiStateManager;
+    private GameManager gameManager;
+    private TileManager tileManager;
+
     //[SerializeField] private float doubleTapTime = 0.3f;
-    [SerializeField]
-        private TileGridVisibilityMode visibilityMode =
-                TileGridVisibilityMode.AllTiles;
+    [SerializeField] private TileGridVisibilityMode visibilityMode = TileGridVisibilityMode.AllTiles;
 
-    private Tile highlightedTile;
+    [SerializeField, ReadOnly] private Vector2Int? highlightedTile;
 
-    private HashSet<Tile> selectedTiles =
-        new HashSet<Tile>();
+    private HashSet<Vector2Int> selectedTiles = new HashSet<Vector2Int>();
 
-    //// Select Button Settings-------------------
-    //[SerializeField] private Key selectionKey = Key.LeftCtrl;
-    //private float lastSelectKeyPressTime = -1f;
-    ////------------------------------------------
-    private bool selectHeld;
+    //Mouse input
+    [SerializeField] private float mouseMoveThreshold = 20f;
+    private Vector2 mouseAccumulator;
+    //---------------------------------------
+
+    [SerializeField, ReadOnly] private bool selectHeld;
+    [SerializeField, ReadOnly] private bool isAddingTiles;
 
     private bool wasTerraforming = false;
 
     //Flag used to activate/deactive keyboard/mouse inputs
-    private bool usingMouse = true;
 
     private Color normalColor = Color.red;
     private Color highlightColor = Color.cyan;
     private Color selectedColor = Color.yellow;
 
-    private void Update()
+    public HashSet<Vector2Int> SelectedTiles => selectedTiles;
+
+    private void Start()
     {
-        if (uiStateManager == null)
-            return;
+        //uiStateManager = UIStateManager.Instance;
+        gameManager = GameManager.Instance;
+        tileManager = TileManager.Instance;
 
-        bool isTerraforming =
-            uiStateManager.IsTerraforming();
+        gameManager.OnGameModeChanged += HandleModeChange;
 
-        // Just entered terraform mode
-        if (isTerraforming && !wasTerraforming)
-        {
-            SetMiddleTile();
-            RefreshAllTileVisibility();
-        }
-        
-        // Just existed terraform mode
-        if(!isTerraforming && wasTerraforming)
-        {
-            ClearEverything();
-        }
-
-        wasTerraforming = isTerraforming;
+        SetGridVisible(false);
     }
 
-    // Initial highlight
-    private void SetMiddleTile()
+    //private void Update()
+    //{
+    //    if (uiStateManager == null)
+    //        return;
+
+    //    bool isTerraforming = uiStateManager.IsTerraforming();
+
+    //    // Just entered terraform mode
+    //    //if (isTerraforming && !wasTerraforming)
+    //    //{
+    //    //    SetMiddleTile();
+    //    //    RefreshAllTileVisibility();
+    //    //}
+
+    //    // Just existed terraform mode
+    //    //if(!isTerraforming && wasTerraforming)
+    //    //{
+    //    //    ClearEverything();
+    //    //}
+
+    //    wasTerraforming = isTerraforming;
+    //}
+
+    public IEnumerable<Tile> GetSelectedTiles()
     {
-        int mapwidth =
-            TileManager.Instance.ChunkGridSize.x * 
-            TileManager.Instance.ChunkSize;
+        return selectedTiles
+            .Select(pos => tileManager.GetTile(pos))
+            .Where(tile => tile != null);
+    }
 
-        int mapDepth =
-            TileManager.Instance.ChunkGridSize.y *
-            TileManager.Instance.ChunkSize;
 
-        int middleX = mapwidth / 2;
-        int middleZ = mapDepth / 2;
+    // Initial highlight
+    public void SetMiddleTile()
+    {
+        MousePositionManager.Instance.TryGetWorldPosition(out Vector3 cameraMid);
 
-        highlightedTile =
-            TileManager.Instance.GetTile(middleX, middleZ);
+        Tile middleTile = tileManager.GetTile(cameraMid.x, cameraMid.y);
 
-        if (highlightedTile != null)
+        highlightedTile = middleTile != null ? middleTile.GridPosition : Vector2Int.zero;
+    }
+
+    private void SetHighlight(int x, int z)
+    {
+        Tile newTile = tileManager.GetTile(x, z);
+
+        if (newTile == null)
+            return;
+
+        if (!highlightedTile.HasValue)
         {
-            SetTileColor(
-                highlightedTile, 
-                highlightColor
-                );
+            highlightedTile = newTile.GridPosition;
+        }
+        else if (newTile.GridPosition == highlightedTile.Value)
+        {
+            return;
+        }
+        else
+        {
+            highlightedTile = newTile.GridPosition;
+            tileManager.SetHighlightGridTiles(new HashSet<Vector2Int> { highlightedTile.Value });
+        }
+
+        if (selectHeld)
+        {
+            if (!isAddingTiles)
+            {
+                selectedTiles.Remove(highlightedTile.Value);
+            }
+            else
+            {
+                selectedTiles.Add(highlightedTile.Value);
+            }
+
+            tileManager.SetSelectionGridTiles(selectedTiles);
         }
     }
 
     private void MoveHighlight(int xDirection, int zDirection)
     {
-        if (highlightedTile == null)
-            return;
+        Vector2Int oldHighlightedTilePos = highlightedTile ?? Vector2Int.zero;
 
-        Tile oldHighlightedTile = highlightedTile;
+        int newX = Mathf.RoundToInt(highlightedTile.Value.x) + xDirection;
+        int newZ = Mathf.RoundToInt(highlightedTile.Value.y) + zDirection;
 
-        int newX =
-            Mathf.RoundToInt(highlightedTile.position.x)
-            + xDirection;
-
-        int newZ =
-            Mathf.RoundToInt(highlightedTile.position.z)
-            + zDirection;
-
-        Tile newTile =
-            TileManager.Instance.GetTile(
-                newX,
-                newZ
-            );
-
-        if (newTile == null)
-            return;
-
-        // Restore old tile
-        if (selectedTiles.Contains(oldHighlightedTile))
-        {
-            SetTileColor(
-                oldHighlightedTile,
-                selectedColor
-            );
-        }
-        else
-        {
-            SetTileColor(
-                oldHighlightedTile,
-                normalColor
-            );
-        }
-
-        highlightedTile = newTile;
-
-        // Holding select = toggle the tile we move onto
-        if (selectHeld)
-        {
-            if (selectedTiles.Contains(highlightedTile))
-            {
-                selectedTiles.Remove(highlightedTile);
-
-                SetTileColor(
-                    highlightedTile,
-                    highlightColor
-                );
-            }
-            else
-            {
-                selectedTiles.Add(highlightedTile);
-
-                SetTileColor(
-                    highlightedTile,
-                    selectedColor
-                );
-            }
-        }
-        else
-        {
-            if (selectedTiles.Contains(highlightedTile))
-            {
-                SetTileColor(
-                    highlightedTile,
-                    selectedColor
-                );
-            }
-            else
-            {
-                SetTileColor(
-                    highlightedTile,
-                    highlightColor
-                );
-            }
-        }
-
-        UpdateTileVisibility(oldHighlightedTile);
-        UpdateTileVisibility(highlightedTile);
+        SetHighlight(newX, newZ);
     }
- 
+
+
+    public void SetGridVisible(bool visible)
+    {
+        RefreshGrids();
+
+        if (tileManager == null)
+        {
+            Debug.LogError("Could not set grid visibility for tiles, TileManager.Instance does not exist or has not been found.");
+            return;
+        }
+
+        // Visibility of the Chunk Grid (i.e all tiles)
+        if (visibilityMode == TileGridVisibilityMode.AllTiles || !visible)
+        {
+            List<GameObject> chunks = tileManager.chunkObjects;
+            foreach (GameObject chunk in chunks)
+            {
+                GameObject chunkGrid = chunk.transform.Find("Chunk Grid").gameObject;
+                if (chunkGrid != null)
+                {
+                    chunkGrid.gameObject.SetActive(visible);
+                }
+                else
+                {
+                    Debug.LogWarning($"Grid object in {chunk.name} could not set visibility because it was not found.");
+                }
+            }
+        }
+
+        // Visibility of the selection
+        GameObject selectionGrid = tileManager.transform.Find("Selection Grid").gameObject;
+        if (selectionGrid != null)
+        {
+            selectionGrid.SetActive(visible);
+        }
+        else
+        {
+            Debug.LogWarning($"{selectionGrid.name} object could not set visibility because it was not found.");
+        }
+
+        // Visibility of the cursor
+        GameObject cursorGrid = tileManager.transform.Find("Highlight Grid").gameObject;
+        if (cursorGrid != null)
+        {
+            cursorGrid.SetActive(visible);
+        }
+        else
+        {
+            Debug.LogWarning($"{cursorGrid.name} object could not set visibility because it was not found.");
+        }
+    }
+
+
+    private void RefreshGrids()
+    {
+        if (highlightedTile.HasValue)
+            tileManager.SetHighlightGridTiles(new HashSet<Vector2Int> { highlightedTile.Value });
+
+        tileManager.SetSelectionGridTiles(selectedTiles);
+    }
+
+
     // Clear selection
     public void ClearSelection()
     {
-        foreach (Tile tile in selectedTiles)
-        {
-            SetTileColor(
-                tile,
-                normalColor
-            );
-        }
-
         selectedTiles.Clear();
-
-        // Giving tile grids their old color back
-        if (highlightedTile != null)
-        {
-            SetTileColor(
-                highlightedTile,
-                highlightColor
-            );
-        }
-
-        RefreshAllTileVisibility();
+        
+        RefreshGrids();
     }
-    private void ClearEverything()
+    public void ClearEverything()
     {
-        foreach (Tile tile in selectedTiles)
-        {
-            SetTileColor(
-                tile,
-                normalColor
-            );
-        }
-
         selectedTiles.Clear();
-
-        if (highlightedTile != null)
-        {
-            SetTileColor(
-                highlightedTile,
-                normalColor
-            );
-        }
 
         highlightedTile = null;
 
         selectHeld = false;
 
-        RefreshAllTileVisibility();
+        RefreshGrids();
     }
 
-    // Grid color and visibility
-    public void SetTileColor(Tile tile, Color color)
-    {
-        TerraformTileGridOverlay overlay =
-        GetOverlay(tile);
-
-        if (overlay == null)
-            return;
-
-        overlay.SetTileColor(tile, color);
-    }
-    private TerraformTileGridOverlay GetOverlay(Tile tile)
-    {
-        Chunk chunk =
-            TileManager.Instance.GetChunk(
-                tile.position.x,
-                tile.position.z
-            );
-
-        if (chunk == null)
-            return null;
-
-        int chunkIndex =
-            TileManager.Instance.chunks.IndexOf(chunk);
-
-        if (chunkIndex < 0)
-            return null;
-
-        Transform tileGrid =
-            TileManager.Instance.chunkObjects[chunkIndex]
-            .transform.Find("TileGrid");
-
-        if (tileGrid == null)
-            return null;
-
-        return tileGrid.GetComponent<TerraformTileGridOverlay>();
-    }
-    private void UpdateTileVisibility(Tile tile)
-    {
-        TerraformTileGridOverlay overlay =
-        GetOverlay(tile);
-
-        if (overlay == null)
-            return;
-
-        switch (visibilityMode)
-        {
-            case TileGridVisibilityMode.AllTiles:
-
-                overlay.SetTileVisible(
-                    tile,
-                    true
-                );
-
-                break;
-
-
-            case TileGridVisibilityMode.HighlightedAndSelected:
-
-                bool shouldBeVisible =
-                    tile == highlightedTile ||
-                    selectedTiles.Contains(tile);
-
-                overlay.SetTileVisible(
-                    tile,
-                    shouldBeVisible
-                );
-
-                break;
-        }
-    }
-    private void RefreshAllTileVisibility()
-    {
-        foreach (Chunk chunk in TileManager.Instance.chunks)
-        {
-            foreach (Tile tile in chunk.Tiles)
-            {
-                UpdateTileVisibility(tile);
-            }
-        }
-    }
-    // Selected tiles getter -----------------------
-    public IEnumerable<Tile> GetSelectedTiles()
-    {
-        return selectedTiles;
-    }
-    //----------------------------------------------
 
     // Player Input Map
     public void OnTileSelect(InputAction.CallbackContext context)
     {
-        if (!uiStateManager.IsTerraforming())
+        if (gameManager.CurrentMode != GameMode.Terraform)
+            return;
+
+        if (!highlightedTile.HasValue)
             return;
 
         if (context.started)
         {
             selectHeld = true;
-            ToggleHighlightedTile();
+
+            isAddingTiles = !selectedTiles.Contains(highlightedTile.Value);
+
+            // If a current highlight already exists, we add it
+            if(highlightedTile.HasValue)
+            {
+                if (!isAddingTiles)
+                {
+                    selectedTiles.Remove(highlightedTile.Value);
+                }
+                else
+                {
+                    selectedTiles.Add(highlightedTile.Value);
+                }
+
+                RefreshGrids();
+            }
+
+            //ToggleHighlightedTile();
         }
 
         if (context.canceled)
         {
             selectHeld = false;
         }
-        
     }
     public void OnTileMove(InputAction.CallbackContext context)
     {
         // Debug
-        Debug.Log("TIleMove event: " + context.phase);
+        //Debug.Log("TIleMove event: " + context.phase);
 
-        if (!uiStateManager.IsTerraforming())
+        if (gameManager.CurrentMode != GameMode.Terraform)
             return;
 
-        if(!context.performed)
+        if (!context.performed)
             return;
 
+        // Handles Mouse input
+        if (context.control.device is Mouse)
+        {
+            Vector3 mouseWorldPosition = MousePositionManager.Instance.WorldPosition;
+            Vector2Int mouseGridPosition = new Vector2Int(Mathf.RoundToInt(mouseWorldPosition.x), Mathf.RoundToInt(mouseWorldPosition.z));
+            
+            SetHighlight(mouseGridPosition.x, mouseGridPosition.y);
+            return;
+        }
+        // Handles Keyboard input
         Vector2 direction = context.ReadValue<Vector2>();
 
         // Debug
         Debug.Log("Direction: " + direction);
 
-        int xDirection = 
+        int xDirection =
             Mathf.RoundToInt(direction.x);
-        int zDirection = 
+        int zDirection =
             Mathf.RoundToInt(direction.y);
 
         MoveHighlight(xDirection, zDirection);
-
     }
-    private void ToggleHighlightedTile()
+
+
+    private void HandleModeChange(GameModeChangedData data)
     {
-        if (highlightedTile == null)
-            return;
+        GameMode mode = data.NewValue;
 
-        if (selectedTiles.Contains(highlightedTile))
+        switch (mode)
         {
-            selectedTiles.Remove(highlightedTile);
+            case GameMode.Terraform:
+                SetGridVisible(true);
+                SetMiddleTile();
+                break;
 
-            SetTileColor(
-                highlightedTile,
-                highlightColor
-            );
+            default:
+                ClearEverything();
+                SetGridVisible(false);
+                break;
         }
-        else
-        {
-            selectedTiles.Add(highlightedTile);
-
-            SetTileColor(
-                highlightedTile,
-                selectedColor
-            );
-        }
-
-        UpdateTileVisibility(highlightedTile);
     }
-    // --------------------------------------------------
 }
