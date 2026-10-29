@@ -24,7 +24,7 @@ public class BossManager : SingletonManager<BossManager>
         GameObject boat = BoatManager.Instance.SpawnBoat();
         
         Boat boatScript = boat.GetComponent<Boat>();
-        GameObject boss = Instantiate(bossPrefab, new Vector3(0, 0, 0), Quaternion.identity, boatScript.LoadPos.transform);
+        GameObject boss = Instantiate(bossPrefab, new Vector3(0, 0, 0), boatScript.InitialRotation, boatScript.LoadPos.transform);
         if (boss == null) return;
 
         BossHealth bossHealth = boss.GetComponent<BossHealth>();
