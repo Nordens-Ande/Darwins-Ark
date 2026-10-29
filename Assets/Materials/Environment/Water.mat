@@ -97,15 +97,15 @@ Material:
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
-    - _Foam_Noise_Scale: 0.05
-    - _Foam_Speed: 1.24
+    - _Foam_Noise_Scale: 0.48
+    - _Foam_Speed: 1.06
     - _Foam_Speed_Inverse: 1.02
-    - _Foam_Width: 0.13
+    - _Foam_Width: 0.29
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _Metallic: 0
-    - _Noise_Scale: 11.01
+    - _Noise_Scale: 5.02
     - _OcclusionStrength: 1
     - _Opacity: 0
     - _Parallax: 0.005
