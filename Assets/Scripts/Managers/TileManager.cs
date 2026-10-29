@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Environment
 {
-    public class TileManager : MonoBehaviour
+    public class TileManager : SingletonManager<TileManager>
     {
         public static TileManager Instance = null;
 
@@ -20,8 +20,14 @@ namespace Assets.Scripts.Environment
         [SerializeField] private int chunkSize = 8; 
         [SerializeField] private Vector2Int chunkGridSize = Vector2Int.one;
 
+        [Space]
+
+        [SerializeField] private bool createWater = true;
+        [SerializeField] private float waterLevel = 0.5f;
+        [SerializeField] private Material waterMaterial;
+
         // -----------------------------------------------
-        [SerializeField] private Material gridLineMaterial;
+        //[SerializeField] private Material gridLineMaterial;
         // -----------------------------------------------
 
         public int ChunkSize => chunkSize;
@@ -30,12 +36,6 @@ namespace Assets.Scripts.Environment
         private string chunkGridName = "Chunk Grid";
         private string selectionGridName = "Selection Grid";
         private string heighlightGridName = "Highlight Grid";
-
-        private void Awake()
-        {
-            if (Instance == null)
-                TileManager.Instance = this;
-        }
 
         void Start()
         {
@@ -78,6 +78,8 @@ namespace Assets.Scripts.Environment
 
             //SetChunkGridVisible(false);
             SubscribeToRainDeity();
+
+            GenerateWater();
         }
 
 
@@ -223,6 +225,22 @@ namespace Assets.Scripts.Environment
 
                 gridMesh.Rebuild();
             }
+        }
+
+        private void GenerateWater()
+        {
+            if (!createWater)
+                return;
+
+            GameObject waterObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            waterObject.name = "Water Quad";
+            waterObject.transform.parent = transform;
+            
+            waterObject.transform.localPosition = waterObject.transform.localPosition + new Vector3(0, waterLevel, 0);
+            waterObject.transform.localScale = new Vector3(chunkGridSize.x * chunkSize, chunkGridSize.y * chunkSize, 1f);
+            waterObject.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+            
+            waterObject.GetComponent<MeshRenderer>().material = waterMaterial;
         }
 
 
