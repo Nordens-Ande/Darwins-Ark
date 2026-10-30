@@ -57,7 +57,7 @@ public class BossRelocateState : BossAIState
             foreach(Tile tile in chunk.Tiles)
             {
                 if (tile.Type != TileType.Grass && tile.Type != TileType.Concrete && tile.Type != TileType.River) continue;
-                float distance = Vector3.Distance(tile.position, boss.transform.position);
+                float distance = Vector3.Distance(tile.Position, boss.transform.position);
                 if (distance < minRelocateDistance && distance > maxRelocateDistance) continue;
                 possibleTiles.Add(tile);
             }

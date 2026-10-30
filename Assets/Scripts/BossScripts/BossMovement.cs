@@ -71,7 +71,7 @@ public class BossMovement : MonoBehaviour
 
     bool CheckIfReachedNextTile(Tile nextTile)
     {
-        return Vector3.Distance(transform.position, nextTile.position) < 0.03f;
+        return Vector3.Distance(transform.position, nextTile.Position) < 0.03f;
     }
 
     bool CheckIfNextTileIsTargetTile(Tile nextTile)
@@ -94,13 +94,13 @@ public class BossMovement : MonoBehaviour
             target = currentPath[pathStage + 1];
         }
         
-        transform.position = Vector3.MoveTowards(transform.position, target.position, movementSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, target.Position, movementSpeed * Time.deltaTime);
 
-        Rotate((target.position - currentPath[pathStage].position).normalized);
+        Rotate((target.Position - currentPath[pathStage].Position).normalized);
 
         if(CheckIfReachedNextTile(target))
         {
-            transform.position = target.position;
+            transform.position = target.Position;
             if(CheckIfNextTileIsTargetTile(target))
             {
                 //Debug.Log("Reached target tile");

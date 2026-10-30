@@ -56,9 +56,9 @@ namespace Assets.Scripts.Environment
                     TileType type = TileType.Ocean; //type is assigned to avoid compile-time error
 
                     float y = useNoise ? noise.GetHeight(x + position.x, z + position.y, out type) : 0f;
-                    tiles[x, z] = new Tile(new Vector3(x + position.x, y, z + position.y), new Vector3(x, y, z), type);
+                    tiles[x, z] = new Tile(this, new Vector2Int(x, z), new Vector3(x + position.x, y, z + position.y), new Vector3(x, y, z), type);
 
-                    Vector2Int gridPosition = new Vector2Int((int)tiles[x, z].position.x, (int)tiles[x, z].position.z);
+                    Vector2Int gridPosition = new Vector2Int((int)tiles[x, z].Position.x, (int)tiles[x, z].Position.z);
                     tileTypes[type].Add(gridPosition);
                 }
             }
@@ -85,7 +85,7 @@ namespace Assets.Scripts.Environment
             if (x > tiles.GetLength(0) - 1 || z > tiles.GetLength(1) - 1 || x < 0 || z < 0)
                 return -10f;
 
-            return tiles[x, z].position.y;
+            return tiles[x, z].Position.y;
         }
         private float GetTileHeight(Vector2Int positionXZ, Space space = Space.World) => GetTileHeight(positionXZ.x, positionXZ.y, space);
 
@@ -124,6 +124,14 @@ namespace Assets.Scripts.Environment
         }
 
 
+        public void CleanChunk()
+        {
+            GenerateMeshData();
+            foreach (Tile tile in tiles)
+                tile.CleanUpTile();
+        }
+
+
         public void GenerateMeshData()
         {
             vertices = new List<Vector3>();
@@ -136,7 +144,7 @@ namespace Assets.Scripts.Environment
             {
                 for (int z = 0; z < size; z++)
                 {
-                    Vector3 tilePos = tiles[x, z].position/* + new Vector3(position.x, 0, position.y)*/;
+                    Vector3 tilePos = tiles[x, z].Position/* + new Vector3(position.x, 0, position.y)*/;
                     float[] neighbourHeights = new float[4] 
                     { 
                         GetTileHeight(x, z + 1, Space.Self), // Noth
@@ -274,20 +282,23 @@ namespace Assets.Scripts.Environment
 
         public void ModifyTile(int x, int z, float newY, Space space = Space.World)
         {
-            if (space == Space.World)
-            {
-                x -= (int)position.x;
-                z -= (int)position.y;
-            }
+            //if (space == Space.World)
+            //{
+            //    x -= (int)position.x;
+            //    z -= (int)position.y;
+            //}
 
-            if (x > size - 1 || z > size - 1 || x < 0 || z < 0)
+            //if (x > size - 1 || z > size - 1 || x < 0 || z < 0)
+            //    return;
+            if (!LocalizePositions(ref x, ref z, space))
                 return;
 
             isDirty = true;
 
             //Vector3 localPosition = new Vector3();
-            tiles[x, z].position.y = newY;
-            tiles[x, z].localPosition.y = newY;
+            //tiles[x, z].Position.y = newY;
+            //tiles[x, z].LocalPosition.y = newY;
+            tiles[x, z].Height += newY;
         }
         public void ModifyTile(Vector2Int positionXZ, float newY, Space space = Space.World) => ModifyTile(positionXZ.x, positionXZ.y, newY, space);
 
@@ -299,8 +310,9 @@ namespace Assets.Scripts.Environment
 
             isDirty = true;
 
-            tiles[x, z].position.y += yIncrement;
-            tiles[x, z].localPosition.y += yIncrement;
+            //tiles[x, z].Position.y += yIncrement;
+            //tiles[x, z].LocalPosition.y += yIncrement;
+            tiles[x, z].Height += yIncrement;
         }
         public void IncreaseTileHeight(Vector2Int positionXZ, float yIncrement, Space space = Space.World) => IncreaseTileHeight(positionXZ.x, positionXZ.y, yIncrement, space);
 

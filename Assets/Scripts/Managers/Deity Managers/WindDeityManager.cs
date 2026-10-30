@@ -51,7 +51,7 @@ public class WindDeityManager : SingletonManager<WindDeityManager>
 
     Vector2Int TileToVector2Int(Tile tile)
     {
-        return new Vector2Int((int)tile.position.x, (int)tile.position.z);
+        return new Vector2Int((int)tile.Position.x, (int)tile.Position.z);
     }
 
     private List<Tile> FindTilesInWindZone(Tile anchorPoint, Vector2 direction)

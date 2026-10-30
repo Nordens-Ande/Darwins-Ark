@@ -9,7 +9,7 @@ public class BossAttackRiverContainer : Container<Boss>
         Tile riverTile = boss.ClosestAttackTilePath[boss.ClosestAttackTilePath.Count - 1];
         if (riverTile == null) return 0f;
 
-        float distance = Vector3.Distance(boss.transform.position, riverTile.position);
+        float distance = Vector3.Distance(boss.transform.position, riverTile.Position);
         if (distance >= boss.SightDistanceToTiles) return 0f; // too far
 
         if (boss.DebugScores)

@@ -104,7 +104,8 @@ namespace Assets.Scripts.Environment
                 if (!chunks[i].isDirty)
                     continue;
 
-                chunks[i].GenerateMeshData();
+                //chunks[i].GenerateMeshData();
+                chunks[i].CleanChunk();
                 Mesh mesh = new Mesh();
 
                 mesh.SetVertices(chunks[i].vertices);

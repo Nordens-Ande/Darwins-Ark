@@ -73,7 +73,7 @@ public class BossEscapeState : BossAIState
             }
             else
             {
-                Debug.Log("escape tile position for boss" + tile.position);
+                Debug.Log("escape tile position for boss" + tile.Position);
             }
             path = boss.MovementScript.PathFinder.GetPathAStar(tileManager.GetTile(boss.transform.position), tile, boss.MovementScript.IsBossTraversable, boss.MovementScript.MaxHeightDifference, (escapeDistance + searchRange) * 2);
             if (path != null)

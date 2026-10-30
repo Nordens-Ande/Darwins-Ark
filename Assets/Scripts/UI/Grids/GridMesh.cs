@@ -108,7 +108,7 @@ public class GridMesh : LineMesh
             if (tile == null)
                 continue;
 
-            Vector3 tilePos = tile.position;
+            Vector3 tilePos = tile.Position;
 
             meshData.AddFace(
                 new Vector3(-0.5f, heightOffset, 0.5f) + tilePos,   // top-left

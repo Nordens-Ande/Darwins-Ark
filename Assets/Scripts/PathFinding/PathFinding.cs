@@ -51,7 +51,7 @@ public class PathFinding
 
     Vector2Int TileToVector2Int(Tile tile)
     {
-        return new Vector2Int((int)tile.position.x, (int)tile.position.z);
+        return new Vector2Int((int)tile.Position.x, (int)tile.Position.z);
     }
 
     List<Tile> BuildPath(Tile targetTile, Tile startTile, Dictionary<Vector2Int, TileNodeAStar> tileNodes)
@@ -196,7 +196,7 @@ public class PathFinding
                 {
                     continue;
                 }
-                if(Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileManager.GetTile(tile).position.y) > maxHeightDifference)
+                if(Mathf.Abs(tileManager.GetTile(currentTile).Position.y - tileManager.GetTile(tile).Position.y) > maxHeightDifference)
                 {
                     continue;
                 }
@@ -211,8 +211,8 @@ public class PathFinding
                     Tile tileXDir = tileManager.GetTile(currentTile.x + direction.x, currentTile.y);
                     Tile tileZDir = tileManager.GetTile(currentTile.x, currentTile.y + direction.y);
 
-                    if (Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileXDir.position.y) > maxHeightDifference) continue;
-                    if (Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileZDir.position.y) > maxHeightDifference) continue;
+                    if (Mathf.Abs(tileManager.GetTile(currentTile).Position.y - tileXDir.Position.y) > maxHeightDifference) continue;
+                    if (Mathf.Abs(tileManager.GetTile(currentTile).Position.y - tileZDir.Position.y) > maxHeightDifference) continue;
 
                     movementCost = Mathf.Sqrt(2f);
                 }
@@ -222,7 +222,7 @@ public class PathFinding
                 }
 
                 //add additional cost to height difference movement
-                float heightDifference = Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileManager.GetTile(tile).position.y);
+                float heightDifference = Mathf.Abs(tileManager.GetTile(currentTile).Position.y - tileManager.GetTile(tile).Position.y);
                 if(heightDifference != 0f)
                 {
                     movementCost += heightDifference / maxHeightDifference;
@@ -308,7 +308,7 @@ public class PathFinding
                 {
                     continue;
                 }
-                if (Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileManager.GetTile(tile).position.y) > maxHeightDifference)
+                if (Mathf.Abs(tileManager.GetTile(currentTile).Position.y - tileManager.GetTile(tile).Position.y) > maxHeightDifference)
                 {
                     continue;
                 }
@@ -323,8 +323,8 @@ public class PathFinding
                     Tile tileXDir = tileManager.GetTile(currentTile.x + direction.x, currentTile.y);
                     Tile tileZDir = tileManager.GetTile(currentTile.x, currentTile.y + direction.y);
 
-                    if (Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileXDir.position.y) > maxHeightDifference) continue;
-                    if (Mathf.Abs(tileManager.GetTile(currentTile).position.y - tileZDir.position.y) > maxHeightDifference) continue;
+                    if (Mathf.Abs(tileManager.GetTile(currentTile).Position.y - tileXDir.Position.y) > maxHeightDifference) continue;
+                    if (Mathf.Abs(tileManager.GetTile(currentTile).Position.y - tileZDir.Position.y) > maxHeightDifference) continue;
 
                     movementCost = Mathf.Sqrt(2f);
                 }
@@ -364,7 +364,7 @@ public class PathFinding
                 }
             }
         }
-        availableTiles = availableTiles.OrderBy(tile => Vector3.Distance(startTile.position, tile.position)).ToList();
+        availableTiles = availableTiles.OrderBy(tile => Vector3.Distance(startTile.Position, tile.Position)).ToList();
 
         for(int i = 0; i < availableTiles.Count; i++)
         {

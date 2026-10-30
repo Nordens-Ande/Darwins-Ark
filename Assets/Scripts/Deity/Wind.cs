@@ -46,22 +46,22 @@ public class Wind
         {
             if (direction.x > 0)
             {
-                result = list.OrderBy((tile => tile.position.x)).ToList();
+                result = list.OrderBy((tile => tile.Position.x)).ToList();
             }
             else
             {
-                result = list.OrderByDescending((tile => tile.position.x)).ToList();
+                result = list.OrderByDescending((tile => tile.Position.x)).ToList();
             }
         }
         else
         {
             if (direction.y > 0)
             {
-                result = list.OrderBy((tile => tile.position.z)).ToList();
+                result = list.OrderBy((tile => tile.Position.z)).ToList();
             }
             else
             {
-                result = list.OrderByDescending((tile => tile.position.z)).ToList();
+                result = list.OrderByDescending((tile => tile.Position.z)).ToList();
             }
         }
         //Debug.Log("wind list count" + result.Count);

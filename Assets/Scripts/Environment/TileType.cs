@@ -10,6 +10,7 @@ namespace Assets.Scripts.Environment
         Beach,
         Grass,
         River,
+        Lake,
         Concrete
     }
 }

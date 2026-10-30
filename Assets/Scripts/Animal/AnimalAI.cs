@@ -222,7 +222,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
     public bool Unload(Tile beachTile)
     {
-        transform.position = beachTile.position;
+        transform.position = beachTile.Position;
         unloaded = true;
 
         return true;
@@ -358,7 +358,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
             int randomPos = Random.Range(0, tileList.Count);
             Vector2Int choosenPosition = tileList[randomPos];
             Tile choosenTile = tileManager.GetTile(choosenPosition);
-            Vector3 point = new Vector3(choosenTile.position.x, choosenTile.position.y + transform.localScale.y / 2, choosenTile.position.z);
+            Vector3 point = new Vector3(choosenTile.Position.x, choosenTile.Position.y + transform.localScale.y / 2, choosenTile.Position.z);
             return point;
         }
         else 
@@ -404,11 +404,11 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
             Idle();
             return;
         }
-        float distance = Vector3.Distance(tileManager.GetTile(transform.position).position, activePath[0].position);
+        float distance = Vector3.Distance(tileManager.GetTile(transform.position).Position, activePath[0].Position);
         if(distance < 1) 
         {
             activePath.Remove(activePath[0]);
-            Vector3 updatepath = new Vector3(activePath[0].position.x, activePath[0].GetHeight() + transform.localScale.y / 2, activePath[0].position.z);
+            Vector3 updatepath = new Vector3(activePath[0].Position.x, activePath[0].GetHeight() + transform.localScale.y / 2, activePath[0].Position.z);
             activePathTarget = updatepath; 
         }
     }

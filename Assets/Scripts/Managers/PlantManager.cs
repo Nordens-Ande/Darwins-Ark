@@ -179,7 +179,7 @@ public class PlantManager : SingletonManager<PlantManager>
 
 
         // the initial pos of the plant on the tile
-        Vector3 spawnPos = tile.position;
+        Vector3 spawnPos = tile.Position;
 
 
         // if we want to use a random offset for the lant on the tile
@@ -264,7 +264,7 @@ public class PlantManager : SingletonManager<PlantManager>
                 if (waterTile == null)
                     continue;
 
-                float distanceToWater = Vector3.Distance(plant.CurrentTile.position, waterTile.position);
+                float distanceToWater = Vector3.Distance(plant.CurrentTile.Position, waterTile.Position);
                 if (distanceToWater <= plant.IsCloseToWaterRange)
                 {
                     return true;

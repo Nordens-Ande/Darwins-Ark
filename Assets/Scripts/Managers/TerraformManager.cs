@@ -64,6 +64,8 @@ namespace Assets.Scripts.Environment
 
         }
 
+        private float heightStep = 0.2f;
+        private float currentStep = 0f;
         public void OnTerraformSelection(InputAction.CallbackContext context)
         {
             //Debug.Log($"OnTerraformSelection called: {context.phase}");
@@ -73,12 +75,23 @@ namespace Assets.Scripts.Environment
 
             //Debug.Log("We are terraforming");
             Vector2 mouseDelta = context.ReadValue<Vector2>();
-            float increment = 10.0f * mouseDelta.y > 0 ? 1f : -1f;
-
-            foreach (Vector2Int tile in selectedTiles)
+            //float increment = 10.0f * mouseDelta.y > 0 ? 1f : -1f;
+            currentStep += mouseDelta.y * Time.deltaTime;
+            if (Mathf.Abs(currentStep) > heightStep)
             {
-                tileManager.GetChunk(tile).IncreaseTileHeight(tile, mouseDelta.y * Time.deltaTime);
+                float delta = heightStep * Mathf.Sign(currentStep);
+                currentStep = 0;
+
+                foreach (Vector2Int tile in selectedTiles)
+                {
+                    tileManager.GetChunk(tile).IncreaseTileHeight(tile, delta);
+                }
             }
+
+            //foreach (Vector2Int tile in selectedTiles)
+            //{
+            //    tileManager.GetChunk(tile).IncreaseTileHeight(tile, mouseDelta.y * Time.deltaTime);
+            //}
         }
     }
 }

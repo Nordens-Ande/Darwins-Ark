@@ -66,7 +66,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
 
     public bool Unload(Tile beachTile)
     {
-        transform.position = beachTile.position;
+        transform.position = beachTile.Position;
         unloaded = true;
 
         return true;
@@ -102,11 +102,11 @@ public class Boss : MonoBehaviour, IBoatSpawning
             return;
         }
 
-        tilesWithPlants = tilesWithPlants.OrderBy(tile => Vector3.Distance(transform.position, tile.position)).ToList();
+        tilesWithPlants = tilesWithPlants.OrderBy(tile => Vector3.Distance(transform.position, tile.Position)).ToList();
 
         for(int i = 0; i < tilesWithPlants.Count; i++)
         {
-            float distance = Vector3.Distance(transform.position, tilesWithPlants[i].position);
+            float distance = Vector3.Distance(transform.position, tilesWithPlants[i].Position);
             if (distance > sightDistanceToTiles) continue;
 
             closestAttackTilePath = movementScript.PathFinder.GetPathAStar(tileManager.GetTile(transform.position), tilesWithPlants[i], movementScript.IsBossTraversable, 2f, (int)(sightDistanceToTiles * 2));
@@ -139,11 +139,11 @@ public class Boss : MonoBehaviour, IBoatSpawning
             return;
         }
 
-        riverTiles = riverTiles.OrderBy(tile => Vector3.Distance(transform.position, tile.position)).ToList();
+        riverTiles = riverTiles.OrderBy(tile => Vector3.Distance(transform.position, tile.Position)).ToList();
 
         for (int i = 0; i < riverTiles.Count; i++)
         {
-            float distance = Vector3.Distance(transform.position, riverTiles[i].position);
+            float distance = Vector3.Distance(transform.position, riverTiles[i].Position);
             if (distance > sightDistanceToTiles) continue;
 
             closestAttackTilePath = movementScript.PathFinder.GetPathAStar(tileManager.GetTile(transform.position), riverTiles[i], movementScript.IsBossTraversable, 2f, (int)(sightDistanceToTiles * 2));

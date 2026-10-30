@@ -9,7 +9,7 @@ public class BossAttackPlantContainer : Container<Boss>
         Tile plantTile = boss.ClosestAttackTilePath[boss.ClosestAttackTilePath.Count - 1];
         if (plantTile == null) return 0f; 
         
-        float distance = Vector3.Distance(boss.transform.position, plantTile.position);
+        float distance = Vector3.Distance(boss.transform.position, plantTile.Position);
         if(distance >= boss.SightDistanceToTiles) return 0f; // too far
 
         if(boss.DebugScores)

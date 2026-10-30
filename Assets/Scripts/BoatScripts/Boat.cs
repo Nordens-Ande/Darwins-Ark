@@ -69,7 +69,7 @@ public class Boat : MonoBehaviour
 
         CreatePath();
         SetNextTile(path[pathStage]);
-        transform.rotation = Quaternion.LookRotation(nextTile.position - currentTile.position);
+        transform.rotation = Quaternion.LookRotation(nextTile.Position - currentTile.Position);
     }
 
     void SetNextTile(Tile nextTile)
@@ -85,7 +85,7 @@ public class Boat : MonoBehaviour
         }
 
         float minimumDistanceFromCenter = IslandNoise.Instance.MaxIslandRadius + distanceFromCoast;
-        float distanceFromCenter = Vector3.Distance(tile.position, Vector3.zero);
+        float distanceFromCenter = Vector3.Distance(tile.Position, Vector3.zero);
         if (distanceFromCenter < minimumDistanceFromCenter)
         {
             return false;
@@ -96,7 +96,7 @@ public class Boat : MonoBehaviour
 
     Tile SetTargetTile()
     {
-        Vector3 bPos = beachTile.position;
+        Vector3 bPos = beachTile.Position;
         float x = Mathf.Abs(bPos.x);
         float z = Mathf.Abs(bPos.z);
 
@@ -127,7 +127,7 @@ public class Boat : MonoBehaviour
 
     Tile SetRotationTile()
     {
-        Vector3 tPos = targetTile.position;
+        Vector3 tPos = targetTile.Position;
         float x = Mathf.Abs(tPos.x);
         float z = Mathf.Abs(tPos.z);
 
@@ -248,7 +248,7 @@ public class Boat : MonoBehaviour
 
     bool CheckIfReachedNextTile(bool goingBackwards)
     {
-        Vector3 toTarget = nextTile.position - transform.position;
+        Vector3 toTarget = nextTile.Position - transform.position;
 
         if (goingBackwards)
         {
@@ -265,8 +265,8 @@ public class Boat : MonoBehaviour
             Debug.Log("current or next tile == null: Boat.cs: DecideSpeed()");
             return movementSpeed;
         }
-        float maxDistance = Vector3.Distance(currentTile.position, nextTile.position);
-        float distance = Vector3.Distance(transform.position, nextTile.position);
+        float maxDistance = Vector3.Distance(currentTile.Position, nextTile.Position);
+        float distance = Vector3.Distance(transform.position, nextTile.Position);
         float d = distance / maxDistance;
         if (nextTile == rotationTile && step == BoatSequence.MoveTowardsRotationTile) //slow down as we are arriving to rotation tile
         {
@@ -286,7 +286,7 @@ public class Boat : MonoBehaviour
         else if(currentTile == rotationTile && step == BoatSequence.Leave) // accelerate for 3 tiles
         {
             maxDistance = 3f;
-            distance = Vector3.Distance(transform.position, currentTile.position);
+            distance = Vector3.Distance(transform.position, currentTile.Position);
             d = Mathf.Clamp01(distance / maxDistance);
             return Mathf.Lerp(minMovementSpeed, maxMovementSpeed, d);
         }
@@ -302,7 +302,7 @@ public class Boat : MonoBehaviour
         float movementSpeed = DecideSpeed();
 
         //move and rotate
-        Vector3 direction = nextTile.position - transform.position;
+        Vector3 direction = nextTile.Position - transform.position;
         direction.Normalize();
 
         Vector3 moveDirection = transform.forward;
@@ -343,7 +343,7 @@ public class Boat : MonoBehaviour
 
     void BoatRotate()
     {
-        Vector3 direction = nextTile.position - transform.position;
+        Vector3 direction = nextTile.Position - transform.position;
         direction.Normalize();
         Quaternion targetRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 30f * Time.deltaTime);

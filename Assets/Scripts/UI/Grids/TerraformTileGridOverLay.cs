@@ -54,7 +54,7 @@ public class TerraformTileGridOverlay : MonoBehaviour
 
     private void CreateTileSquare(Tile tile)
     {
-        Vector3 tilePos = tile.position;
+        Vector3 tilePos = tile.Position;
 
         float y = tilePos.y + heightOffset;
 

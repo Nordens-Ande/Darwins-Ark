@@ -28,7 +28,7 @@ public class BossEscapeContainer : Container<Boss>
             }
             else
             {
-                float distance = Vector3.Distance(boss.transform.position, plantTile.position);
+                float distance = Vector3.Distance(boss.transform.position, plantTile.Position);
                 distanceTile = Mathf.Clamp01(distance / boss.SightDistanceToTiles);
             }
         }
