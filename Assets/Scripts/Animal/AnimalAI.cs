@@ -416,12 +416,12 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
                 if (activePath != null)
                 {
                     pathStage = 0;
-                    activePathTarget = activePath[pathStage].position;
+                    activePathTarget = activePath[pathStage].Position;
                     hasSetPath = true;
                 }
             }
             //Checks distance between position and target in the list
-            float distance = Vector3.Distance(tileManager.GetTile(transform.position).position, activePath[pathStage].position);
+            float distance = Vector3.Distance(tileManager.GetTile(transform.position).Position, activePath[pathStage].Position);
 
             if (distance < 1)
             {
@@ -438,7 +438,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
                 else
                 {
                     pathStage++;
-                    Vector3 updatepath = new Vector3(activePath[pathStage].position.x, activePath[pathStage].GetHeight() + transform.localScale.y / 2, activePath[pathStage].position.z);
+                    Vector3 updatepath = new Vector3(activePath[pathStage].Position.x, activePath[pathStage].GetHeight() + transform.localScale.y / 2, activePath[pathStage].Position.z);
                     activePathTarget = updatepath;
                 }
             }

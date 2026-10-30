@@ -74,7 +74,7 @@ public class Boat : MonoBehaviour
         CreatePath();
         SetNextTile(path[pathStage]);
 
-        initialRotation = Quaternion.LookRotation(nextTile.position - currentTile.position);
+        initialRotation = Quaternion.LookRotation(nextTile.Position - currentTile.Position);
         transform.rotation = initialRotation;
     }
 
