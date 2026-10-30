@@ -26,29 +26,33 @@ public class Boat : MonoBehaviour
         Leave
     }
 
-    BoatSequence step = BoatSequence.MoveTowardsRotationTile;
+    private BoatSequence step = BoatSequence.MoveTowardsRotationTile;
+    private bool boatFinished = false;
 
-    Tile beachTile; // beach tile where object will be dropped off
-    Tile targetTile; // tile where the boat will stop, 1 or 2 tiles away from beach
-    Tile rotationTile; //tile where the boat will stop and rotate towards the beach
+    private Tile beachTile; // beach tile where object will be dropped off
+    private Tile targetTile; // tile where the boat will stop, 1 or 2 tiles away from beach
+    private Tile rotationTile; //tile where the boat will stop and rotate towards the beach
 
-    Tile startTile; // start and end tile of boat 
+    private Tile startTile; // start and end tile of boat 
 
-    Tile currentTile;
-    Tile nextTile;
+    private Tile currentTile;
+    private Tile nextTile;
 
-    List<Tile> path;
-    int pathStage = 0;
+    private List<Tile> path;
+    private int pathStage = 0;
 
-    float maxMovementSpeed = 5;
-    float minMovementSpeed = 1f;
+    private float maxMovementSpeed = 5;
+    private float minMovementSpeed = 1f;
 
-    float distanceFromCoast = 3f; // make not hardcoded if weird later
+    private float distanceFromCoast = 3f; // make not hardcoded if weird later
 
-    [SerializeField] GameObject loadPos;
-    IBoatSpawning loadObject; //object on boat, animal or boss
+    private Quaternion initialRotation;
+    [SerializeField] private GameObject loadPos;
+    private IBoatSpawning loadObject; //object on boat, animal or boss
 
+    public bool BoatFinished => boatFinished;
     public GameObject LoadPos => loadPos;
+    public Quaternion InitialRotation => initialRotation;
     public IBoatSpawning LoadObject
     {
         get => loadObject;
@@ -69,7 +73,9 @@ public class Boat : MonoBehaviour
 
         CreatePath();
         SetNextTile(path[pathStage]);
-        transform.rotation = Quaternion.LookRotation(nextTile.Position - currentTile.Position);
+
+        initialRotation = Quaternion.LookRotation(nextTile.position - currentTile.position);
+        transform.rotation = initialRotation;
     }
 
     void SetNextTile(Tile nextTile)
@@ -226,6 +232,10 @@ public class Boat : MonoBehaviour
         else if (currentTile == rotationTile && step == BoatSequence.LeavingTowardsRotationTile)
         {
             step = BoatSequence.RotateToLeave;
+        }
+        else if(currentTile == startTile && step == BoatSequence.Leave)
+        {
+            boatFinished = true;
         }
     }
 

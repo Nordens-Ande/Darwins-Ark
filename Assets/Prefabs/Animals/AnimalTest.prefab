@@ -152,6 +152,7 @@ MonoBehaviour:
   poop:
   - {fileID: 7206990565552924369, guid: 9d83281e4b6364a4bbce31d9758ccd88, type: 3}
   - {fileID: 5212644513495774897, guid: a7db1c59c01addb40b02cf2d8d146946, type: 3}
+  poopPrefab: {fileID: 919132149155446097, guid: a3f5228d69a166c449d040b3abdcbd5f, type: 3}
   TestMutation: 0
 --- !u!114 &-6405640087756652402
 MonoBehaviour:

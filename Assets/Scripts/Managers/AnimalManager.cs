@@ -78,7 +78,7 @@ public class AnimalManager : MonoBehaviour
             GameObject boat = boatManager.SpawnBoat();
             Boat boatScript = boat.GetComponent<Boat>();
 
-            GameObject spawnedAnimal = Instantiate(animalPrefab, new Vector3(0, 0, 0), Quaternion.identity, boatScript.LoadPos.transform);
+            GameObject spawnedAnimal = Instantiate(animalPrefab, new Vector3(0, 0, 0), boatScript.InitialRotation, boatScript.LoadPos.transform);
             AnimalAI aiScript = spawnedAnimal.GetComponent<AnimalAI>();
             if(aiScript != null)
             { 
