@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Assets.Scripts.Environment
@@ -69,6 +70,17 @@ namespace Assets.Scripts.Environment
         // You use the indexer like this: Chunk chunk = new Chunk(); oceanTiles = chunk[TileType.Ocean];
         public HashSet<Vector2Int> this[TileType type] => tileTypes[type];
         public HashSet<Vector2Int> GetTiles(TileType type) => tileTypes[type];
+
+        public HashSet<Vector2Int> this[params TileType[] types] => GetTiles(types);
+        public HashSet<Vector2Int> GetTiles(params TileType[] types)
+        {
+            HashSet<Vector2Int> result = new HashSet<Vector2Int>();
+            foreach (TileType type in types)
+            {
+                result.AddRange(tileTypes[type]);
+            }
+            return result;
+        }
 
         public Tile this[int x, int z, Space space = Space.World] => GetTile(x, z, space);
         public Tile this[Vector2Int positionXZ, Space space = Space.World] => GetTile(positionXZ, space);

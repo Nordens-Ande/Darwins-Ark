@@ -23,6 +23,7 @@ namespace Assets.Scripts.Environment
         [SerializeField] private bool createWater = true;
         [SerializeField] private float waterLevel = 0.5f;
         [SerializeField] private Material waterMaterial;
+        [SerializeField, ReadOnly] private GameObject oceanObject;
         [SerializeField, ReadOnly] private GameObject waterObject;
 
         // -----------------------------------------------
@@ -78,7 +79,7 @@ namespace Assets.Scripts.Environment
             //SetChunkGridVisible(false);
             SubscribeToRainDeity();
 
-            GenerateWater();
+            GenerateSaltWater();
         }
 
 
@@ -227,13 +228,13 @@ namespace Assets.Scripts.Environment
             }
         }
 
-        private void GenerateWater()
+        private void GenerateSaltWater()
         {
             if (!createWater)
                 return;
 
-            if (waterObject != null)
-                Destroy(waterObject);
+            if (oceanObject != null)
+                Destroy(oceanObject);
 
             List<Vector3> vertices = new List<Vector3>();
             List<int> triangles = new List<int>();
@@ -258,7 +259,8 @@ namespace Assets.Scripts.Environment
 
             foreach (Chunk chunk in chunks)
             {
-                foreach (Vector2Int tile in chunk[TileType.Ocean])
+                HashSet<Vector2Int> saltWater = chunk[TileType.Ocean];
+                foreach (Vector2Int tile in saltWater)
                 {
                     Vector3 tilePos = new Vector3(tile.x, 0/*waterLevel*/, tile.y);
                     AddFace(
@@ -268,16 +270,94 @@ namespace Assets.Scripts.Environment
                         new Vector3(-0.5f, 0, -0.5f) + tilePos  // bottom-left
                     );
                 }
+
+
             }
 
             //waterObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            waterObject = new GameObject("Water Object", typeof(MeshRenderer), typeof(MeshFilter));
-            waterObject.transform.parent = transform;
+            oceanObject = new GameObject("Water Object", typeof(MeshRenderer), typeof(MeshFilter));
+            oceanObject.transform.parent = transform;
 
-            waterObject.transform.localPosition = waterObject.transform.localPosition + new Vector3(0, waterLevel, 0);
+            oceanObject.transform.localPosition = oceanObject.transform.localPosition + new Vector3(0, waterLevel, 0);
             //waterObject.transform.localScale = new Vector3(chunkGridSize.x * chunkSize, chunkGridSize.y * chunkSize, 1f);
             //waterObject.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
 
+
+            // Water Object mesh and material
+            oceanObject.GetComponent<MeshRenderer>().material = waterMaterial;
+
+            Mesh mesh = new Mesh()
+            {
+                name = "Chunk Mesh"
+            };
+
+            mesh.SetVertices(vertices);
+            mesh.SetTriangles(triangles, 0);
+
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+
+            oceanObject.GetComponent<MeshFilter>().sharedMesh = mesh;
+        }
+
+        public void GenerateSweetWater()
+        {
+            if (!createWater)
+                return;
+
+            //if (waterObject != null)
+            //    Destroy(waterObject);
+
+            List<Vector3> vertices = new List<Vector3>();
+            List<int> triangles = new List<int>();
+
+            void AddFace(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
+            {
+                int index = vertices.Count;
+
+                vertices.Add(a);
+                vertices.Add(b);
+                vertices.Add(c);
+                vertices.Add(d);
+
+                triangles.Add(index + 0);
+                triangles.Add(index + 1);
+                triangles.Add(index + 2);
+
+                triangles.Add(index + 0);
+                triangles.Add(index + 2);
+                triangles.Add(index + 3);
+            }
+
+            foreach (Chunk chunk in chunks)
+            {
+                HashSet<Vector2Int> sweetWater = chunk[TileType.River, TileType.Lake];
+                foreach (Vector2Int tileGridPos in sweetWater)
+                {
+                    Tile tile = GetTile(tileGridPos);
+                    Tile[] neighbours = new Tile[4]
+                    {
+                        GetTile(tileGridPos + Vector2Int.up),
+                        GetTile(tileGridPos + Vector2Int.right),
+                        GetTile(tileGridPos + Vector2Int.down),
+                        GetTile(tileGridPos + Vector2Int.left)
+                    };
+
+                    Vector3 tilePos = new Vector3(tileGridPos.x, tile.WaterHeight, tileGridPos.y);
+                    AddFace(
+                        new Vector3(-0.5f, 0, 0.5f) + tilePos,  // top-left
+                        new Vector3(+0.5f, 0, 0.5f) + tilePos,  // top-right
+                        new Vector3(+0.5f, 0, -0.5f) + tilePos, // bottom-right
+                        new Vector3(-0.5f, 0, -0.5f) + tilePos  // bottom-left
+                    );
+                }
+            }
+
+            if (waterObject == null)
+            {
+                waterObject = new GameObject("Water Object", typeof(MeshRenderer), typeof(MeshFilter));
+                waterObject.transform.parent = transform;
+            }
 
             // Water Object mesh and material
             waterObject.GetComponent<MeshRenderer>().material = waterMaterial;
