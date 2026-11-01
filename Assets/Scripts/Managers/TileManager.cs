@@ -2,6 +2,7 @@ using NUnit.Framework.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -80,6 +81,13 @@ namespace Assets.Scripts.Environment
             SubscribeToRainDeity();
 
             GenerateSaltWater();
+
+            Tile sourceWater = GetTile(Vector2Int.zero);
+            sourceWater.Height = 0;
+            sourceWater.SetType(TileType.Lake);
+            sourceWater.WaterHeight = 1f;
+
+            GenerateSweetWater();
         }
 
 
@@ -94,16 +102,18 @@ namespace Assets.Scripts.Environment
             //    updateCounter = 0;
 
             //    chunks[0].ModifyTile(index % chunkSize, index / chunkSize, Random.Range(0, 1f), Space.Self);
-                
+
             //    index++;
             //    if (index >= 64)
             //        index = 0;
             //}
 
+            bool hasCleaned = false;
             for (int i = 0; i < chunks.Count; i++)
             {
                 if (!chunks[i].isDirty)
                     continue;
+                hasCleaned = true;
 
                 //chunks[i].GenerateMeshData();
                 chunks[i].CleanChunk();
@@ -122,7 +132,12 @@ namespace Assets.Scripts.Environment
                 GetGridMesh(chunkObjects[i].transform, chunkGridName).Rebuild();
                 GetGridMesh(transform, heighlightGridName).Rebuild();
                 GetGridMesh(transform, selectionGridName).Rebuild();
+
+                GenerateSweetWater();
             }
+
+            if (hasCleaned)
+                Debug.Log("We just cleaned the tiles");
         }
 
         //All Getters here can be refactored for more perfomance, currently they are not super efficient
@@ -275,7 +290,7 @@ namespace Assets.Scripts.Environment
             }
 
             //waterObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            oceanObject = new GameObject("Water Object", typeof(MeshRenderer), typeof(MeshFilter));
+            oceanObject = new GameObject("Salt Water Object", typeof(MeshRenderer), typeof(MeshFilter));
             oceanObject.transform.parent = transform;
 
             oceanObject.transform.localPosition = oceanObject.transform.localPosition + new Vector3(0, waterLevel, 0);
@@ -329,33 +344,61 @@ namespace Assets.Scripts.Environment
                 triangles.Add(index + 3);
             }
 
+            HashSet<Vector2Int> lakes = new HashSet<Vector2Int>();
+            HashSet<Vector2Int> rivers = new HashSet<Vector2Int>();
+            
             foreach (Chunk chunk in chunks)
             {
-                HashSet<Vector2Int> sweetWater = chunk[TileType.River, TileType.Lake];
-                foreach (Vector2Int tileGridPos in sweetWater)
-                {
-                    Tile tile = GetTile(tileGridPos);
-                    Tile[] neighbours = new Tile[4]
-                    {
-                        GetTile(tileGridPos + Vector2Int.up),
-                        GetTile(tileGridPos + Vector2Int.right),
-                        GetTile(tileGridPos + Vector2Int.down),
-                        GetTile(tileGridPos + Vector2Int.left)
-                    };
-
-                    Vector3 tilePos = new Vector3(tileGridPos.x, tile.WaterHeight, tileGridPos.y);
-                    AddFace(
-                        new Vector3(-0.5f, 0, 0.5f) + tilePos,  // top-left
-                        new Vector3(+0.5f, 0, 0.5f) + tilePos,  // top-right
-                        new Vector3(+0.5f, 0, -0.5f) + tilePos, // bottom-right
-                        new Vector3(-0.5f, 0, -0.5f) + tilePos  // bottom-left
-                    );
-                }
+                lakes.AddRange(chunk[TileType.Lake]);
+                rivers.AddRange(chunk[TileType.River]);
             }
+
+            GenerateRivers(lakes, rivers, 10);
+
+            HashSet<Vector2Int> sweetWater = new HashSet<Vector2Int>(lakes);
+            sweetWater.UnionWith(rivers);
+
+            Debug.Log("Sweet water tile count: " + sweetWater.Count);
+
+            foreach (Vector2Int water in sweetWater)
+            {
+                Tile tile = GetTile(water);
+                Vector3 tilePos = new Vector3(water.x, tile.WaterHeight, water.y);
+                AddFace(
+                    new Vector3(-0.5f, 0, 0.5f) + tilePos,  // top-left
+                    new Vector3(+0.5f, 0, 0.5f) + tilePos,  // top-right
+                    new Vector3(+0.5f, 0, -0.5f) + tilePos, // bottom-right
+                    new Vector3(-0.5f, 0, -0.5f) + tilePos  // bottom-left
+                );
+            }
+
+            //foreach (Chunk chunk in chunks)
+            //{
+            //    HashSet<Vector2Int> sweetWater = chunk[TileType.River, TileType.Lake];
+            //    foreach (Vector2Int tileGridPos in sweetWater)
+            //    {
+            //        Tile tile = GetTile(tileGridPos);
+            //        Tile[] neighbours = new Tile[4]
+            //        {
+            //            GetTile(tileGridPos + Vector2Int.up),
+            //            GetTile(tileGridPos + Vector2Int.right),
+            //            GetTile(tileGridPos + Vector2Int.down),
+            //            GetTile(tileGridPos + Vector2Int.left)
+            //        };
+
+            //        Vector3 tilePos = new Vector3(tileGridPos.x, tile.WaterHeight, tileGridPos.y);
+            //        AddFace(
+            //            new Vector3(-0.5f, 0, 0.5f) + tilePos,  // top-left
+            //            new Vector3(+0.5f, 0, 0.5f) + tilePos,  // top-right
+            //            new Vector3(+0.5f, 0, -0.5f) + tilePos, // bottom-right
+            //            new Vector3(-0.5f, 0, -0.5f) + tilePos  // bottom-left
+            //        );
+            //    }
+            //}
 
             if (waterObject == null)
             {
-                waterObject = new GameObject("Water Object", typeof(MeshRenderer), typeof(MeshFilter));
+                waterObject = new GameObject("Sweet Water Object", typeof(MeshRenderer), typeof(MeshFilter));
                 waterObject.transform.parent = transform;
             }
 
@@ -374,6 +417,71 @@ namespace Assets.Scripts.Environment
             mesh.RecalculateBounds();
 
             waterObject.GetComponent<MeshFilter>().sharedMesh = mesh;
+        }
+
+        // Creating a simple BFS alogrithm to simulate the water progation for the water (we assume lakes are source water and the rivers are the progation)
+        private void GenerateRivers(HashSet<Vector2Int> sourceWater, HashSet<Vector2Int> riverTiles, int maxFlowDistance)
+        {
+            Vector2Int[] directions =
+            {
+                Vector2Int.up,
+                Vector2Int.down,
+                Vector2Int.left,
+                Vector2Int.right
+            };
+
+            Queue<(Vector2Int position, int distance, float sourceHeight)> queue = new Queue<(Vector2Int position, int distance, float sourceHeight)>();
+
+            HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+
+            // Add all source (lake) water tiles.
+            foreach (Vector2Int source in sourceWater)
+            {
+                queue.Enqueue((source, 0, GetTile(source).WaterHeight));
+                visited.Add(source);
+                riverTiles.Add(source);
+            }
+
+            while (queue.Count > 0)
+            {
+                (Vector2Int position, int distance, float sourceHeight) current = queue.Dequeue();
+
+                if (current.distance >= maxFlowDistance)
+                    continue;
+
+                foreach (Vector2Int direction in directions)
+                {
+                    Vector2Int neighbour = current.position + direction;
+
+                    if (visited.Contains(neighbour))
+                        continue;
+
+                    Tile neighbourTile = GetTile(neighbour);
+
+                    // Check whether the tile exists.
+                    if (neighbourTile == null)
+                        continue;
+
+                    //if (neighbourTile.Type == TileType.River)
+                    //    continue;
+
+                    float neighbourHeight = neighbourTile.Height;
+
+                    // If neighbour tile is below water then it can flow
+                    if (neighbourHeight >= current.sourceHeight)
+                        continue;
+
+                    visited.Add(neighbour);
+                    riverTiles.Add(neighbour);
+
+                    if (neighbourTile.WaterHeight != current.sourceHeight)
+                        neighbourTile.WaterHeight = current.sourceHeight;
+                    if (neighbourTile.Type != TileType.River)
+                        neighbourTile.SetType(TileType.River);
+
+                    queue.Enqueue((neighbour, current.distance + 1, current.sourceHeight));
+                }
+            }
         }
 
 

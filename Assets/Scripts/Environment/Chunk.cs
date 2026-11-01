@@ -77,7 +77,7 @@ namespace Assets.Scripts.Environment
             HashSet<Vector2Int> result = new HashSet<Vector2Int>();
             foreach (TileType type in types)
             {
-                result.AddRange(tileTypes[type]);
+                result.UnionWith(tileTypes[type]);
             }
             return result;
         }
@@ -138,6 +138,16 @@ namespace Assets.Scripts.Environment
 
         public void CleanChunk()
         {
+            InitializeTileHashsets();
+            for (int x = 0; x < size; x++)
+            {
+                for (int z = 0; z < size; z++)
+                {
+                    Tile tile = GetTile(x, z, Space.Self);
+                    tileTypes[tile.Type].Add(tile.GridPosition);
+                }
+            }
+
             GenerateMeshData();
             foreach (Tile tile in tiles)
                 tile.CleanUpTile();

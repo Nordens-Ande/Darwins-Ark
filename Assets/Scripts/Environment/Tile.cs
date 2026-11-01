@@ -47,7 +47,7 @@ namespace Assets.Scripts.Environment
         }
         public float WaterHeight
         {
-            get => Position.y;
+            get => waterHeight;
             set
             {
                 owner.isDirty = true;
