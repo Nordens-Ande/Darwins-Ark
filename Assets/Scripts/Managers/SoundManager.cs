@@ -83,10 +83,10 @@ public class SoundManager : MonoBehaviour
     }
 
     //Gets the soundeffect of type and then plays from set audiosource
-    public void PlaySoundeffectFromIndex(AudioSource source, AudioType type) 
+    public void PlaySoundeffectFromIndex(AudioSource source, AudioType type, float volume) 
     { 
         AudioClip clip = GetAudioClipFromIndex(type);
-        source.PlayOneShot(clip);
+        source.PlayOneShot(clip,volume);
     }
 
     //Made customized playclipatpoint but so the audiomixer and mindistance and maxdistance are included
@@ -130,5 +130,10 @@ public class SoundManager : MonoBehaviour
         backgroundMusic = soundIndex[AudioType.backgroundMusic_Idle];
         backgroundMusicPlayer.clip = backgroundMusic;
         backgroundMusicPlayer.Play();
+    }
+
+    public void SetBackgroundMusicVolume(float volume) 
+    { 
+        backgroundMusicPlayer.volume = volume;
     }
 }
