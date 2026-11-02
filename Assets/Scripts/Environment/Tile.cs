@@ -127,6 +127,7 @@ namespace Assets.Scripts.Environment
 
         public void ClearPlant()
         {
+            currentPlant.DamagePlant(currentPlant.Health); // kill the plant
             currentPlant = null;
         }
 
