@@ -163,29 +163,29 @@ namespace Assets.Scripts.Utility
 
             AddFace(vertices, triangles, colors, nw, ne, se, sw, color);
 
-            // West side.
-            if (!Mathf.Approximately(nwHeight, swHeight))
-            {
-                AddTriangle(vertices, triangles, colors, nw, sw, new Vector3(-0.5f, currentHeight, 0.5f) + tilePos, color);
-            }
+            //// West side.
+            //if (!Mathf.Approximately(nwHeight, swHeight))
+            //{
+            //    AddTriangle(vertices, triangles, colors, nw, sw, new Vector3(-0.5f, currentHeight, 0.5f) + tilePos, color);
+            //}
 
-            // East side.
-            if (!Mathf.Approximately(neHeight, seHeight))
-            {
-                AddTriangle(vertices, triangles, colors, ne, new Vector3(0.5f, currentHeight, 0.5f) + tilePos, se, color);
-            }
+            //// East side.
+            //if (!Mathf.Approximately(neHeight, seHeight))
+            //{
+            //    AddTriangle(vertices, triangles, colors, ne, new Vector3(0.5f, currentHeight, 0.5f) + tilePos, se, color);
+            //}
 
-            // North side.
-            if (!Mathf.Approximately(nwHeight, neHeight))
-            {
-                AddTriangle(vertices, triangles, colors, nw, new Vector3(-0.5f, currentHeight, 0.5f) + tilePos, ne, color);
-            }
+            //// North side.
+            //if (!Mathf.Approximately(nwHeight, neHeight))
+            //{
+            //    AddTriangle(vertices, triangles, colors, nw, new Vector3(-0.5f, currentHeight, 0.5f) + tilePos, ne, color);
+            //}
 
-            // South side.
-            if (!Mathf.Approximately(swHeight, seHeight))
-            {
-                AddTriangle(vertices, triangles, colors, sw, se, new Vector3(-0.5f, currentHeight, -0.5f) + tilePos, color);
-            }
+            //// South side.
+            //if (!Mathf.Approximately(swHeight, seHeight))
+            //{
+            //    AddTriangle(vertices, triangles, colors, sw, se, new Vector3(-0.5f, currentHeight, -0.5f) + tilePos, color);
+            //}
         }
 
         #endregion

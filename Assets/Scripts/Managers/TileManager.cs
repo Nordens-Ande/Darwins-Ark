@@ -1,3 +1,4 @@
+using Assets.Scripts.Utility;
 using NUnit.Framework.Internal;
 using System;
 using System.Collections.Generic;
@@ -315,6 +316,18 @@ namespace Assets.Scripts.Environment
             oceanObject.GetComponent<MeshFilter>().sharedMesh = mesh;
         }
 
+        private enum Direction
+        {
+            North,
+            NorthWest,
+            West,
+            SouthWest,
+            South,
+            SouthEast,
+            East,
+            NorthEast
+        }
+
         public void GenerateSweetWater()
         {
             if (!createWater)
@@ -358,17 +371,64 @@ namespace Assets.Scripts.Environment
             HashSet<Vector2Int> sweetWater = new HashSet<Vector2Int>(lakes);
             sweetWater.UnionWith(rivers);
 
-            Debug.Log("Sweet water tile count: " + sweetWater.Count);
+            float? GetWaterHeight(int x, int z)
+            {
+                //if (sweetWater.Contains(new Vector2Int(x, z)))
+                //    Debug.Log(GetTile(x, z).WaterHeight);
+                return sweetWater.Contains(new Vector2Int(x, z)) ? GetTile(x, z)?.WaterHeight : null;
+            }
 
             foreach (Vector2Int water in sweetWater)
             {
                 Tile tile = GetTile(water);
+
                 Vector3 tilePos = new Vector3(water.x, tile.WaterHeight, water.y);
-                AddFace(
-                    new Vector3(-0.5f, 0, 0.5f) + tilePos,  // top-left
-                    new Vector3(+0.5f, 0, 0.5f) + tilePos,  // top-right
-                    new Vector3(+0.5f, 0, -0.5f) + tilePos, // bottom-right
-                    new Vector3(-0.5f, 0, -0.5f) + tilePos  // bottom-left
+                //AddFace(
+                //    new Vector3(-0.5f, 0, 0.5f) + tilePos,  // top-left
+                //    new Vector3(+0.5f, 0, 0.5f) + tilePos,  // top-right
+                //    new Vector3(+0.5f, 0, -0.5f) + tilePos, // bottom-right
+                //    new Vector3(-0.5f, 0, -0.5f) + tilePos  // bottom-left
+                //);
+
+                float currentHeight = tilePos.y;
+
+                Dictionary<Direction, float> neighbourHeights = new Dictionary<Direction, float>();
+                foreach (Direction direction in Enum.GetValues(typeof(Direction)))
+                {
+                    float value = direction switch
+                    {
+                        Direction.North     => GetWaterHeight(water.x, water.y + 1) ?? currentHeight,
+                        Direction.NorthWest => GetWaterHeight(water.x - 1, water.y + 1) ?? currentHeight,
+                        Direction.West      => GetWaterHeight(water.x - 1, water.y) ?? currentHeight,
+                        Direction.SouthWest => GetWaterHeight(water.x - 1, water.y - 1) ?? currentHeight,
+                        Direction.South     => GetWaterHeight(water.x, water.y - 1) ?? currentHeight,
+                        Direction.SouthEast => GetWaterHeight(water.x + 1, water.y - 1) ?? currentHeight,
+                        Direction.East      => GetWaterHeight(water.x + 1, water.y) ?? currentHeight,
+                        Direction.NorthEast => GetWaterHeight(water.x + 1, water.y + 1) ?? currentHeight,
+                        _ => 0
+                    };
+                    neighbourHeights.Add(direction, value);
+                }
+
+                float nwHeight = Mathf.Max(currentHeight, neighbourHeights[Direction.North], neighbourHeights[Direction.West], neighbourHeights[Direction.NorthWest]);
+                float neHeight = Mathf.Max(currentHeight, neighbourHeights[Direction.North], neighbourHeights[Direction.East], neighbourHeights[Direction.NorthEast]);
+                float seHeight = Mathf.Max(currentHeight, neighbourHeights[Direction.South], neighbourHeights[Direction.East], neighbourHeights[Direction.SouthEast]);
+                float swHeight = Mathf.Max(currentHeight, neighbourHeights[Direction.South], neighbourHeights[Direction.West], neighbourHeights[Direction.SouthWest]);
+
+                //int heightCount = (Mathf.Approximately(nwHeight, currentHeight) ? 0 : 1)
+                //                + (Mathf.Approximately(neHeight, currentHeight) ? 0 : 1)
+                //                + (Mathf.Approximately(seHeight, currentHeight) ? 0 : 1)
+                //                + (Mathf.Approximately(swHeight, currentHeight) ? 0 : 1);
+
+                //Debug.Log(heightCount);
+
+                TileMeshBuilder.AddFace(
+                    vertices,
+                    triangles,
+                    new Vector3(-0.5f, nwHeight, 0.5f) + new Vector3(tilePos.x, 0, tilePos.z),
+                    new Vector3(+0.5f, neHeight, 0.5f) + new Vector3(tilePos.x, 0, tilePos.z),
+                    new Vector3(+0.5f, seHeight, -0.5f) + new Vector3(tilePos.x, 0, tilePos.z),
+                    new Vector3(-0.5f, swHeight, -0.5f) + new Vector3(tilePos.x, 0, tilePos.z)
                 );
             }
 
@@ -430,7 +490,7 @@ namespace Assets.Scripts.Environment
                 Vector2Int.right
             };
 
-            Queue<(Vector2Int position, int distance, float sourceHeight)> queue = new Queue<(Vector2Int position, int distance, float sourceHeight)>();
+            Queue<(Vector2Int position, float height, float waterHeight)> queue = new Queue<(Vector2Int position, float height, float waterHeight)>();
 
             HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
 
@@ -444,9 +504,9 @@ namespace Assets.Scripts.Environment
 
             while (queue.Count > 0)
             {
-                (Vector2Int position, int distance, float sourceHeight) current = queue.Dequeue();
+                (Vector2Int position, float height, float waterHeight) current = queue.Dequeue();
 
-                if (current.distance >= maxFlowDistance)
+                if (current.height >= current.waterHeight)
                     continue;
 
                 foreach (Vector2Int direction in directions)
@@ -468,18 +528,22 @@ namespace Assets.Scripts.Environment
                     float neighbourHeight = neighbourTile.Height;
 
                     // If neighbour tile is below water then it can flow
-                    if (neighbourHeight >= current.sourceHeight)
+                    if (neighbourHeight >= current.waterHeight)
                         continue;
 
                     visited.Add(neighbour);
                     riverTiles.Add(neighbour);
 
-                    if (neighbourTile.WaterHeight != current.sourceHeight)
-                        neighbourTile.WaterHeight = current.sourceHeight;
+                    if (!Mathf.Approximately(neighbourTile.WaterHeight, current.waterHeight - 0.1f))
+                    {
+                        neighbourTile.WaterHeight = current.waterHeight - 0.1f;
+                    }
                     if (neighbourTile.Type != TileType.River)
+                    {
                         neighbourTile.SetType(TileType.River);
-
-                    queue.Enqueue((neighbour, current.distance + 1, current.sourceHeight));
+                    }
+                    
+                    queue.Enqueue((neighbour, neighbourTile.Height, neighbourTile.WaterHeight));
                 }
             }
         }
