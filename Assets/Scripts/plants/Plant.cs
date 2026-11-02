@@ -305,6 +305,7 @@ public class Plant : MonoBehaviour
     public float TimeSinceLastGrowth => timeSinceLastGrowth;
     public bool IsCloseToWater => isCloseToWater;
     public float IsCloseToWaterRange => isCloseToWaterRange;
+    public float Health => health;
 
     public bool CanBeEaten
     {
