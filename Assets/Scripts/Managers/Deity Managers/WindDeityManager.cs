@@ -19,9 +19,10 @@ public class WindDeityManager : SingletonManager<WindDeityManager>
     [SerializeField] private float windWidth;
     [SerializeField] private float windHeight; //the height of a tile to fully block wind.
     [SerializeField] private float maxWindStrength; 
-    [SerializeField] private float windOffset; //acts as a weight for wind strength change regarding height difference, wind accel and retardation (:
 
     [SerializeField] public bool triggerWind = false;
+
+    public float MaxWindStrength => maxWindStrength;
 
     private void Start()
     {
@@ -32,20 +33,19 @@ public class WindDeityManager : SingletonManager<WindDeityManager>
 
         baseCost = 10;
 
-        windWidth = 20f;
+        windWidth = 6f;
         windHeight = 2;
-        maxWindStrength = 10;
-        windOffset = 0.5f;
-        
+        maxWindStrength = 10; 
     }
 
     public void TriggerWind(Tile anchorPoint, Vector3 direction)
     {
+        //if (!currencyManager.SpendDeityPoints(baseCost)) return;
         if(anchorPoint == null) return;
         direction.y = 0;
         Vector2 vec2Dir = new Vector2(direction.x, direction.z);
 
-        Wind wind = new Wind(FindWindStrips(anchorPoint, vec2Dir), vec2Dir, windHeight, maxWindStrength, windOffset);
+        Wind wind = new Wind(FindWindStrips(anchorPoint, vec2Dir), vec2Dir, windHeight, maxWindStrength);
         activeWindInstances.Add(wind);
     }
 
@@ -110,14 +110,8 @@ public class WindDeityManager : SingletonManager<WindDeityManager>
                             windStrips[listIndex] = new List<Tile>();
                         }
 
-                        if (listIndex == 0) minZ = j - 1;
-
                         windStrips[listIndex].Add(tile);
                         listIndex++;
-                    }
-                    else
-                    {
-                        if (listIndex > 0) maxZ = j + 1;
                     }
                 }
             }
@@ -141,14 +135,8 @@ public class WindDeityManager : SingletonManager<WindDeityManager>
                             windStrips[listIndex] = new List<Tile>();
                         }
 
-                        if (listIndex == 0) minX = j - 1;
-
                         windStrips[listIndex].Add(tile);
                         listIndex++;
-                    }
-                    else
-                    {
-                        if (listIndex > 0) maxX = j + 1;
                     }
                 }
             }
@@ -160,7 +148,7 @@ public class WindDeityManager : SingletonManager<WindDeityManager>
     {
         if(triggerWind == true)
         {
-            TriggerWind(tileManager.GetTile(new Vector2(0, 0)), new Vector3(0.5f, 0, 1).normalized);
+            TriggerWind(tileManager.GetTile(new Vector2(0, 0)), new Vector3(0, 0, 1).normalized);
             //TriggerWind(tileManager.GetTile(new Vector2(0, 0)), new Vector3(1, 0, 0));
             triggerWind = false;
         }

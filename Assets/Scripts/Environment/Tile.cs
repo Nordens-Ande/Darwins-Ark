@@ -171,7 +171,7 @@ namespace Assets.Scripts.Environment
                 }
             }
             if (windStrength <= 0) return;
-            windStrength -= 1 * Time.deltaTime;
+            windStrength -= 2 * Time.deltaTime;
             if(windStrength <= 0)
             {
                 windStrength = 0;

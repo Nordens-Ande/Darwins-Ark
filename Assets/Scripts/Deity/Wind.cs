@@ -15,7 +15,6 @@ public class Wind
 
     private float maxWindHeight;
     private float maxWindStrength;
-    private float windOffset;
 
     private Dictionary<Tile, float> windStrengthAtTile;
     
@@ -25,13 +24,12 @@ public class Wind
 
     public bool WindComplete => windComplete;
 
-    public Wind(Dictionary<int, List<Tile>> windStrips, Vector2 direction, float maxWindHeight, float maxWindStrength, float windOffset)
+    public Wind(Dictionary<int, List<Tile>> windStrips, Vector2 direction, float maxWindHeight, float maxWindStrength)
     {
         this.windStrips = windStrips;
         this.direction = direction;
         this.maxWindHeight = maxWindHeight;
         this.maxWindStrength = maxWindStrength;
-        this.windOffset = windOffset;
 
         windStrengthAtTile = new Dictionary<Tile, float>();
         CalculateWindStrengths();
