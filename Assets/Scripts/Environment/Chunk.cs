@@ -143,7 +143,18 @@ namespace Assets.Scripts.Environment
             {
                 for (int z = 0; z < size; z++)
                 {
-                    Tile tile = GetTile(x, z, Space.Self);
+                    //Tile tile = GetTile(x, z, Space.Self);
+                    Tile tile = tiles[x, z];
+                    // Rules for Tile conversion
+                    if (tile.Height > tile.WaterHeight /*&& tile.Type != TileType.Grass*/)
+                    {
+                        tile.SetType(TileType.Grass);
+                    }
+                    if (tile.Type == TileType.River)
+                    {
+                        tile.ClearPlant();
+                    }
+
                     tileTypes[tile.Type].Add(tile.GridPosition);
                 }
             }
@@ -151,6 +162,8 @@ namespace Assets.Scripts.Environment
             GenerateMeshData();
             foreach (Tile tile in tiles)
                 tile.CleanUpTile();
+
+            isDirty = false;
         }
 
 

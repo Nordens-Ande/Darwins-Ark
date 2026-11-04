@@ -24,6 +24,7 @@ namespace Assets.Scripts.Environment
 
         [SerializeField] private bool createWater = true;
         [SerializeField] private float waterLevel = 0.5f;
+        [SerializeField] private int waterFlowDistance = 6;
         [SerializeField] private Material waterMaterial;
         [SerializeField, ReadOnly] private GameObject oceanObject;
         [SerializeField, ReadOnly] private GameObject waterObject;
@@ -83,10 +84,14 @@ namespace Assets.Scripts.Environment
 
             GenerateSaltWater();
 
-            Tile sourceWater = GetTile(Vector2Int.zero);
-            sourceWater.Height = 0;
-            sourceWater.SetType(TileType.Lake);
-            sourceWater.WaterHeight = 1f;
+            // Temp water creation
+            Tile[] sourceWaters = new Tile[] { GetTile(new Vector2Int(0, 0)), GetTile(new Vector2Int(1, 0)), GetTile(new Vector2Int(-1, 0)), GetTile(new Vector2Int(0, 1)), GetTile(new Vector2Int(0, -1)) };
+            foreach (Tile sourceWater in sourceWaters)
+            {
+                sourceWater.WaterHeight = sourceWater.Height - 0.15f;
+                sourceWater.Height = 0;
+                sourceWater.SetType(TileType.Lake);
+            }
 
             GenerateSweetWater();
         }
@@ -339,24 +344,6 @@ namespace Assets.Scripts.Environment
             List<Vector3> vertices = new List<Vector3>();
             List<int> triangles = new List<int>();
 
-            void AddFace(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
-            {
-                int index = vertices.Count;
-
-                vertices.Add(a);
-                vertices.Add(b);
-                vertices.Add(c);
-                vertices.Add(d);
-
-                triangles.Add(index + 0);
-                triangles.Add(index + 1);
-                triangles.Add(index + 2);
-
-                triangles.Add(index + 0);
-                triangles.Add(index + 2);
-                triangles.Add(index + 3);
-            }
-
             HashSet<Vector2Int> lakes = new HashSet<Vector2Int>();
             HashSet<Vector2Int> rivers = new HashSet<Vector2Int>();
             
@@ -366,7 +353,7 @@ namespace Assets.Scripts.Environment
                 rivers.AddRange(chunk[TileType.River]);
             }
 
-            GenerateRivers(lakes, rivers, 10);
+            GenerateRivers(lakes, rivers, waterFlowDistance);
 
             HashSet<Vector2Int> sweetWater = new HashSet<Vector2Int>(lakes);
             sweetWater.UnionWith(rivers);
@@ -490,23 +477,27 @@ namespace Assets.Scripts.Environment
                 Vector2Int.right
             };
 
-            Queue<(Vector2Int position, float height, float waterHeight)> queue = new Queue<(Vector2Int position, float height, float waterHeight)>();
+            Queue<(Vector2Int position, float height, float waterHeight, int distance)> queue = new Queue<(Vector2Int position, float height, float waterHeight, int distance)>();
 
             HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
 
             // Add all source (lake) water tiles.
             foreach (Vector2Int source in sourceWater)
             {
-                queue.Enqueue((source, 0, GetTile(source).WaterHeight));
+                Tile sourceTile = GetTile(source);
+                queue.Enqueue((source, sourceTile.Height, sourceTile.WaterHeight, 0));
                 visited.Add(source);
                 riverTiles.Add(source);
             }
 
             while (queue.Count > 0)
             {
-                (Vector2Int position, float height, float waterHeight) current = queue.Dequeue();
+                (Vector2Int position, float height, float waterHeight, int distance) current = queue.Dequeue();
 
                 if (current.height >= current.waterHeight)
+                    continue;
+
+                if (current.distance > maxFlowDistance)
                     continue;
 
                 foreach (Vector2Int direction in directions)
@@ -528,22 +519,29 @@ namespace Assets.Scripts.Environment
                     float neighbourHeight = neighbourTile.Height;
 
                     // If neighbour tile is below water then it can flow
-                    if (neighbourHeight >= current.waterHeight)
+                    if (neighbourHeight > current.waterHeight)
                         continue;
 
                     visited.Add(neighbour);
                     riverTiles.Add(neighbour);
 
-                    if (!Mathf.Approximately(neighbourTile.WaterHeight, current.waterHeight - 0.1f))
+                    float heightDecrease = maxFlowDistance > 0 ? current.distance / (maxFlowDistance * 0.5f) : 0.1f;
+                    //float newHeight = Mathf.Max(current.waterHeight - 0.1f, neighbourHeight);
+                    float newHeight = current.distance == maxFlowDistance ? neighbourHeight : current.waterHeight;
+
+                    neighbourTile.SetType(TileType.River);
+
+                    if (!Mathf.Approximately(neighbourTile.WaterHeight, newHeight))
                     {
-                        neighbourTile.WaterHeight = current.waterHeight - 0.1f;
+                        //neighbourTile.SetType(TileType.River);
+                        neighbourTile.WaterHeight = newHeight;
                     }
-                    if (neighbourTile.Type != TileType.River)
-                    {
-                        neighbourTile.SetType(TileType.River);
-                    }
+                    //if (neighbourTile.Type != TileType.River)
+                    //{
+                    //    neighbourTile.SetType(TileType.River);
+                    //}
                     
-                    queue.Enqueue((neighbour, neighbourTile.Height, neighbourTile.WaterHeight));
+                    queue.Enqueue((neighbour, neighbourTile.Height, neighbourTile.WaterHeight, current.distance + 1));
                 }
             }
         }

@@ -101,6 +101,9 @@ namespace Assets.Scripts.Environment
 
         public void SetType(TileType newType)
         {
+            if (newType == type)
+                return;
+
             owner.isDirty = true;
             type = newType;
         }
