@@ -628,8 +628,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     {
         choosenPlant = null;
         plant.EatPlant();
-        soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.cowEat), 1, 100, 0.5f);
-        vfxManager.GetSetAndDestroyVFX(VFXenum.animal_eat, transform.position);
+        //soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.cowEat), 1, 100, 0.5f);
+        //vfxManager.GetSetAndDestroyVFX(VFXenum.animal_eat, transform.position);
         hunger = 0;
         Poop();
     }
@@ -787,7 +787,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
             if (distance < 1.5f)
             {
-                vfxManager.GetSetAndDestroyVFX(VFXenum.animal_mate, transform.position);
+                //vfxManager.GetSetAndDestroyVFX(VFXenum.animal_mate, transform.position);
 
                 //Instantiate new animal
                 Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);

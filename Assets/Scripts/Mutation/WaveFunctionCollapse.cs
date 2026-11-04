@@ -1,6 +1,8 @@
 using NUnit.Framework;
-using UnityEngine;
 using System.Collections.Generic;
+//using System.Drawing;
+using UnityEngine;
+using UnityEngine.Rendering;
 
 public enum WFCDomenant 
 { 
@@ -12,10 +14,10 @@ public enum WFCDomenant
 public class WFCcell 
 {
     private bool isCollapsed;
-    private int entropy;
-    private Color cellColor;
-    private WFCDomenant cellsDominentParent;
-    private List<WFCDomenant> activeChoices;
+    private int entropy = 0;
+    private Color cellColor = Color.red;
+    private WFCDomenant cellsDominentParent = WFCDomenant.perfectMix;
+    private List<WFCDomenant> activeChoices = new List<WFCDomenant>();
     private int gridPosX;
     private int gridPosY;
 
@@ -61,39 +63,50 @@ public class WFCcell
 
 public class WaveFunctionCollapse : MonoBehaviour
 {
+
     Texture2D fatherTexture;
     Texture2D motherTexture;
+    Texture2D newTexture;
     List<WFCcell> isnetCollapsedCells = new List<WFCcell>();
 
     WFCcell[,] cells;
 
+    List<Color> possibleColorsFather;
+    List<Color> possibleColorsMother;
+    List <Color> possibleColorsPerfectMix; // Will act as a buffert between the dominent forces
 
-    List<Color> possibleColorsFather = new List<Color>();
-    List<Color> possibleColorsMother = new List<Color>();
-    List <Color> possibleColorsPerfectMix = new List<Color>(); // Will act as a buffert between the dominent forces
+    //DebugValues
+    [SerializeField] private GameObject debugObj;
+    [SerializeField] private bool activateDebug;
 
-    void GetPossibleColors(Texture2D fatherTex, Texture2D motherTex) 
+    void GetPossibleColors(Texture2D fatherTex, Texture2D motherTex, WFCcell[,] cells, List<WFCcell> isnetCollapsed) 
     {
+
+        possibleColorsFather = new List<Color>();
+        possibleColorsMother = new List<Color>();
+        possibleColorsPerfectMix = new List<Color>(); // Will act as a buffert between the dominent forces
+
         Color[] fatherPixels = fatherTex.GetPixels();
         Color[] motherPixels = motherTex.GetPixels();
 
         cells = new WFCcell[fatherTex.width, fatherTex.height];
 
-        PopulateGridWithCells(cells, fatherTex.width, fatherTex.height);
+        PopulateGridWithCells(cells, fatherTex.width, fatherTex.height, isnetCollapsed);
 
-        foreach (Color color in fatherPixels)
+        for(int i = 0; i < fatherPixels.Length; i++) 
+        {
+            if (!possibleColorsFather.Contains(fatherPixels[i]))
             {
-                if (possibleColorsFather.Contains(color))
-                {
-                    possibleColorsFather.Add(color);
-                }
+                possibleColorsFather.Add(fatherPixels[i]);
             }
 
-        foreach (Color color in motherPixels) 
+        }
+
+        for (int i = 0; i < motherPixels.Length; i++)
         {
-            if (possibleColorsMother.Contains(color)) 
-            { 
-                possibleColorsMother.Add(color);
+            if (!possibleColorsMother.Contains(motherPixels[i]))
+            {
+                possibleColorsMother.Add(motherPixels[i]);
             }
         }
 
@@ -105,36 +118,49 @@ public class WaveFunctionCollapse : MonoBehaviour
         }
     }
 
-    void PopulateGridWithCells(WFCcell[,] array, int width, int height) 
+    void PopulateGridWithCells(WFCcell[,] array, int width, int height, List<WFCcell> isnetCollapsedCells) 
     {
+        WFCDomenant father = WFCDomenant.fatherDominent;
+        WFCDomenant mother = WFCDomenant.fatherDominent;
+        WFCDomenant mix = WFCDomenant.fatherDominent;
+        List<WFCDomenant> list = new List<WFCDomenant> { father, mother, mix };
+
         for (int i = 0; i < width; i++)
         {
-            for (int j = 0; j < height; i++)
+            for (int j = 0; j < height; j++)
             {
                 WFCcell cell = new WFCcell();
                 cell.GridPosX = i;
                 cell.GridPosY = j;
-                cells[i, j] = cell;
+                cell.ActiveChoices = list;
+                cell.Entropy = list.Count;
+                isnetCollapsedCells.Add(cell);
+
+                array[i, j] = cell;
             }
         }
     }
 
-    void PopulateCellChoices(WFCcell[,] cells) 
-    {
-        List<WFCDomenant> list = new List<WFCDomenant> {WFCDomenant.fatherDominent, WFCDomenant.motherDominent, WFCDomenant.perfectMix };
-        foreach (WFCcell cell in cells) 
-        { 
-            cell.ActiveChoices = list;
-            cell.Entropy = list.Count;
-            isnetCollapsedCells.Add(cell); //Needed to check that all cells are collapsed
+    //void PopulateCellChoices(WFCcell[,] cells, List<WFCcell> isnetCollapsedCells) 
+    //{
+    //    //List<WFCDomenant> list = new List<WFCDomenant> {WFCDomenant.fatherDominent, WFCDomenant.motherDominent, WFCDomenant.perfectMix };
 
-        }
-    }
+
+    //    foreach (WFCcell cell in cells) 
+    //    {
+    //        cell.ActiveChoices = list;
+    //        cell.Entropy = list.Count;
+    //        isnetCollapsedCells.Add(cell); //Needed to check that all cells are collapsed
+
+    //    }
+    //}
 
     //Will be used to initionaly populate the textures
     Color GetRandomColorFromList(List<Color> list) 
     {
-        return list[Random.Range(0,list.Count)];
+        Color color = new Color();
+        color = list[Random.Range(0, list.Count)];
+        return color;
     }
 
     WFCcell GetLowestEntropy() 
@@ -153,65 +179,71 @@ public class WaveFunctionCollapse : MonoBehaviour
         return tempCell;
     }
 
-    void CollapseCell(WFCcell cell) 
+    void CollapseCell(WFCcell cell, List<WFCcell> insetCollapsedCells) 
     {
         cell.CellsDominentParent = cell.ActiveChoices[Random.Range(0, cell.ActiveChoices.Count)];
         cell.IsCollapsed = true;
-        isnetCollapsedCells.Remove(cell);
+        insetCollapsedCells.Remove(cell);
 
     }
 
-    void RulesOfNeighbor(WFCcell cell) //Propegering?
+    void RulesOfNeighbor(WFCcell cell, int width, int height) //Propegering?
     {
         if (cell.IsCollapsed) return;
 
         WFCDomenant selectedDomenent = cell.CellsDominentParent;
         List<WFCcell> neighbor = new List<WFCcell>();
-
-        for (int i = -1; i < 1; i++) 
+        if (cell.GridPosX < width -1 && cell.GridPosY < height - 1 && cell.GridPosX > 1 && cell.GridPosY > 1) 
         {
-            for (int j = -1; j < 1; j++) 
+            for (int i = -1; i < 1; i++)
             {
-                if (i == 0 && j == 0) return;
+                for (int j = -1; j < 1; j++)
+                {
+                    if (i == 0 && j == 0) return;
 
-                WFCcell currentCell = cells[cell.GridPosX + i, cell.GridPosY + j];
-                if (!currentCell.IsCollapsed)
-                { 
-                    neighbor.Add(cells[cell.GridPosX + i, cell.GridPosY + j]); 
+                    WFCcell currentCell = cells[cell.GridPosX + i, cell.GridPosY + j];
+                    if (!currentCell.IsCollapsed)
+                    {
+                        neighbor.Add(cells[cell.GridPosX + i, cell.GridPosY + j]);
+                    }
                 }
             }
-        }
 
-        if(cell.CellsDominentParent == WFCDomenant.motherDominent) 
-        { 
-            foreach(WFCcell wFCcell in neighbor) 
+            if (cell.CellsDominentParent == WFCDomenant.motherDominent)
             {
-                wFCcell.ActiveChoices.Remove(WFCDomenant.fatherDominent);
-                wFCcell.Entropy = wFCcell.ActiveChoices.Count;
+                foreach (WFCcell wFCcell in neighbor)
+                {
+                    wFCcell.ActiveChoices.Remove(WFCDomenant.fatherDominent);
+                    wFCcell.Entropy = wFCcell.ActiveChoices.Count;
+                }
             }
+            else if (cell.CellsDominentParent == WFCDomenant.fatherDominent)
+            {
+                foreach (WFCcell wFCcell in neighbor)
+                {
+                    wFCcell.ActiveChoices.Remove(WFCDomenant.motherDominent);
+                    wFCcell.Entropy = wFCcell.ActiveChoices.Count;
+                }
+            } 
         }
-        else if(cell.CellsDominentParent == WFCDomenant.fatherDominent) 
-        {
-            foreach (WFCcell wFCcell in neighbor)
-            {
-                wFCcell.ActiveChoices.Remove(WFCDomenant.motherDominent);
-                wFCcell.Entropy = wFCcell.ActiveChoices.Count;
-            }
+        else 
+        { 
+            return;
         }
     }
 
     public void WFC(Texture2D fatherTexture, Texture2D motherTexture, WFCcell[,] cells)
     {
-        GetPossibleColors(fatherTexture, motherTexture);
-        PopulateCellChoices(cells);
+        GetPossibleColors(fatherTexture, motherTexture, cells, isnetCollapsedCells);
+        //PopulateCellChoices(cells);
 
         while(isnetCollapsedCells.Count != 0) 
         {
             WFCcell cell = GetLowestEntropy();
             if (cell != null) 
             {
-                CollapseCell(cell);
-                RulesOfNeighbor(cell);
+                CollapseCell(cell, isnetCollapsedCells);
+                RulesOfNeighbor(cell, fatherTexture.width, fatherTexture.height);
             }
             else 
             {
@@ -219,34 +251,129 @@ public class WaveFunctionCollapse : MonoBehaviour
             }
         }
 
-        PaintTheFinalResult(cells);
-        CreateNewTexture();
+        PaintTheFinalResult(cells, fatherTexture.width, fatherTexture.height);
+        CreateNewTexture(newTexture, cells);
 
     }
 
 
-    void PaintTheFinalResult(WFCcell[,] cells ) 
-    { 
-        foreach(WFCcell cell in cells) 
-        { 
-            if(cell.CellsDominentParent == WFCDomenant.motherDominent) 
+    void PaintTheFinalResult(WFCcell[,] cells, int width, int height) 
+    {
+
+        for (int i = 0; i < width - 1; i++)
+        {
+            for (int j = 0; j < height - 1; j++)
             {
-                cell.CellColor = GetRandomColorFromList(possibleColorsMother);
-            }
-            else if(cell.CellsDominentParent == WFCDomenant.fatherDominent) 
-            {
-                cell.CellColor = GetRandomColorFromList(possibleColorsFather);
-            }
-            else 
-            {
-                cell.CellColor = GetRandomColorFromList(possibleColorsPerfectMix);
+
+                //cells[i, j].CellColor = GetRandomColorFromList(possibleColorsMother);
+                if (cells[i, j].CellsDominentParent == WFCDomenant.motherDominent)
+                {
+                    cells[i, j].CellColor = GetRandomColorFromList(possibleColorsMother);
+                }
+                else if (cells[i, j].CellsDominentParent == WFCDomenant.fatherDominent)
+                {
+                    cells[i, j].CellColor = GetRandomColorFromList(possibleColorsFather);
+                }
+                else
+                {
+                    cells[i, j].CellColor = GetRandomColorFromList(possibleColorsPerfectMix);
+                }
+
             }
         }
     }
 
-    void CreateNewTexture() 
-    { 
-    
+    void CreateNewTexture(Texture2D size, WFCcell[,] cells) 
+    {
+        newTexture = new Texture2D(256, 256);
+        for (int i = 0; i < size.width; i ++) 
+        { 
+            for (int j = 0; j < size.height; j++) 
+            {
+                Color setColor = cells[i, j].CellColor;
+                newTexture.SetPixel(i, j, setColor);
+            }
+        }
+        newTexture.Apply();
     }
 
+    /// <summary>
+    /// /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    /// </summary>
+    /// <param name="fatherTex"></param>
+    /// <param name="motherTex"></param>
+    /// 
+
+    //Debug feature, making textures inside this scripts to see if it works
+    void DebugCreateTextures(Texture2D fatherTex, Texture2D motherTex) 
+    {
+        Texture2D texture = new Texture2D(256,256);
+
+        for(int i = 0; i < texture.width; i++) 
+        { 
+            for (int j = 0; j < texture.height; j++) 
+            {
+                fatherTex.SetPixel(i, j, Color.blue);
+                motherTex.SetPixel(i, j, Color.red);
+            }
+        }
+        fatherTex.Apply();
+        motherTex.Apply();
+    }
+
+    Texture2D DebugCreateFather() 
+    { 
+        Texture2D fatherTex = new Texture2D(256,256);
+        return fatherTex;
+    }
+    Texture2D DebugCreateMother()
+    {
+        Texture2D motherTex = new Texture2D(256, 256);
+        return motherTex;
+    }
+
+    void DebugSetobjColor(GameObject obj)
+    {
+        Renderer renderer = obj.GetComponent<Renderer>();
+        renderer.material.mainTexture = newTexture;
+    }
+
+    public void DebugWFC()
+    {
+        List<WFCcell> isnetCollapsedCells = new List<WFCcell>();
+        Texture2D fatherTex = DebugCreateFather();
+        Texture2D motherTex = DebugCreateMother();
+        DebugCreateTextures(fatherTex, motherTex);
+
+        WFCcell[,] cells = new WFCcell[256, 256];
+        GetPossibleColors(fatherTex, motherTex, cells, isnetCollapsedCells);
+
+
+        while (isnetCollapsedCells.Count != 0)
+        {
+            WFCcell cell = GetLowestEntropy();
+            if (cell != null)
+            {
+                CollapseCell(cell, isnetCollapsedCells);
+                RulesOfNeighbor(cell, fatherTexture.width, fatherTexture.height);
+            }
+            else
+            {
+                isnetCollapsedCells.Clear(); //Tried to Failsafe
+            }
+        }
+        PaintTheFinalResult(cells, fatherTex.width, fatherTex.height);
+        CreateNewTexture(newTexture, cells);
+        DebugSetobjColor(debugObj);
+
+    }
+
+    private void Update()
+    {
+        if(activateDebug == true) 
+        {
+            activateDebug = false;
+            DebugWFC();
+        }
+    }
 }
