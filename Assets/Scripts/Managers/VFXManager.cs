@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class VFXManager : MonoBehaviour
+public class VFXManager : SingletonManager<VFXManager>
 {
     public static VFXManager instance = null;
 
@@ -25,15 +25,26 @@ public class VFXManager : MonoBehaviour
         public ParticleSystem Value => value;
     }
 
-    private void Awake()
+    //private void Awake()
+    //{
+    //    if (contentList != null)
+    //    {
+    //        foreach (var content in contentList)
+    //        {
+    //            particleDictonary.TryAdd(content.Key, content.Value);
+    //        }
+    //    }
+    //}
+    private void Start()
     {
-        if (contentList != null) 
+        if (contentList != null)
         {
-            foreach (var content in contentList) 
+            foreach (var content in contentList)
             {
                 particleDictonary.TryAdd(content.Key, content.Value);
             }
         }
+
     }
 
     public ParticleSystem GetParticleSystem(VFXenum key) 

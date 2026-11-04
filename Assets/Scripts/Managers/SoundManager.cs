@@ -4,10 +4,10 @@ using UnityEngine.Audio;
 
 using System.Collections.Generic;
 
-public class SoundManager : MonoBehaviour
+public class SoundManager : SingletonManager<SoundManager>
 {
 
-    public static SoundManager Instance = null;
+    //public static SoundManager Instance = null;
 
     [SerializeField] private AudioClip backgroundMusic;
     [SerializeField] private AudioSource backgroundMusicPlayer; //Where the backgroundmusic will be played 
@@ -22,27 +22,33 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private Dictionary<MixerType, AudioMixerGroup> mixerIndex = new Dictionary<MixerType, AudioMixerGroup>();
 
 
-    private void Awake()
-    {
-        if (Instance == null) 
-        {
-            Instance = this;
-        }
-        else 
-        {
-            Destroy(this);
-        }
+    //private void Awake()
+    //{
+    //    if (Instance == null) 
+    //    {
+    //        Instance = this;
+    //    }
+    //    else 
+    //    {
+    //        Destroy(this);
+    //    }
 
-        //Populates the dictonary with the scripble objects, connecting the type to the clip
+    //    //Populates the dictonary with the scripble objects, connecting the type to the clip
+    //    foreach (SO_SoundEffect audio in soundEffectsList)
+    //    {
+    //        if (audio.Clip == null) continue;
+    //        soundIndex.Add(audio.AudioType, audio.Clip);
+    //    }
+    //}
+
+    private void Start()
+    {
         foreach (SO_SoundEffect audio in soundEffectsList)
         {
             if (audio.Clip == null) continue;
             soundIndex.Add(audio.AudioType, audio.Clip);
         }
-    }
 
-    private void Start()
-    {
         StartBackgroundMusic(0.1f);
     }
 

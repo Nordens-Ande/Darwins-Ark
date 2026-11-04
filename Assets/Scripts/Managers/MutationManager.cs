@@ -4,9 +4,9 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 
-public class MutationManager : MonoBehaviour
+public class MutationManager : SingletonManager<MutationManager>
 {
-    public static MutationManager instance = null;
+    //public static MutationManager instance = null;
     [SerializeField] private List<SO_AnimalMutation> mutationsList = new List<SO_AnimalMutation>();
     [SerializeField] private ParticleSystem mutationParticleSystem;
 
@@ -16,13 +16,13 @@ public class MutationManager : MonoBehaviour
         set => mutationsList = value;
     }
     
-    private void Awake()
-    {
-        if(MutationManager.instance == null) 
-        {
-            MutationManager.instance = this;
-        }
-    }
+    //private void Awake()
+    //{
+    //    if(MutationManager.instance == null) 
+    //    {
+    //        MutationManager.instance = this;
+    //    }
+    //}
 
     SO_AnimalMutation RandomMutation() 
     {

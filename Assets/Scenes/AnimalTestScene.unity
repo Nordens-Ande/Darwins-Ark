@@ -761,7 +761,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 515219464}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 52acc1e03f873ac4a96f6356effd77e9, type: 3}
   m_Name: 
@@ -5998,7 +5998,9 @@ MonoBehaviour:
   chunkGridSize: {x: 4, y: 4}
   createWater: 1
   waterLevel: 0.5
+  waterFlowDistance: 6
   waterMaterial: {fileID: 0}
+  oceanObject: {fileID: 0}
   waterObject: {fileID: 0}
 --- !u!4 &1837467434
 Transform:

@@ -13,11 +13,11 @@ public enum WFCDomenant
 
 public class WFCcell 
 {
-    private bool isCollapsed;
+    private bool isCollapsed = false;
     private int entropy = 0;
     private Color cellColor = Color.red;
     private WFCDomenant cellsDominentParent = WFCDomenant.perfectMix;
-    private List<WFCDomenant> activeChoices = new List<WFCDomenant>();
+    private List<WFCDomenant> activeChoices = new List<WFCDomenant> {WFCDomenant.fatherDominent, WFCDomenant.motherDominent, WFCDomenant.perfectMix };
     private int gridPosX;
     private int gridPosY;
 
@@ -69,7 +69,7 @@ public class WaveFunctionCollapse : MonoBehaviour
     Texture2D newTexture;
     List<WFCcell> isnetCollapsedCells = new List<WFCcell>();
 
-    WFCcell[,] cells;
+    WFCcell[,] cellsArray;
 
     List<Color> possibleColorsFather;
     List<Color> possibleColorsMother;
@@ -89,7 +89,9 @@ public class WaveFunctionCollapse : MonoBehaviour
         Color[] fatherPixels = fatherTex.GetPixels();
         Color[] motherPixels = motherTex.GetPixels();
 
-        cells = new WFCcell[fatherTex.width, fatherTex.height];
+        //cells = new WFCcell[fatherTex.width, fatherTex.height];
+
+        cellsArray = new WFCcell[fatherTex.width, fatherTex.height];
 
         PopulateGridWithCells(cells, fatherTex.width, fatherTex.height, isnetCollapsed);
 
@@ -133,27 +135,15 @@ public class WaveFunctionCollapse : MonoBehaviour
                 cell.GridPosX = i;
                 cell.GridPosY = j;
                 cell.ActiveChoices = list;
+                cell.CellsDominentParent = WFCDomenant.motherDominent;
                 cell.Entropy = list.Count;
+                cell.IsCollapsed = false;
                 isnetCollapsedCells.Add(cell);
 
                 array[i, j] = cell;
             }
         }
     }
-
-    //void PopulateCellChoices(WFCcell[,] cells, List<WFCcell> isnetCollapsedCells) 
-    //{
-    //    //List<WFCDomenant> list = new List<WFCDomenant> {WFCDomenant.fatherDominent, WFCDomenant.motherDominent, WFCDomenant.perfectMix };
-
-
-    //    foreach (WFCcell cell in cells) 
-    //    {
-    //        cell.ActiveChoices = list;
-    //        cell.Entropy = list.Count;
-    //        isnetCollapsedCells.Add(cell); //Needed to check that all cells are collapsed
-
-    //    }
-    //}
 
     //Will be used to initionaly populate the textures
     Color GetRandomColorFromList(List<Color> list) 
@@ -163,7 +153,7 @@ public class WaveFunctionCollapse : MonoBehaviour
         return color;
     }
 
-    WFCcell GetLowestEntropy() 
+    WFCcell GetLowestEntropy(WFCcell[,] cells, List<WFCcell> isnetCollapsedCells) 
     {
         if (isnetCollapsedCells.Count == 0) return null;
 
@@ -181,19 +171,34 @@ public class WaveFunctionCollapse : MonoBehaviour
 
     void CollapseCell(WFCcell cell, List<WFCcell> insetCollapsedCells) 
     {
-        cell.CellsDominentParent = cell.ActiveChoices[Random.Range(0, cell.ActiveChoices.Count)];
-        cell.IsCollapsed = true;
-        insetCollapsedCells.Remove(cell);
+        if(cell == null) 
+        {
+            insetCollapsedCells.Remove(cell);
+            return;
+        }
+
+        if(cell.ActiveChoices.Count == 1) 
+        {
+            cell.CellsDominentParent = cell.ActiveChoices[0];
+            cell.IsCollapsed = true;
+            insetCollapsedCells.Remove(cell);
+        }
+        else 
+        {
+            cell.CellsDominentParent = cell.ActiveChoices[Random.Range(0, cell.ActiveChoices.Count)];
+            cell.IsCollapsed = true;
+            insetCollapsedCells.Remove(cell);
+        }
 
     }
 
-    void RulesOfNeighbor(WFCcell cell, int width, int height) //Propegering?
+    void RulesOfNeighbor(WFCcell cell, int width, int height, WFCcell[,] cells) //Propegering?
     {
         if (cell.IsCollapsed) return;
 
         WFCDomenant selectedDomenent = cell.CellsDominentParent;
         List<WFCcell> neighbor = new List<WFCcell>();
-        if (cell.GridPosX < width -1 && cell.GridPosY < height - 1 && cell.GridPosX > 1 && cell.GridPosY > 1) 
+        if (cell.GridPosX < width -1 && cell.GridPosY < height - 1 && cell.GridPosX > 0 && cell.GridPosY > 0) 
         {
             for (int i = -1; i < 1; i++)
             {
@@ -239,11 +244,11 @@ public class WaveFunctionCollapse : MonoBehaviour
 
         while(isnetCollapsedCells.Count != 0) 
         {
-            WFCcell cell = GetLowestEntropy();
+            WFCcell cell = GetLowestEntropy(cells, isnetCollapsedCells);
             if (cell != null) 
             {
                 CollapseCell(cell, isnetCollapsedCells);
-                RulesOfNeighbor(cell, fatherTexture.width, fatherTexture.height);
+                RulesOfNeighbor(cell, fatherTexture.width, fatherTexture.height, cellsArray);
             }
             else 
             {
@@ -260,23 +265,26 @@ public class WaveFunctionCollapse : MonoBehaviour
     void PaintTheFinalResult(WFCcell[,] cells, int width, int height) 
     {
 
-        for (int i = 0; i < width - 1; i++)
+        for (int i = 0; i < width; i++)
         {
-            for (int j = 0; j < height - 1; j++)
+            for (int j = 0; j < height; j++)
             {
 
                 //cells[i, j].CellColor = GetRandomColorFromList(possibleColorsMother);
                 if (cells[i, j].CellsDominentParent == WFCDomenant.motherDominent)
                 {
-                    cells[i, j].CellColor = GetRandomColorFromList(possibleColorsMother);
+                    //cells[i, j].CellColor = GetRandomColorFromList(possibleColorsMother);
+                    cells[i, j].CellColor = possibleColorsMother[0];
                 }
                 else if (cells[i, j].CellsDominentParent == WFCDomenant.fatherDominent)
                 {
-                    cells[i, j].CellColor = GetRandomColorFromList(possibleColorsFather);
+                    //cells[i, j].CellColor = GetRandomColorFromList(possibleColorsFather);
+                    cells[i, j].CellColor = possibleColorsFather[0];
                 }
                 else
                 {
-                    cells[i, j].CellColor = GetRandomColorFromList(possibleColorsPerfectMix);
+                    //cells[i, j].CellColor = GetRandomColorFromList(possibleColorsPerfectMix);
+                    cells[i, j].CellColor = possibleColorsPerfectMix[0];
                 }
 
             }
@@ -285,7 +293,7 @@ public class WaveFunctionCollapse : MonoBehaviour
 
     void CreateNewTexture(Texture2D size, WFCcell[,] cells) 
     {
-        newTexture = new Texture2D(256, 256);
+        newTexture = new Texture2D(size.width, size.height);
         for (int i = 0; i < size.width; i ++) 
         { 
             for (int j = 0; j < size.height; j++) 
@@ -307,7 +315,7 @@ public class WaveFunctionCollapse : MonoBehaviour
     //Debug feature, making textures inside this scripts to see if it works
     void DebugCreateTextures(Texture2D fatherTex, Texture2D motherTex) 
     {
-        Texture2D texture = new Texture2D(256,256);
+        Texture2D texture = new Texture2D(16, 16);
 
         for(int i = 0; i < texture.width; i++) 
         { 
@@ -323,18 +331,19 @@ public class WaveFunctionCollapse : MonoBehaviour
 
     Texture2D DebugCreateFather() 
     { 
-        Texture2D fatherTex = new Texture2D(256,256);
+        Texture2D fatherTex = new Texture2D(16,16);
         return fatherTex;
     }
     Texture2D DebugCreateMother()
     {
-        Texture2D motherTex = new Texture2D(256, 256);
+        Texture2D motherTex = new Texture2D(16, 16);
         return motherTex;
     }
 
     void DebugSetobjColor(GameObject obj)
     {
         Renderer renderer = obj.GetComponent<Renderer>();
+        newTexture.filterMode = FilterMode.Point;
         renderer.material.mainTexture = newTexture;
     }
 
@@ -345,35 +354,31 @@ public class WaveFunctionCollapse : MonoBehaviour
         Texture2D motherTex = DebugCreateMother();
         DebugCreateTextures(fatherTex, motherTex);
 
-        WFCcell[,] cells = new WFCcell[256, 256];
+        WFCcell[,] cells = new WFCcell[fatherTex.width, fatherTex.height];
         GetPossibleColors(fatherTex, motherTex, cells, isnetCollapsedCells);
+
+        //cellsArray = cells;
 
 
         while (isnetCollapsedCells.Count != 0)
         {
-            WFCcell cell = GetLowestEntropy();
-            if (cell != null)
-            {
-                CollapseCell(cell, isnetCollapsedCells);
-                RulesOfNeighbor(cell, fatherTexture.width, fatherTexture.height);
-            }
-            else
-            {
-                isnetCollapsedCells.Clear(); //Tried to Failsafe
-            }
+            WFCcell cell = GetLowestEntropy(cells, isnetCollapsedCells);
+            CollapseCell(cell, isnetCollapsedCells);
+            RulesOfNeighbor(cell, fatherTex.width, fatherTex.height, cells);
         }
+
         PaintTheFinalResult(cells, fatherTex.width, fatherTex.height);
-        CreateNewTexture(newTexture, cells);
+        CreateNewTexture(fatherTex, cells);
         DebugSetobjColor(debugObj);
 
     }
 
-    private void Update()
-    {
-        if(activateDebug == true) 
-        {
-            activateDebug = false;
-            DebugWFC();
-        }
-    }
+    //private void Update()
+    //{
+    //    if(activateDebug == true) 
+    //    {
+    //        activateDebug = false;
+    //        DebugWFC();
+    //    }
+    //}
 }
