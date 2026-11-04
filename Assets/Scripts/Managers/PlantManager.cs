@@ -13,9 +13,14 @@ public class PlantManager : SingletonManager<PlantManager>
 
     [Header("Varibles")]
     [SerializeField] float secondsForPlantToGrow = 10.0f;
+    [Header("close to water tiles")]
     [SerializeField, ReadOnly] float closeToWaterModifier = 1.0f;
     [SerializeField] float waterModiferFastGrowth = 1.25f; 
     [SerializeField] float waterModiferSlowGrowth = 1.0f;
+    [Header("rain diety tiles")]
+    [SerializeField,ReadOnly] float rainTileModifier = 1.0f;
+    [SerializeField] float rainModifierFastGrowth = 1.25f;
+    [SerializeField] float rainModifierSlowGrowth = 1.0f;
     [Space]
 
     [Header("Plant Spawning")]
@@ -42,7 +47,7 @@ public class PlantManager : SingletonManager<PlantManager>
     [SerializeField] float maxTileOffset = 0.25f;
     [Space]
     [SerializeField] bool massPlantPlantsAsGrown = true;
-    private bool massSpawning = false; //this is a varible to know if we're mass spawning plants or not
+    private bool massSpawning = false; // this is a varible to know if we're mass spawning plants or not
 
     [Header("List of all Plants")]
     [SerializeField] private List<Plant> plants = new List<Plant>();
@@ -73,17 +78,27 @@ public class PlantManager : SingletonManager<PlantManager>
         //loop all plants
         for (int i = plants.Count - 1; i >= 0; i--)
         {
-            //if the plant is null, remove it from the list
+            // if the plant is null, remove it from the list
             if (plants[i] == null)
             {
                 plants.RemoveAt(i);
                 continue;
             }
 
-            //check if the plant is close to water
+            // check if the tile is wet from diety
+            if (plants[i].CurrentTile.IsWetFromRain)
+            {
+                rainTileModifier = rainModifierFastGrowth;
+            }
+            else
+            {
+                rainTileModifier = rainModifierSlowGrowth;
+            }
+
+            // check if the plant is close to water
             if (IsPlantCloseToWater(plants[i]))
             {
-                //if the plant is close to water, we make it grow faster
+                // if the plant is close to water, we make it grow faster
                 closeToWaterModifier = waterModiferFastGrowth;
             }
             else
@@ -91,8 +106,12 @@ public class PlantManager : SingletonManager<PlantManager>
                 closeToWaterModifier = waterModiferSlowGrowth;
             }
 
-            //check if the plant is ready to grow, depnding on growth speed and time since last growth
-            if (plants[i].TimeSinceLastGrowth / plants[i].GrowthSpeed * closeToWaterModifier >= secondsForPlantToGrow)
+            // check if the plant is ready to grow, depnding on
+            // growth speed of the indivudual plant
+            // time since last growth
+            // modifier is it's close to water or not
+            // modifier is it's on a tile that is wet from rain or not
+            if (plants[i].TimeSinceLastGrowth / (plants[i].GrowthSpeed * closeToWaterModifier * rainTileModifier) >= secondsForPlantToGrow)
             {
                 plants[i].GrowPlant();
             }
@@ -100,7 +119,7 @@ public class PlantManager : SingletonManager<PlantManager>
 
 
 
-        //try to spawn plants on all tiles
+        // try to spawn plants on all tiles
         if (spawnPlantAllTiles)
         {
             MassPlantPlants();
