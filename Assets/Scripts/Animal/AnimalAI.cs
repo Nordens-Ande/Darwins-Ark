@@ -28,7 +28,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     [SerializeField] private float MutationRate = 1;
     [SerializeField, ReadOnly] private float currentMutationValue = 0;
     [SerializeField] private float MutationMax = 100;
-    [SerializeField] private float Defence = 1; //Do nothing at the moment
+    //[SerializeField] private float Defence = 1; //Do nothing at the moment
 
 
     [Header("Timers")]
@@ -37,8 +37,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     [SerializeField] private float maxIdleTime = 5f;
     [SerializeField, ReadOnly] private float currentIdleTime = 0;
 
-    [SerializeField] private float maxAttackTime = 2;
-    [SerializeField, ReadOnly] private float currentAttackTime = 0;
+    //[SerializeField] private float maxAttackTime = 2;
+    //[SerializeField, ReadOnly] private float currentAttackTime = 0;
 
     [SerializeField] private float clockCycleTime = 10; //How long before points deteriate
     [SerializeField, ReadOnly] private float clockCycleTimeCurrent;
@@ -46,10 +46,10 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     [SerializeField] private float sleepTimeMax = 10;
     [SerializeField, ReadOnly] private float currentSleepTime = 0;
 
-    [Header("Boss")]
-    [Space]
-    //bossFight
-    [SerializeField] private float attackDistance = 3;
+    //[Header("Boss")]
+    //[Space]
+    ////bossFight
+    //[SerializeField] private float attackDistance = 3;
 
     //Seeds that animal can spawn
     [Header("Seeds that can spawn")]
@@ -65,6 +65,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     private TileManager tileManager;
     private MutationManager mutationManager;
     private AnimalManager animalManager;
+    private SoundManager soundManager;
+    private VFXManager vfxManager;
 
     //Boat Spawning
     private bool unloaded = false;
@@ -214,10 +216,12 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     {
         transform.localPosition = Vector3.zero;
         tileManager = TileManager.Instance;
-        mutationManager = MutationManager.instance;
+        mutationManager = MutationManager.Instance;
         animalManager = AnimalManager.Instance;
+        soundManager = SoundManager.Instance;
+        vfxManager = VFXManager.instance;
         activeBosses = new List<Boss>();
-        maxAttackTime = 2;
+        //maxAttackTime = 2;
         tileCheckSize = 1;
         BossThreat = 0;
         matingSeason = 0;
@@ -624,6 +628,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     {
         choosenPlant = null;
         plant.EatPlant();
+        //soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.cowEat), 1, 100, 0.5f);
+        //vfxManager.GetSetAndDestroyVFX(VFXenum.animal_eat, transform.position);
         hunger = 0;
         Poop();
     }
@@ -781,6 +787,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
             if (distance < 1.5f)
             {
+                //vfxManager.GetSetAndDestroyVFX(VFXenum.animal_mate, transform.position);
+
                 //Instantiate new animal
                 Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
                 spawnPosition = spawnPosition - (transform.forward * 2);

@@ -32,6 +32,7 @@ namespace Assets.Scripts.Environment
 
         public Vector3 Position => position;
         public Vector3 LocalPosition => localPosition;
+
         public float Height
         {
             get => Position.y;
@@ -45,6 +46,7 @@ namespace Assets.Scripts.Environment
                 //CleanUpTile();
             }
         }
+
         public float WaterHeight
         {
             get => waterHeight;
