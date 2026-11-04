@@ -74,7 +74,10 @@ public class BoatManager : SingletonManager<BoatManager>
         Tile spawnTile = GetSpawnTile();
         Tile beachTile = GetBeachTile();
 
-        GameObject boat = Instantiate(BoatPrefab, spawnTile.Position, Quaternion.identity);
+        Vector3 spawnPosition = spawnTile.Position;
+        spawnPosition.y = 0.5f;
+
+        GameObject boat = Instantiate(BoatPrefab, spawnPosition, Quaternion.identity);
         if(boat != null)
         {
             Boat boatScript = boat.GetComponent<Boat>();

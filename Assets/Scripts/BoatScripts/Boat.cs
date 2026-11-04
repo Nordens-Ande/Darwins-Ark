@@ -45,6 +45,7 @@ public class Boat : MonoBehaviour
     private float minMovementSpeed = 1f;
 
     private float distanceFromCoast = 3f; // make not hardcoded if weird later
+    private const float boatPosY = 0.5f;
 
     private Quaternion initialRotation;
     [SerializeField] private GameObject loadPos;
@@ -312,7 +313,10 @@ public class Boat : MonoBehaviour
         float movementSpeed = DecideSpeed();
 
         //move and rotate
-        Vector3 direction = nextTile.Position - transform.position;
+        Vector3 nextPos = nextTile.Position;
+        nextPos.y = boatPosY;
+
+        Vector3 direction = nextPos - transform.position;
         direction.Normalize();
 
         Vector3 moveDirection = transform.forward;
@@ -353,7 +357,9 @@ public class Boat : MonoBehaviour
 
     void BoatRotate()
     {
-        Vector3 direction = nextTile.Position - transform.position;
+        Vector3 nextPos = nextTile.Position;
+        nextPos.y = boatPosY;
+        Vector3 direction = nextPos - transform.position;
         direction.Normalize();
         Quaternion targetRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 30f * Time.deltaTime);
