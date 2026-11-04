@@ -47,7 +47,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Environment.TerraformManager
   isActive: 0
   modifySelectionEnabled: 0
-  doubleClickTimer: 0
 --- !u!114 &5547338016526990173
 MonoBehaviour:
   m_ObjectHideFlags: 0

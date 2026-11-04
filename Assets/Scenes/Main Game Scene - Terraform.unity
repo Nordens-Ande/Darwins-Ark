@@ -780,9 +780,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileSelectionManager
   visibilityMode: 1
+  doubleClickTime: 0.2
   mouseMoveThreshold: 20
   selectHeld: 0
   isAddingTiles: 0
+  doubleClickTimer: 0
 --- !u!4 &695006196
 Transform:
   m_ObjectHideFlags: 0
@@ -880,6 +882,10 @@ PrefabInstance:
     - target: {fileID: 5219250614393762907, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
       propertyPath: m_Name
       value: Terraform Manager
+      objectReference: {fileID: 0}
+    - target: {fileID: 5547338016526990173, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
+      propertyPath: doubleClickTime
+      value: 0.2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -40,6 +40,10 @@ namespace Assets.Scripts.Environment
         private string selectionGridName = "Selection Grid";
         private string heighlightGridName = "Highlight Grid";
 
+
+        public event Action<Chunk[]> ChunksCleaned;
+
+
         void Start()
         {
             rainDeityManager = RainDeityManager.Instance;
@@ -115,10 +119,12 @@ namespace Assets.Scripts.Environment
             //}
 
             bool hasCleaned = false;
+            List<Chunk> cleanedChunks = new List<Chunk>();
             for (int i = 0; i < chunks.Count; i++)
             {
                 if (!chunks[i].isDirty)
                     continue;
+                cleanedChunks.Add(chunks[i]);
                 hasCleaned = true;
 
                 //chunks[i].GenerateMeshData();
@@ -143,7 +149,10 @@ namespace Assets.Scripts.Environment
             }
 
             if (hasCleaned)
+            {
                 Debug.Log("We just cleaned the tiles");
+                ChunksCleaned?.Invoke(cleanedChunks.ToArray());
+            }
         }
 
         //All Getters here can be refactored for more perfomance, currently they are not super efficient
