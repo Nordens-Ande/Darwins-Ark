@@ -47,7 +47,7 @@ public class Inventory : MonoBehaviour
 
                     if (amount <= 0)
                     {
-                        Debug.Log($"Successfully added seed to inventory");
+                        //Debug.Log($"Successfully added seed to inventory");
                         return true;
                     }
                 }

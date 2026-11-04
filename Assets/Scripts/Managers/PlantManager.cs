@@ -151,20 +151,19 @@ public class PlantManager : SingletonManager<PlantManager>
                     float randomValue = Random.Range(0f, 100f);
                     if (randomValue <= spawnPlantAllTilesChance)
                     {
-
-                        float randomGrowthSpeed = 1.0f;
                         Plant plant = plantPrefabToSpawn.First();
 
-                        if (useRandomGrowthSpeed)
-                        {
-                            randomGrowthSpeed = Random.Range(minGrowthSpeed, maxGrowthSpeed);
-                        }
                         if (useRandomPlants)
                         {
                             plant = plantPrefabToSpawn[Random.Range(0, plantPrefabToSpawn.Count)];
                         }
                        
                         massSpawning = true;
+                        float randomGrowthSpeed = 1.0f;
+                        if (useRandomGrowthSpeed)
+                        {
+                            randomGrowthSpeed = Random.Range(minGrowthSpeed, maxGrowthSpeed);
+                        }
 
                         SpawnPlantOnThisTile(plant, chunk.GetTile(tilePos.x, tilePos.y), randomGrowthSpeed);
 
@@ -233,6 +232,11 @@ public class PlantManager : SingletonManager<PlantManager>
             newPlant.SetGrowthStage(Plant.GrowthStage.grown);
         }
 
+        //if we want to use a random growth speed for the plant
+        if (useRandomGrowthSpeed)
+        {
+            CustomGrowSpeed = Random.Range(minGrowthSpeed, maxGrowthSpeed);
+        }
 
         // set the growth speed of the plant
         newPlant.GrowthSpeed = CustomGrowSpeed;

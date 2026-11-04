@@ -1147,6 +1147,54 @@
                     "isPartOfComposite": true
                 }
             ]
+        },
+        {
+            "name": "Inventory",
+            "id": "6130c2bc-7109-4adc-84c7-f046a70d7792",
+            "actions": [
+                {
+                    "name": "PlantSelectTile",
+                    "type": "Button",
+                    "id": "3b907a9e-dd79-4b07-ae3c-806595fa7186",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "PlantHoverMove",
+                    "type": "Value",
+                    "id": "8bef14d3-125c-4ce6-a1fe-6a2cb7cebc94",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "59122df8-6f6a-403d-b3d4-64c8c5b6093d",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PlantSelectTile",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "53bc5a90-c4e2-4cae-8e84-f42f6822292c",
+                    "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PlantHoverMove",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [
