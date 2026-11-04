@@ -405,16 +405,12 @@ MonoBehaviour:
   MutationRate: 1
   currentMutationValue: 0
   MutationMax: 100
-  Defence: 1
   maxIdleTime: 5
   currentIdleTime: 0
-  maxAttackTime: 2
-  currentAttackTime: 0
   clockCycleTime: 30
   clockCycleTimeCurrent: 0
   sleepTimeMax: 10
   currentSleepTime: 0
-  attackDistance: 3
   poop:
   - {fileID: 7206990565552924369, guid: 9d83281e4b6364a4bbce31d9758ccd88, type: 3}
   - {fileID: 5212644513495774897, guid: a7db1c59c01addb40b02cf2d8d146946, type: 3}
@@ -5757,6 +5753,9 @@ MonoBehaviour:
   closeToWaterModifier: 1
   waterModiferFastGrowth: 1.25
   waterModiferSlowGrowth: 1
+  rainTileModifier: 1
+  rainModifierFastGrowth: 1.25
+  rainModifierSlowGrowth: 1
   plantPrefabToSpawn: []
   spawnPlantAllTiles: 0
   spawnPlantAllTilesChance: 20
@@ -5870,7 +5869,10 @@ MonoBehaviour:
   chunkObjects: []
   chunkSize: 8
   chunkGridSize: {x: 4, y: 4}
-  gridLineMaterial: {fileID: 0}
+  createWater: 1
+  waterLevel: 0.5
+  waterMaterial: {fileID: 0}
+  waterObject: {fileID: 0}
 --- !u!4 &1837467434
 Transform:
   m_ObjectHideFlags: 0
@@ -5918,6 +5920,7 @@ MonoBehaviour:
     mediumOffset: 100
     smallScaler: 0.08
     smallOffset: 200
+  slopeOceanFloor: 1
 --- !u!1 &1952803386
 GameObject:
   m_ObjectHideFlags: 0
@@ -5963,16 +5966,12 @@ MonoBehaviour:
   MutationRate: 1
   currentMutationValue: 0
   MutationMax: 100
-  Defence: 1
   maxIdleTime: 5
   currentIdleTime: 0
-  maxAttackTime: 2
-  currentAttackTime: 0
   clockCycleTime: 30
   clockCycleTimeCurrent: 0
   sleepTimeMax: 10
   currentSleepTime: 0
-  attackDistance: 3
   poop:
   - {fileID: 7206990565552924369, guid: 9d83281e4b6364a4bbce31d9758ccd88, type: 3}
   - {fileID: 5212644513495774897, guid: a7db1c59c01addb40b02cf2d8d146946, type: 3}

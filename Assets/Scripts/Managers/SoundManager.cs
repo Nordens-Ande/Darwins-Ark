@@ -41,10 +41,16 @@ public class SoundManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        StartBackgroundMusic(0.1f);
+    }
+
     //Starts the backgroundmusic
-    public void StartBackgroundMusic() 
+    public void StartBackgroundMusic(float volume) 
     { 
         backgroundMusicPlayer.clip = backgroundMusic;
+        backgroundMusicPlayer.volume = volume;
         backgroundMusicPlayer.Play();
     }
 
@@ -90,27 +96,27 @@ public class SoundManager : MonoBehaviour
     }
 
     //Made customized playclipatpoint but so the audiomixer and mindistance and maxdistance are included
-    public void PlaySoundEffectAtVec3(Vector3 position, AudioClip clip, float minDistance, float maxDistance, MixerType mixerType) 
+    public void PlaySoundEffectAtVec3(Vector3 position, AudioClip clip, float minDistance, float maxDistance, float volume /*MixerType mixerType*/) 
     {
         GameObject audioObj = new GameObject("Temp audio");
         audioObj.transform.position = position;
         AudioSource audioSource = audioObj.transform.AddComponent<AudioSource>();
-        audioSource.outputAudioMixerGroup = mixerIndex[mixerType]; //Can be unstable, no check if it exists
+        //audioSource.outputAudioMixerGroup = mixerIndex[mixerType]; //Can be unstable, no check if it exists
         audioSource.clip = clip;
         audioSource.minDistance = minDistance;
         audioSource.maxDistance = maxDistance;
         audioSource.loop = false;
         audioSource.playOnAwake = true;
-        InstantiateSoundEffect(audioObj, clip);
+        InstantiateSoundEffect(audioObj, clip, volume);
     }
 
     //Creates and destroyes the temporery gameobject after the clip finished playing
     //OBS used in PlaySOundEffectAtVec3
-    private void InstantiateSoundEffect(GameObject source, AudioClip clip) 
+    private void InstantiateSoundEffect(GameObject source, AudioClip clip, float volume) 
     { 
         Instantiate(source);
         AudioSource audio = source.GetComponent<AudioSource>();
-        audio.PlayOneShot(clip);
+        audio.PlayOneShot(clip, volume);
         Destroy(source, clip.length);
     }
 

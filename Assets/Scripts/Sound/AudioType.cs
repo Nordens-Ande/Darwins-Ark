@@ -5,16 +5,22 @@ using UnityEngine;
 public enum AudioType 
 {
     //Cow
-    cowPoop,
     cowEat,
+    cowMoo,
+    cowSnoring,
 
-    //Antilope
-    antilopePoop,
-    antilopeEat,
+    ////Antilope
+    //antilopePoop,
+    //antilopeEat,
 
     //Boss
     bossMove,
-    bossDestroy,
+
+    //Plant
+    plantDestroy,
+
+    //Boat
+    boatHorn,
 
     //Deity
 

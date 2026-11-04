@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class VFXManager : MonoBehaviour
 {
-    static VFXManager instance = null;
+    public static VFXManager instance = null;
 
     private Dictionary<VFXenum, ParticleSystem> particleDictonary;
     [SerializeField] private List<VFX_KeyAndParticle> contentList = new List<VFX_KeyAndParticle>();
