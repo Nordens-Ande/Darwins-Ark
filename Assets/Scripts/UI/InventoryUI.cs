@@ -54,6 +54,7 @@ public class InventoryUI : MonoBehaviour
     {
         for (int i = 0; i < slotUIs.Count; i++)
         {
+
             slotUIs[i].SetSlot(
                 inventory.Slots[i]
             );

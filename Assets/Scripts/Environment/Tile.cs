@@ -49,48 +49,18 @@ namespace Assets.Scripts.Environment
 
         public float WaterHeight
         {
-            //get => waterHeight;
-            //set
-            //{
-            //    owner.isDirty = true;
-
-            //    waterHeight = value;
-            //    if (waterHeight < position.y)
-            //        Debug.LogWarning($"Tile {index.ToString()} at position {position} in chunk {owner.position} water height was set to be below its actual height.\nPlease check that you are setting the correct tile.");
-            //    if (type != TileType.Ocean && type != TileType.River && type != TileType.Lake)
-            //        Debug.LogWarning($"Tile {index.ToString()} at position {position} in chunk {owner.position} is not a water type tile.\nAre you sure you should modify the water height?");
-
-            //    //CleanUpTile();
-            //}
-
             get => waterHeight;
             set
             {
-                Debug.LogWarning(
-                    $"WaterHeight SET on tile {index}, value = {value}\n" +
-                    System.Environment.StackTrace
-                );
-
                 owner.isDirty = true;
+
                 waterHeight = value;
-
                 if (waterHeight < position.y)
-                {
-                    Debug.LogWarning(
-                        $"Tile {index} at position {position} in chunk {owner.position} " +
-                        $"water height was set below its actual height."
-                    );
-                }
+                    Debug.LogWarning($"Tile {index.ToString()} at position {position} in chunk {owner.position} water height was set to be below its actual height.\nPlease check that you are setting the correct tile.");
+                if (type != TileType.Ocean && type != TileType.River && type != TileType.Lake)
+                    Debug.LogWarning($"Tile {index.ToString()} at position {position} in chunk {owner.position} is not a water type tile.\nAre you sure you should modify the water height?");
 
-                if (type != TileType.Ocean &&
-                    type != TileType.River &&
-                    type != TileType.Lake)
-                {
-                    Debug.LogWarning(
-                        $"Tile {index} at position {position} in chunk {owner.position} " +
-                        $"is not a water type tile."
-                    );
-                }
+                //CleanUpTile();
             }
         }
 
