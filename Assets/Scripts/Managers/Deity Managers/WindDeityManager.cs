@@ -16,9 +16,9 @@ public class WindDeityManager : SingletonManager<WindDeityManager>
 
     public event Action OnWindSpawned;
     
-    [SerializeField] private float windWidth;
-    [SerializeField] private float windHeight; //the height of a tile to fully block wind.
-    [SerializeField] private float maxWindStrength; 
+    private float windWidth;
+    private float windHeight; //the height of a tile to fully block wind.
+    private float maxWindStrength; 
 
     [SerializeField] public bool triggerWind = false;
 
