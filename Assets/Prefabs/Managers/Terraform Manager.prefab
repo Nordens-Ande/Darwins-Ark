@@ -60,6 +60,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileSelectionManager
   visibilityMode: 1
+  doubleClickTime: 0.2
   mouseMoveThreshold: 20
   selectHeld: 0
   isAddingTiles: 0
+  doubleClickTimer: 0

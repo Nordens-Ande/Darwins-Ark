@@ -47,7 +47,7 @@ namespace Assets.Scripts.Environment
         }
         public float WaterHeight
         {
-            get => Position.y;
+            get => waterHeight;
             set
             {
                 owner.isDirty = true;
@@ -101,6 +101,9 @@ namespace Assets.Scripts.Environment
 
         public void SetType(TileType newType)
         {
+            if (newType == type)
+                return;
+
             owner.isDirty = true;
             type = newType;
         }
@@ -127,6 +130,9 @@ namespace Assets.Scripts.Environment
 
         public void ClearPlant()
         {
+            if (!HasPlant)
+                return;
+
             currentPlant.DamagePlant(currentPlant.Health); // kill the plant
             currentPlant = null;
         }

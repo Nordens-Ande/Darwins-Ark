@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Assets.Scripts.Environment
@@ -70,6 +71,17 @@ namespace Assets.Scripts.Environment
         public HashSet<Vector2Int> this[TileType type] => tileTypes[type];
         public HashSet<Vector2Int> GetTiles(TileType type) => tileTypes[type];
 
+        public HashSet<Vector2Int> this[params TileType[] types] => GetTiles(types);
+        public HashSet<Vector2Int> GetTiles(params TileType[] types)
+        {
+            HashSet<Vector2Int> result = new HashSet<Vector2Int>();
+            foreach (TileType type in types)
+            {
+                result.UnionWith(tileTypes[type]);
+            }
+            return result;
+        }
+
         public Tile this[int x, int z, Space space = Space.World] => GetTile(x, z, space);
         public Tile this[Vector2Int positionXZ, Space space = Space.World] => GetTile(positionXZ, space);
 
@@ -126,9 +138,32 @@ namespace Assets.Scripts.Environment
 
         public void CleanChunk()
         {
+            InitializeTileHashsets();
+            for (int x = 0; x < size; x++)
+            {
+                for (int z = 0; z < size; z++)
+                {
+                    //Tile tile = GetTile(x, z, Space.Self);
+                    Tile tile = tiles[x, z];
+                    // Rules for Tile conversion
+                    if (tile.Height > tile.WaterHeight /*&& tile.Type != TileType.Grass*/)
+                    {
+                        tile.SetType(TileType.Grass);
+                    }
+                    if (tile.Type == TileType.River)
+                    {
+                        tile.ClearPlant();
+                    }
+
+                    tileTypes[tile.Type].Add(tile.GridPosition);
+                }
+            }
+
             GenerateMeshData();
             foreach (Tile tile in tiles)
                 tile.CleanUpTile();
+
+            isDirty = false;
         }
 
 
