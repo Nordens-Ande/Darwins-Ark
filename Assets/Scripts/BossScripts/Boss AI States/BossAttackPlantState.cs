@@ -2,7 +2,7 @@ using UnityEngine;
 using Assets.Scripts.Environment;
 using System;
 
-
+[Serializable]
 public class BossAttackPlantState : BossAIState
 {
     Tile plantTile;
@@ -17,13 +17,19 @@ public class BossAttackPlantState : BossAIState
         attackTimer = 0;
     }
 
+    public override void Initialize(Boss boss)
+    {
+        this.boss = boss;
+        container = new BossAttackPlantContainer();
+    }
+
     public override bool OnEnterState()
     {
         CanBeInterupted = false;
         TaskCompleted = false;
 
-        if (boss.ClosestPlantTilePath == null) return false;
-        plantTile = boss.ClosestPlantTilePath[boss.ClosestPlantTilePath.Count - 1];
+        if (boss.ClosestAttackTilePath == null) return false;
+        plantTile = boss.ClosestAttackTilePath[boss.ClosestAttackTilePath.Count - 1];
         if (plantTile == null) return false;
 
         boss.MovementScript.SetPath(plantTile, boss.MovementScript.IsBossTraversable);
@@ -56,7 +62,6 @@ public class BossAttackPlantState : BossAIState
                 }
                 TaskCompleted = true;
                 CanBeInterupted = true;
-                //OnEnterState();
             }
             attackTimer += Time.deltaTime;
         }

@@ -1,8 +1,10 @@
 using UnityEngine;
+using System;
 using Assets.Scripts.Environment;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Unity.VisualScripting;
 
 public class Boss : MonoBehaviour, IBoatSpawning
 {
@@ -18,17 +20,15 @@ public class Boss : MonoBehaviour, IBoatSpawning
     private bool unloaded;
 
     //ai
+    [SerializeReference]
     private List<BossAIState> AIStates;
-    private BossAIState currentState;
-    private BossAIState beachState;
+    [SerializeField, ReadOnly] private BossAIState currentState;
+    
     private float sightDistanceToAnimals;
     private float sightDistanceToTiles;
     private float attackTime;
 
-    private List<Tile> closestPlantTilePath; //used to cache the path to the closest plant, minimizes A star pathfinding calls #optimization
-
-    Tile currentTile; //?
-    public Tile CurrentTile => currentTile; //?
+    private List<Tile> closestAttackTilePath; //used to cache the path to the closest plant, river or animal, minimizes A star pathfinding calls #optimization
 
     public PathFinding PathFinder => pathFinder;
     public BossHealth HealthScript => healthScript;
@@ -36,7 +36,11 @@ public class Boss : MonoBehaviour, IBoatSpawning
     public float SightDistanceToAnimals => sightDistanceToAnimals;
     public float SightDistanceToTiles => sightDistanceToTiles;
     public float AttackTime => attackTime;
-    public List<Tile> ClosestPlantTilePath => closestPlantTilePath;
+    public List<Tile> ClosestAttackTilePath => closestAttackTilePath;
+
+
+    public bool DebugScores => false;
+
 
 
     void Start()
@@ -51,22 +55,20 @@ public class Boss : MonoBehaviour, IBoatSpawning
         sightDistanceToTiles = 20;
         attackTime = 3;
 
-        AIStates = new List<BossAIState>();
-        BossRelocateState relocate = new BossRelocateState(this);
-        BossAttackPlantState attack = new BossAttackPlantState(this);
-        BossEscapeState escape = new BossEscapeState(this);
-        beachState = new BossOnBeachState(this);
-        AIStates.Add(relocate);
-        AIStates.Add(attack);
-        AIStates.Add(escape);
-        AIStates.Add(beachState);
+        if(AIStates == null)
+            AIStates = new List<BossAIState>();
+
+        foreach (BossAIState state in AIStates)
+            state?.Initialize(this);
+
         currentState = null;
     }
 
     public bool Unload(Tile beachTile)
     {
-        transform.position = beachTile.position;
+        transform.position = beachTile.Position;
         unloaded = true;
+
         return true;
     }
 
@@ -96,19 +98,56 @@ public class Boss : MonoBehaviour, IBoatSpawning
         List<Tile> tilesWithPlants = FindAllTilesWithPlants();
         if (tilesWithPlants.Count <= 0)
         {
-            closestPlantTilePath = null;
+            closestAttackTilePath = null;
             return;
         }
 
-        tilesWithPlants = tilesWithPlants.OrderBy(tile => Vector3.Distance(transform.position, tile.position)).ToList();
+        tilesWithPlants = tilesWithPlants.OrderBy(tile => Vector3.Distance(transform.position, tile.Position)).ToList();
 
         for(int i = 0; i < tilesWithPlants.Count; i++)
         {
-            float distance = Vector3.Distance(transform.position, tilesWithPlants[i].position);
+            float distance = Vector3.Distance(transform.position, tilesWithPlants[i].Position);
             if (distance > sightDistanceToTiles) continue;
 
-            closestPlantTilePath = movementScript.PathFinder.GetPathAStar(tileManager.GetTile(transform.position), tilesWithPlants[i], movementScript.IsBossTraversable, 2f, (int)(distance * 2));
-            if (closestPlantTilePath != null)
+            closestAttackTilePath = movementScript.PathFinder.GetPathAStar(tileManager.GetTile(transform.position), tilesWithPlants[i], movementScript.IsBossTraversable, 2f, (int)(sightDistanceToTiles * 2));
+            if (closestAttackTilePath != null)
+            {
+                return;
+            }
+        }
+    }
+
+    public void FindClosestRiverTile()
+    {
+        List<Tile> riverTiles = new List<Tile>();
+
+        foreach(Chunk chunk in tileManager.chunks)
+        {
+            HashSet<Vector2Int> riverTilePositions = chunk.GetTiles(TileType.River);
+            foreach(Vector2Int riverTilePosition in riverTilePositions)
+            {
+                Tile tile = tileManager.GetTile(riverTilePosition);
+                if(tile == null) continue;
+
+                riverTiles.Add(tile);
+            }
+        }
+
+        if (riverTiles.Count <= 0)
+        {
+            closestAttackTilePath = null;
+            return;
+        }
+
+        riverTiles = riverTiles.OrderBy(tile => Vector3.Distance(transform.position, tile.Position)).ToList();
+
+        for (int i = 0; i < riverTiles.Count; i++)
+        {
+            float distance = Vector3.Distance(transform.position, riverTiles[i].Position);
+            if (distance > sightDistanceToTiles) continue;
+
+            closestAttackTilePath = movementScript.PathFinder.GetPathAStar(tileManager.GetTile(transform.position), riverTiles[i], movementScript.IsBossTraversable, 2f, (int)(sightDistanceToTiles * 2));
+            if (closestAttackTilePath != null)
             {
                 return;
             }
@@ -125,6 +164,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
         {
             float distance = Vector3.Distance(transform.position, orderedList[i].transform.position);
             if (distance > SightDistanceToAnimals) continue;
+
             //change to animal traversable func later? (not implemented yet)
             if(movementScript.PathFinder.GetPathAStar(tileManager.GetTile(transform.position), tileManager.GetTile(orderedList[i].transform.position), movementScript.IsBossTraversable, 2f, (int)(distance * 2)) != null)
             {
@@ -136,6 +176,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
                 }
             }
         }
+        //Debug.Log("amount of animals parameter: " + amountOfAnimals + " list count: "+ closestAnimals.Count);
         return closestAnimals;
     }
 
@@ -155,11 +196,6 @@ public class Boss : MonoBehaviour, IBoatSpawning
             FindClosestPlantTile();
             List<BossAIState> statesOrdered = EvaluateStates();
 
-            //for (int i = 0; i < statesOrdered.Count; i++)
-            //{
-            //   Debug.Log("score: " +  statesOrdered[i].ToString());
-            //}
-
             for (int i = 0; i < statesOrdered.Count; i++)
             {
                 if (statesOrdered[i].OnEnterState())
@@ -173,7 +209,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
 
         if (currentState == null)
         {
-            Debug.Log("state null");
+            Debug.Log("bossAI state null");
             return;
         }
 
@@ -183,12 +219,23 @@ public class Boss : MonoBehaviour, IBoatSpawning
             return;
         }
 
-        FindClosestPlantTile();
+        foreach(BossAIState state in AIStates)
+        {
+            if(state is BossAttackPlantState)
+            {
+                FindClosestPlantTile();
+            }
+            else if(state is BossAttackRiverState)
+            {
+                FindClosestRiverTile();
+            }
+            //else if(state is BossAttackAnimalState) to be implemented
+            //{
+            //    FindClosestAnimalTile();
+            //}
+        }
+        
         List<BossAIState> statesOrderedByScore = EvaluateStates();
-        //for (int i = 0; i < statesOrderedByScore.Count; i++)
-        //{
-        //    Debug.Log("score: " + statesOrderedByScore[i].ToString());
-        //}
 
         for (int i = 0; i < statesOrderedByScore.Count; i++)
         {
@@ -197,13 +244,16 @@ public class Boss : MonoBehaviour, IBoatSpawning
                 if(currentState.TaskCompleted)
                 {
                     currentState.OnExitState();
-                    currentState.OnEnterState();
+                    if(currentState.OnEnterState())
+                    {
+                        break;
+                    }
                 }
                 else
                 {
                     currentState.Tick();
+                    break;
                 }
-                break;
             }
 
             if (statesOrderedByScore[i].OnEnterState())
@@ -217,7 +267,6 @@ public class Boss : MonoBehaviour, IBoatSpawning
             {
                 //Debug.Log("cant enter state " + statesOrderedByScore[i].ToString());
             }
-            
         }
     }
 }

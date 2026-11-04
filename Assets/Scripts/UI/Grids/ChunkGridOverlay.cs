@@ -6,7 +6,7 @@ public class ChunkGridOverlay : MonoBehaviour
     [SerializeField] private float lineHeight = 0.03f;
     [SerializeField] private float lineWidth = 0.08f;
 
-    private Material lineMaterial;
+    [SerializeField, ReadOnly] private Material lineMaterial;
 
     public void Setup(Chunk chunk, int chunkSize, Material material)
     {

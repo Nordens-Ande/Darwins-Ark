@@ -27,6 +27,7 @@ public class UtilityBrain<T>
         foreach (UtilityAction<T> action in actionList) 
         { 
             float score = action.Container.Evaluate(agent);
+            //Debug.Log(score + " behaviour: " + action.Container.ToString());
             if (score > bestActionScore) 
             { 
                 bestActionOption = action;

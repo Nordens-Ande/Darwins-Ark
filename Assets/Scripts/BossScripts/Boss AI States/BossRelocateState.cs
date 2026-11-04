@@ -1,8 +1,9 @@
+using System;
 using System.Collections.Generic;
 using Assets.Scripts.Environment;
 using UnityEngine;
 
-
+[Serializable]
 public class BossRelocateState : BossAIState
 {
     TileManager tileManager = TileManager.Instance;
@@ -13,6 +14,13 @@ public class BossRelocateState : BossAIState
     public BossRelocateState(Boss boss) : base(boss)
     {
         container = new BossRelocateContainer();
+    }
+
+    public override void Initialize(Boss boss)
+    {
+        this.boss = boss;
+        container = new BossRelocateContainer();
+        tileManager = TileManager.Instance;
     }
 
     public override bool OnEnterState()
@@ -38,12 +46,18 @@ public class BossRelocateState : BossAIState
         List<Tile> path = new List<Tile>();
 
         List<Tile> possibleTiles = new List<Tile>();
+
+        if(tileManager == null)
+        {
+            Debug.Log("BossRelocateState: tileManager null");
+        }
+
         foreach(Chunk chunk in tileManager.chunks)
         {
             foreach(Tile tile in chunk.Tiles)
             {
                 if (tile.Type != TileType.Grass && tile.Type != TileType.Concrete && tile.Type != TileType.River) continue;
-                float distance = Vector3.Distance(tile.position, boss.transform.position);
+                float distance = Vector3.Distance(tile.Position, boss.transform.position);
                 if (distance < minRelocateDistance && distance > maxRelocateDistance) continue;
                 possibleTiles.Add(tile);
             }
@@ -51,7 +65,7 @@ public class BossRelocateState : BossAIState
        
         for (int i = possibleTiles.Count - 1; i > 0; i--)
         {
-            int j = Random.Range(0, i + 1);
+            int j = UnityEngine.Random.Range(0, i + 1);
             (possibleTiles[i], possibleTiles[j]) =
                 (possibleTiles[j], possibleTiles[i]);
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace Assets.Scripts.Environment
@@ -20,6 +21,8 @@ namespace Assets.Scripts.Environment
         public List<Vector3> vertices;
         public List<Color> colors;
         public List<int> triangles;
+
+        public LineMeshData gridMeshData;
 
         public int Size => size; 
         public Tile[,] Tiles => tiles;
@@ -43,6 +46,8 @@ namespace Assets.Scripts.Environment
             tileTypes = new Dictionary<TileType, HashSet<Vector2Int>>();
             InitializeTileHashsets();
 
+            gridMeshData = new LineMeshData();
+
             //Creates all the tiles (and assigns to tile hashsets)
             tiles = new Tile[size, size];
             for (int x = 0; x < size; x++)
@@ -52,9 +57,9 @@ namespace Assets.Scripts.Environment
                     TileType type = TileType.Ocean; //type is assigned to avoid compile-time error
 
                     float y = useNoise ? noise.GetHeight(x + position.x, z + position.y, out type) : 0f;
-                    tiles[x, z] = new Tile(new Vector3(x + position.x, y, z + position.y), new Vector3(x, y, z), type);
+                    tiles[x, z] = new Tile(this, new Vector2Int(x, z), new Vector3(x + position.x, y, z + position.y), new Vector3(x, y, z), type);
 
-                    Vector2Int gridPosition = new Vector2Int((int)tiles[x, z].position.x, (int)tiles[x, z].position.z);
+                    Vector2Int gridPosition = new Vector2Int((int)tiles[x, z].Position.x, (int)tiles[x, z].Position.z);
                     tileTypes[type].Add(gridPosition);
                 }
             }
@@ -65,6 +70,17 @@ namespace Assets.Scripts.Environment
         // You use the indexer like this: Chunk chunk = new Chunk(); oceanTiles = chunk[TileType.Ocean];
         public HashSet<Vector2Int> this[TileType type] => tileTypes[type];
         public HashSet<Vector2Int> GetTiles(TileType type) => tileTypes[type];
+
+        public HashSet<Vector2Int> this[params TileType[] types] => GetTiles(types);
+        public HashSet<Vector2Int> GetTiles(params TileType[] types)
+        {
+            HashSet<Vector2Int> result = new HashSet<Vector2Int>();
+            foreach (TileType type in types)
+            {
+                result.UnionWith(tileTypes[type]);
+            }
+            return result;
+        }
 
         public Tile this[int x, int z, Space space = Space.World] => GetTile(x, z, space);
         public Tile this[Vector2Int positionXZ, Space space = Space.World] => GetTile(positionXZ, space);
@@ -81,20 +97,30 @@ namespace Assets.Scripts.Environment
             if (x > tiles.GetLength(0) - 1 || z > tiles.GetLength(1) - 1 || x < 0 || z < 0)
                 return -10f;
 
-            return tiles[x, z].position.y;
+            return tiles[x, z].Position.y;
         }
         private float GetTileHeight(Vector2Int positionXZ, Space space = Space.World) => GetTileHeight(positionXZ.x, positionXZ.y, space);
 
         public Tile GetTile(int x, int z, Space space = Space.World)
         {
+            if (tiles == null)
+            {
+                Debug.LogError($"Chunk at {position} has a null tiles array!");
+                return null;
+            }
+
             if (space == Space.World)
             {
                 x -= (int)position.x;
                 z -= (int)position.y;
             }
 
-            if (x > tiles.GetLength(0) - 1 || z > tiles.GetLength(1) - 1 || x < 0 || z < 0)
+            if (x >= tiles.GetLength(0) || z >= tiles.GetLength(1) || x < 0 || z < 0)
+            {
+                Debug.LogWarning($"Out of bounds: local ({x}, {z}), array ({tiles.GetLength(0)}, {tiles.GetLength(1)}), chunk position {position}");
+
                 return null;
+            }
 
             return tiles[x, z];
         }
@@ -110,6 +136,37 @@ namespace Assets.Scripts.Environment
         }
 
 
+        public void CleanChunk()
+        {
+            InitializeTileHashsets();
+            for (int x = 0; x < size; x++)
+            {
+                for (int z = 0; z < size; z++)
+                {
+                    //Tile tile = GetTile(x, z, Space.Self);
+                    Tile tile = tiles[x, z];
+                    // Rules for Tile conversion
+                    if (tile.Height > tile.WaterHeight /*&& tile.Type != TileType.Grass*/)
+                    {
+                        tile.SetType(TileType.Grass);
+                    }
+                    if (tile.Type == TileType.River)
+                    {
+                        tile.ClearPlant();
+                    }
+
+                    tileTypes[tile.Type].Add(tile.GridPosition);
+                }
+            }
+
+            GenerateMeshData();
+            foreach (Tile tile in tiles)
+                tile.CleanUpTile();
+
+            isDirty = false;
+        }
+
+
         public void GenerateMeshData()
         {
             vertices = new List<Vector3>();
@@ -122,7 +179,7 @@ namespace Assets.Scripts.Environment
             {
                 for (int z = 0; z < size; z++)
                 {
-                    Vector3 tilePos = tiles[x, z].position/* + new Vector3(position.x, 0, position.y)*/;
+                    Vector3 tilePos = tiles[x, z].Position/* + new Vector3(position.x, 0, position.y)*/;
                     float[] neighbourHeights = new float[4] 
                     { 
                         GetTileHeight(x, z + 1, Space.Self), // Noth
@@ -130,16 +187,35 @@ namespace Assets.Scripts.Environment
                         GetTileHeight(x, z - 1, Space.Self), // South
                         GetTileHeight(x + 1, z, Space.Self)  // East
                     };
-                    Color tileColor = useNoise ? IslandNoise.Instance.GetColor(new Vector2(tilePos.x, tilePos.z)) : Color.white;
+
+                    //Color tileColor = useNoise ? IslandNoise.Instance.GetColor(new Vector2(tilePos.x, tilePos.z)) : Color.white;
+                    // we want to get the color from the BiomeManager instead of the IslandNoise
+                    Color tileColor = Color.white;
+                    if (BiomeManager.Instance != null)
+                    {
+                        // If BiomeManager is available, we get the color from it based on the tile type
+                        tileColor = BiomeManager.Instance.GetTileColor(tiles[x, z]);
+                    }
+                    else
+                    {
+                        // If BiomeManager is not available, we fall back to white color
+                        tileColor = Color.white;
+                    }
 
                     //Top face
                     AddFace(
-                        new Vector3(-0.5f, 0, 0.5f) + tilePos,      // top-left
-                        new Vector3(+0.5f, 0, 0.5f) + tilePos,      // top-right
-                        new Vector3(+0.5f, 0, -0.5f) + tilePos,     // bottom-right
-                        new Vector3(-0.5f, 0, -0.5f) + tilePos,     // bottom-left
+                        new Vector3(-0.5f, 0, 0.5f) + tilePos,  // top-left
+                        new Vector3(+0.5f, 0, 0.5f) + tilePos,  // top-right
+                        new Vector3(+0.5f, 0, -0.5f) + tilePos, // bottom-right
+                        new Vector3(-0.5f, 0, -0.5f) + tilePos, // bottom-left
                         tileColor
                     );
+                    //gridMeshData.AddFace(
+                    //    new Vector3(-0.5f, 0.01f, 0.5f) + tilePos,  // top-left
+                    //    new Vector3(+0.5f, 0.01f, 0.5f) + tilePos,  // top-right
+                    //    new Vector3(+0.5f, 0.01f, -0.5f) + tilePos, // bottom-right
+                    //    new Vector3(-0.5f, 0.01f, -0.5f) + tilePos  // bottom-left
+                    //);
 
                     float tileHeight = tilePos.y;
 
@@ -225,7 +301,9 @@ namespace Assets.Scripts.Environment
             triangles.Add(index + 3);
         }
 
-        public void ModifyTile(int x, int z, float newY, Space space = Space.World)
+
+        // Returns true if the position is within the chunk, false if not
+        private bool LocalizePositions(ref int x, ref int z, Space space = Space.World)
         {
             if (space == Space.World)
             {
@@ -233,20 +311,45 @@ namespace Assets.Scripts.Environment
                 z -= (int)position.y;
             }
 
-            if (x > size - 1 || z > size - 1 || x < 0 || z < 0)
+            return !(x > size - 1 || z > size - 1 || x < 0 || z < 0);
+        }
+
+
+        public void ModifyTile(int x, int z, float newY, Space space = Space.World)
+        {
+            //if (space == Space.World)
+            //{
+            //    x -= (int)position.x;
+            //    z -= (int)position.y;
+            //}
+
+            //if (x > size - 1 || z > size - 1 || x < 0 || z < 0)
+            //    return;
+            if (!LocalizePositions(ref x, ref z, space))
                 return;
 
             isDirty = true;
 
             //Vector3 localPosition = new Vector3();
-            tiles[x, z].position.y = newY;
-            tiles[x, z].localPosition.y = newY;
+            //tiles[x, z].Position.y = newY;
+            //tiles[x, z].LocalPosition.y = newY;
+            tiles[x, z].Height += newY;
         }
         public void ModifyTile(Vector2Int positionXZ, float newY, Space space = Space.World) => ModifyTile(positionXZ.x, positionXZ.y, newY, space);
 
 
+        public void IncreaseTileHeight(int x, int z, float yIncrement, Space space = Space.World)
+        {
+            if (!LocalizePositions(ref x, ref z, space))
+                return;
 
+            isDirty = true;
 
+            //tiles[x, z].Position.y += yIncrement;
+            //tiles[x, z].LocalPosition.y += yIncrement;
+            tiles[x, z].Height += yIncrement;
+        }
+        public void IncreaseTileHeight(Vector2Int positionXZ, float yIncrement, Space space = Space.World) => IncreaseTileHeight(positionXZ.x, positionXZ.y, yIncrement, space);
 
     }
 }

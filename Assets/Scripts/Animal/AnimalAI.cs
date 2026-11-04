@@ -1,11 +1,12 @@
 using Assets.Scripts.Environment;
 
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class AnimalAI : MonoBehaviour
+public class AnimalAI : MonoBehaviour, IBoatSpawning
 {
     [Header("Utility points")]
     [Space]
@@ -54,20 +55,30 @@ public class AnimalAI : MonoBehaviour
     [Header("Seeds that can spawn")]
     [SerializeField] private List<GameObject> poop;
 
+    [Header("Seeds that can spawn")]
+    [SerializeField] private GameObject poopPrefab;
+
     [Header("DebugMode")]
     [SerializeField] private bool TestMutation = false;
 
     //Manager instances 
     private TileManager tileManager;
     private MutationManager mutationManager;
+    private AnimalManager animalManager;
 
+    //Boat Spawning
+    private bool unloaded = false;
+
+    //Boss fighting
+    private List<Boss> activeBosses;
+    public bool ActiveBosses => activeBosses.Count > 0;
 
     //Traversing
     private Vector3 walkPoint;
     private bool hasSetPath = false;
 
     //Find plant
-    private int tileCheckSize = 2; //How many tiles animal should see plant
+    private int tileCheckSize = 3; //How many tiles animal should see plant
     private Tile currentTile;
     private Plant choosenPlant = null;
 
@@ -82,6 +93,7 @@ public class AnimalAI : MonoBehaviour
     private bool hasMate = false;
     private bool hasProcreated = false;
     private bool awaitMate = false;
+    private bool hasSearchedForMate = false;
     private AnimalAI assignedMate = null;
 
     //Utility AI
@@ -96,7 +108,20 @@ public class AnimalAI : MonoBehaviour
     System.Action walkAroundAction;
     System.Action sleepAction;
 
+    //Leave 
+    private bool hasSetExit;
+    private Vector3 leaveVec;
+
+    //PathFinding
+    private PathFinding pathFinder;
+    private List<Tile> activePath;
+    private Vector3 activePathTarget;
+    private int pathStage = 0;
+
+
     //Properties
+    public Transform Transform => transform;
+
     public float BossThreat
     {
         get => bossThreat;
@@ -179,20 +204,56 @@ public class AnimalAI : MonoBehaviour
         set => hasProcreated = value;
     }
 
+    public float MutationRatefloat 
+    { 
+        get => MutationRate; 
+        set => MutationRate = value;
+    }
+
     void Start()
     {
+        transform.localPosition = Vector3.zero;
         tileManager = TileManager.Instance;
         mutationManager = MutationManager.instance;
+        animalManager = AnimalManager.Instance;
+        activeBosses = new List<Boss>();
         maxAttackTime = 2;
         tileCheckSize = 1;
         BossThreat = 0;
         matingSeason = 0;
-
+        //pathFinder = new PathFinding();
+        activePath = new List<Tile>();
+        pathFinder = new PathFinding();
         InstantiateUtilityBrain();
+    }
+
+    public bool Unload(Tile beachTile)
+    {
+        transform.position = beachTile.Position;
+        unloaded = true;
+
+        return true;
+    }
+
+    public void BossSpawned(BossSpawnedEventData data)
+    {
+        //Debug.Log("boss spawned");
+        BossHealth bossHealth = data.Boss.gameObject.GetComponent<BossHealth>();
+        bossHealth.OnBossDeath += BossDied;
+        activeBosses.Add(data.Boss);
+    }
+
+    public void BossDied(BossDeathEventData data)
+    {
+        data.Boss.OnBossDeath -= BossDied;
+        Boss boss = data.Boss.gameObject.GetComponent<Boss>();
+        activeBosses.Remove(boss);
     }
 
     void Update()
     {
+        if (!unloaded) return;
+
         utilityBrain.DecisionProcess();
         ClockCycleDeteriation();
     }
@@ -205,7 +266,8 @@ public class AnimalAI : MonoBehaviour
         procreateAction = () => { Procreate(); };
         leaveIslandAction = () => { LeaveIsland(); };
         searchForFoodAction = () => { SearchForFood(); };
-        walkAroundAction = () => { WalkAround(); };
+        //walkAroundAction = () => { WalkAround(); };
+        walkAroundAction = () => { PathfindingWalk(); };
         sleepAction = () => {Sleep(); };
 
         //UtilityActions with its containers 
@@ -214,13 +276,13 @@ public class AnimalAI : MonoBehaviour
         UtilityAction<AnimalAI> leaveAction = new UtilityAction<AnimalAI>(new LeaveContainer(), leaveIslandAction);
         UtilityAction<AnimalAI> hungerAction = new UtilityAction<AnimalAI>(new HungryContainer(), searchForFoodAction);
         UtilityAction<AnimalAI> tiredAction = new UtilityAction<AnimalAI>(new TiredContainer(), sleepAction);
-        utilityChoosesList = new List<UtilityAction<AnimalAI>> { bossAction, walkAction, leaveAction, hungerAction, tiredAction };
+        UtilityAction<AnimalAI> procreationAction = new UtilityAction<AnimalAI>(new ProcreationContrainer(), procreateAction);
+        utilityChoosesList = new List<UtilityAction<AnimalAI>> { bossAction, walkAction, leaveAction, hungerAction, tiredAction, procreationAction };
 
         utilityBrain = new UtilityBrain<AnimalAI>(utilityChoosesList, this);
-
     }
 
-    //Simple deteriation of the utility points during game time
+    //Simple deteriation of the utility points during game time      
     void ClockCycleDeteriation() 
     {
         clockCycleTimeCurrent += Time.deltaTime;
@@ -228,6 +290,7 @@ public class AnimalAI : MonoBehaviour
         {
             hunger += hungerDeteration;
             tired += 2;
+            matingSeason += 1;
 
             Happiness = Happiness - hunger / 10;
 
@@ -270,8 +333,28 @@ public class AnimalAI : MonoBehaviour
         {
             currentIdleTime = 0;
             isIdle = false;
-            WalkAround();
+            //Vector3 temp = FindWalkPoint();
+            //activePath = PathfindingMovement(temp);
+            pathStage = 0;
+            PathfindingWalk();
+            //WalkAround();
         }
+    }
+
+    List<Vector2Int> GetAllTileOfType(TileType type) 
+    {
+        if (tileManager.chunks.Count == 0) return null;
+        List<Vector2Int> tileList = new List<Vector2Int>();
+
+        foreach (Chunk chunk in tileManager.chunks)
+        {
+            List<Vector2Int> temp = chunk.GetTiles(type).ToList();
+            if (temp.Count != 0)
+            {
+                tileList.AddRange(temp);
+            }
+        }
+        return tileList;
     }
 
     //Updated movement to chunk logic / will need modification if we want something other then square chunks so animals dont hoover between chunks 
@@ -283,41 +366,12 @@ public class AnimalAI : MonoBehaviour
             //Now the issue seems to be fixed 
             //Might be better to have this as a standalone method that updates everytime the island does, right now this updates every time the animal chooses a new path
             List<Vector2Int> tileList = new List<Vector2Int>();
-
-            foreach (Chunk chunk in tileManager.chunks) 
-            {
-                List<Vector2Int> temp = chunk.GetTiles(TileType.Grass).ToList();
-                if(temp.Count != 0) 
-                { 
-                    tileList.AddRange(temp);
-                }
-            }
+            tileList = GetAllTileOfType(TileType.Grass);
             int randomPos = Random.Range(0, tileList.Count);
             Vector2Int choosenPosition = tileList[randomPos];
             Tile choosenTile = tileManager.GetTile(choosenPosition);
-            Vector3 point = new Vector3(choosenTile.position.x, choosenTile.position.y + transform.localScale.y / 2, choosenTile.position.z);
+            Vector3 point = new Vector3(choosenTile.Position.x, choosenTile.Position.y + transform.localScale.y / 2, choosenTile.Position.z);
             return point;
-
-
-            //Old solution
-            //Chunk choosenChunk = tileManager.chunks[Random.Range(0, tileManager.chunks.Count)];
-            ////Vector2Int[] choosenTiles = choosenChunk.GetTiles(TileType.Grass).ToArray();
-            //Vector2Int[] choosenTiles = choosenChunk.GetTiles(TileType.Grass).ToArray<Vector2Int>();
-            //Debug.LogWarning(choosenTiles.Length);
-
-            //if (choosenTiles == null || choosenTiles.Length > 0)
-            //{
-            //    //Try again
-            //    return FindWalkPoint(); //fixed
-            //}
-            //else
-            //{
-            //    int randomPos = Random.Range(0, choosenTiles.Length - 1);
-            //    Vector2Int choosenPosition = choosenTiles[randomPos];
-            //    Tile choosenTile = tileManager.GetTile(choosenPosition);
-            //    Vector3 point = new Vector3(choosenTile.position.x, choosenTile.position.y + transform.localScale.y / 2, choosenTile.position.z);
-            //    return point;
-            //}
         }
         else 
         {
@@ -325,10 +379,84 @@ public class AnimalAI : MonoBehaviour
         }
     }
 
+    //Method to decide which tile is traversable, used in pathfinding
+    public bool TravesableTile(Tile tile) 
+    {
+        if (tile.Type == TileType.Ocean) return false;
+        return true;
+    }
+
+    //Method to get a path from pathfining script. 
+    List<Tile> PathfindingMovement(Vector3 target) 
+    {
+        Tile currentPos = tileManager.GetTile(transform.position);
+        Tile targetPos = tileManager.GetTile(target);
+        float maxHeightDifference = 4;
+        int iterations = 0;
+        List<Tile> path = new List<Tile>();
+        path = pathFinder.GetPathAStar(currentPos, targetPos, TravesableTile, maxHeightDifference, iterations);
+        return path;
+    }
+
+    //Upgraded walk method, with pathfinding 
+    void PathfindingWalk() 
+    {
+        //If animal is idle then idle and return
+        if (isIdle)
+        {
+            Idle();
+        }
+        else
+        {
+            //Sets a new path if none is found
+            if (!hasSetPath)
+            {
+                Vector3 temp = FindWalkPoint();
+                activePath = PathfindingMovement(temp);
+                if (activePath != null)
+                {
+                    pathStage = 0;
+                    activePathTarget = activePath[pathStage].Position;
+                    hasSetPath = true;
+                }
+            }
+            //Checks distance between position and target in the list
+            float distance = Vector3.Distance(tileManager.GetTile(transform.position).Position, activePath[pathStage].Position);
+
+            if (distance < 1)
+            {
+                //If next in the list is the last then idle
+                if (pathStage + 1 == activePath.Count)
+                {
+                    hasSetPath = false;
+                    isIdle = true;
+                    pathStage = 0;
+                    Idle();
+                    return;
+                }
+                //Otherwise go to next position
+                else
+                {
+                    pathStage++;
+                    Vector3 updatepath = new Vector3(activePath[pathStage].Position.x, activePath[pathStage].GetHeight() + transform.localScale.y / 2, activePath[pathStage].Position.z);
+                    activePathTarget = updatepath;
+                }
+            }
+            //lastly just move towards the tileposition in the list
+            else
+            {
+                if (activePath[pathStage] != null && hasSetPath)
+                {
+                    AnimalWalkMoveTowards(activePathTarget);
+                }
+            }
+        }
+    }
+
     //Checks so the animals dosent collide
     bool WillCollideWithNeighbour() 
     { 
-        if(Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 1)) 
+        if(Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 1.0f)) 
         {
             AnimalAI animal =hit.transform.GetComponent<AnimalAI>();
             if (animal == null)
@@ -337,8 +465,11 @@ public class AnimalAI : MonoBehaviour
             }
             else 
             {
-                transform.position += Vector3.right * Time.deltaTime;
-                hit.transform.position += Vector3.left * Time.deltaTime;
+                //Needs improvement but works
+                Vector3 seperationDir = (transform.position - hit.transform.position).normalized;
+                transform.position += (transform.right * 0.2f + seperationDir) * Time.deltaTime;
+                hit.transform.position += (-hit.transform.right * 0.2f - seperationDir) * Time.deltaTime;
+
                 return true;
             }
         }
@@ -357,7 +488,7 @@ public class AnimalAI : MonoBehaviour
             }
             //AnimalWalkMoveTowards(walkPoint);
 
-            if (Vector3.Distance(transform.position, walkPoint) < 2f)
+            if (Vector3.Distance(transform.position, walkPoint) < 1f)
             {
                 hasSetPath = false;
                 isIdle = true;
@@ -500,53 +631,61 @@ public class AnimalAI : MonoBehaviour
     //Will spawn plantseeds
     void Poop()
     {
-        if (poop.Count > 0)
-        {
-            int choosenPoop = Random.Range(0, poop.Count);
-            GameObject waste = Instantiate(poop[choosenPoop], transform.position, Quaternion.identity);
-        }
+        GameObject poopObj = Instantiate(poopPrefab, transform.position, Quaternion.identity);
+        return;
+
+        //if (poop.Count > 0)
+        //{
+        //    int choosenPoop = Random.Range(0, poop.Count);
+        //    GameObject waste = Instantiate(poop[choosenPoop], transform.position, Quaternion.identity);
+        //}
     }
 
 
     //Will walk to corner and die if unhappy
     void LeaveIsland() 
     {
-        Vector3 leaveVec = new Vector3(0, 0, 0);
-
-        AnimalWalkMoveTowards(leaveVec);
-        if (Vector3.Distance(transform.position, leaveVec) < 3)
+        if (!hasSetExit) 
         {
-            Debug.LogWarning("Im out of here: ", this);
+            leaveVec = new Vector3(0.1f + Random.Range(-1, 1), 0, 0.1f + Random.Range(-1, 1));
+            hasSetExit = true;
+        }
+        AnimalWalkInDirection(leaveVec.normalized);
+        if (tileManager.GetTile(transform.position) == null) //When outside tilemap it will destroy
+        { 
+            //Need to set animal list
             Destroy(gameObject);
         }
 
+
+
     }
     //Prototype can only handle one enemy in the sceen, can be changed later
-    void BossFigth() 
+    void BossFigth() // commented out because BossManager now supports multiple bosses, the CurrentBoss property no longer exists.
     {
         if (health > 25)
         {
-            currentAttackTime += Time.deltaTime;
-            Vector3 bossPosition = BossManager.Instance.CurrentBoss.transform.position;
-            bossPosition.y = 0.5f;
-            Vector3 directionToBoss = Vector3.Normalize(bossPosition - transform.position);
+            //currentAttackTime += Time.deltaTime;
+            //Vector3 bossPosition = BossManager.Instance.CurrentBoss.transform.position;
+            //bossPosition.y = 0.5f;
+            //Vector3 directionToBoss = Vector3.Normalize(bossPosition - transform.position);
             
-            transform.LookAt(bossPosition);
-            transform.position = Vector3.MoveTowards(transform.position, bossPosition - directionToBoss, runSpeed * Time.deltaTime);
-            float distanceToBoss = Vector3.Distance(bossPosition, transform.position);
+            //transform.LookAt(bossPosition);
+            //transform.position = Vector3.MoveTowards(transform.position, bossPosition - directionToBoss, runSpeed * Time.deltaTime);
+            //float distanceToBoss = Vector3.Distance(bossPosition, transform.position);
 
-            if(distanceToBoss < attackDistance)
-            {
-                if(currentAttackTime >= maxAttackTime)
-                {
-                    BossHealth bossHealth = BossManager.Instance.CurrentBoss.GetComponent<BossHealth>();
-                    if(bossHealth != null)
-                    {
-                        bossHealth.TakeDamage(damage);
-                        currentAttackTime = 0;
-                    }
-                }
-            }
+            //if(distanceToBoss < attackDistance)
+            //{
+            //    if(currentAttackTime >= maxAttackTime)
+            //    {
+            //        BossHealth bossHealth = BossManager.Instance.CurrentBoss.GetComponent<BossHealth>();
+            //        if(bossHealth != null)
+            //        {
+            //            bossHealth.TakeDamage(damage);
+            //            currentAttackTime = 0;
+            //        }
+            //    }
+            //}
         }
     }
 
@@ -573,10 +712,12 @@ public class AnimalAI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// ///////////////////////////////////Procreation
+    /// </summary>
+    /// <returns></returns>
 
     //Future method for offspring and procreation
-
-    //Can be called in the animalManager to check mating status of every animal
     public bool CanMate() 
     { 
         if(hasProcreated || awaitMate || hasMate) 
@@ -585,6 +726,30 @@ public class AnimalAI : MonoBehaviour
         }
         else return true;
     }
+
+    public void GetMate() 
+    {
+        List<AnimalAI> potentialMates = new List<AnimalAI>();
+        //Debug.LogWarning(animalManager.Animals.Count);
+        foreach(AnimalAI animal in animalManager.Animals) 
+        {
+            if (animal.CanMate() && animal.MatingSeason > 70 && animal != this) 
+            {
+                AnimalAI animalAI = animal;
+                potentialMates.Add(animalAI);
+            }
+        }
+        if (potentialMates.Count > 0) 
+        { 
+            int randomMate = Random.Range(0, potentialMates.Count);
+            AnimalAI assignedMate = potentialMates[randomMate];
+            AssignMate(assignedMate);
+        }
+        else 
+        {
+            hasSearchedForMate = true;
+        }
+    }   
 
     //Can be called to assign mates in the animalManager, choices over animal procreation maybe chall be called in animalManager
     public void AssignMate(AnimalAI animal) 
@@ -600,15 +765,37 @@ public class AnimalAI : MonoBehaviour
     //First draft over the procreate method
     void Procreate() 
     {
-        if (hasMate && !awaitMate)
+        if (!hasSearchedForMate) //No mate found need to wait for mate
         {
-            if (assignedMate == null) return;
-            walkPoint = assignedMate.transform.position;
+            GetMate();
+        }
+        else if (hasMate && !awaitMate)
+        {
+            if (assignedMate == null) 
+            {
+                hasMate = false;
+                awaitMate = false;
+            }
+            walkPoint = assignedMate.gameObject.transform.position;
             float distance = Vector3.Distance(transform.position, assignedMate.transform.position);
 
-            if (distance < 2)
+            if (distance < 1.5f)
             {
                 //Instantiate new animal
+                Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+                spawnPosition = spawnPosition - (transform.forward * 2);
+                GameObject child = Instantiate(this.gameObject, spawnPosition, Quaternion.identity);
+                AnimalAI childAi = child.GetComponent<AnimalAI>();
+                AnimalChild chiildLogic = child.AddComponent<AnimalChild>();
+                chiildLogic.Parent = this.gameObject;
+                chiildLogic.ChildWalkSpeed = walkSpeed;
+                childAi.enabled = false;
+                child.transform.localScale *= 0.3f;
+                chiildLogic.Parent1 = this;
+                chiildLogic.Parent2 = assignedMate;
+                //child.transform.SetParent(transform); //Will be fixed in childscript
+
+                //Reset mating values
                 matingSeason = 0;
                 hasProcreated = true;
                 assignedMate.MatingSeason = 0;
@@ -651,6 +838,33 @@ public class AnimalAI : MonoBehaviour
         {
             transform.position -= new Vector3(0, 0.5f, 0) * Time.deltaTime;
         }
+    }
+
+    public void AnimalWalkInDirection(Vector3 direction) 
+    {
+        transform.rotation = Quaternion.LookRotation(direction);
+        Vector2 currentPostion = new Vector2((int)transform.position.x, (int)transform.position.z);
+        Tile currentTile = tileManager.GetTile(currentPostion);
+        transform.position += direction * Time.deltaTime;
+        Vector3 heightCorrection = new Vector3(transform.position.x, currentTile.GetHeight() + transform.localScale.y / 2, transform.position.z);
+        Vector3.MoveTowards(transform.position, heightCorrection, walkSpeed * Time.deltaTime);
+
+        if (transform.position.y < currentTile.GetHeight() + transform.localScale.y / 2)
+        {
+            transform.position += new Vector3(0, 0.5f, 0) * Time.deltaTime;
+        }
+        else if (transform.position.y > currentTile.GetHeight() + transform.localScale.y / 2)
+        {
+            transform.position -= new Vector3(0, 0.5f, 0) * Time.deltaTime;
+        }
+
+    }
+
+    //Information given to a GUI, can be called to populate the UI with information of the animal
+    public AnimalGUIInfo GetAnimalGUIInformation() 
+    {
+        AnimalGUIInfo info = new AnimalGUIInfo(walkSpeed, runSpeed, damage, health, hungerDeteration, MutationRate, hunger, bossThreat, Happiness, matingSeason, tired);
+        return info;
     }
 
     //If we decide to have animals lose health

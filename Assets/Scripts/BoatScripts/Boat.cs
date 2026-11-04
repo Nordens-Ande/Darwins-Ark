@@ -26,29 +26,34 @@ public class Boat : MonoBehaviour
         Leave
     }
 
-    BoatSequence step = BoatSequence.MoveTowardsRotationTile;
+    private BoatSequence step = BoatSequence.MoveTowardsRotationTile;
+    private bool boatFinished = false;
 
-    Tile beachTile; // beach tile where object will be dropped off
-    Tile targetTile; // tile where the boat will stop, 1 or 2 tiles away from beach
-    Tile rotationTile; //tile where the boat will stop and rotate towards the beach
+    private Tile beachTile; // beach tile where object will be dropped off
+    private Tile targetTile; // tile where the boat will stop, 1 or 2 tiles away from beach
+    private Tile rotationTile; //tile where the boat will stop and rotate towards the beach
 
-    Tile startTile; // start and end tile of boat 
+    private Tile startTile; // start and end tile of boat 
 
-    Tile currentTile;
-    Tile nextTile;
+    private Tile currentTile;
+    private Tile nextTile;
 
-    List<Tile> path;
-    int pathStage = 0;
+    private List<Tile> path;
+    private int pathStage = 0;
 
-    float maxMovementSpeed = 5;
-    float minMovementSpeed = 1f;
+    private float maxMovementSpeed = 5;
+    private float minMovementSpeed = 1f;
 
-    float distanceFromCoast = 3f; // make not hardcoded if weird later
+    private float distanceFromCoast = 3f; // make not hardcoded if weird later
+    private const float boatPosY = 0.5f;
 
-    [SerializeField] GameObject loadPos;
-    IBoatSpawning loadObject; //object on boat, animal or boss
+    private Quaternion initialRotation;
+    [SerializeField] private GameObject loadPos;
+    private IBoatSpawning loadObject; //object on boat, animal or boss
 
+    public bool BoatFinished => boatFinished;
     public GameObject LoadPos => loadPos;
+    public Quaternion InitialRotation => initialRotation;
     public IBoatSpawning LoadObject
     {
         get => loadObject;
@@ -69,7 +74,9 @@ public class Boat : MonoBehaviour
 
         CreatePath();
         SetNextTile(path[pathStage]);
-        transform.rotation = Quaternion.LookRotation(nextTile.position - currentTile.position);
+
+        initialRotation = Quaternion.LookRotation(nextTile.Position - currentTile.Position);
+        transform.rotation = initialRotation;
     }
 
     void SetNextTile(Tile nextTile)
@@ -85,7 +92,7 @@ public class Boat : MonoBehaviour
         }
 
         float minimumDistanceFromCenter = IslandNoise.Instance.MaxIslandRadius + distanceFromCoast;
-        float distanceFromCenter = Vector3.Distance(tile.position, Vector3.zero);
+        float distanceFromCenter = Vector3.Distance(tile.Position, Vector3.zero);
         if (distanceFromCenter < minimumDistanceFromCenter)
         {
             return false;
@@ -96,7 +103,7 @@ public class Boat : MonoBehaviour
 
     Tile SetTargetTile()
     {
-        Vector3 bPos = beachTile.position;
+        Vector3 bPos = beachTile.Position;
         float x = Mathf.Abs(bPos.x);
         float z = Mathf.Abs(bPos.z);
 
@@ -127,7 +134,7 @@ public class Boat : MonoBehaviour
 
     Tile SetRotationTile()
     {
-        Vector3 tPos = targetTile.position;
+        Vector3 tPos = targetTile.Position;
         float x = Mathf.Abs(tPos.x);
         float z = Mathf.Abs(tPos.z);
 
@@ -227,6 +234,10 @@ public class Boat : MonoBehaviour
         {
             step = BoatSequence.RotateToLeave;
         }
+        else if(currentTile == startTile && step == BoatSequence.Leave)
+        {
+            boatFinished = true;
+        }
     }
 
     void UpdateStepFromRotate()
@@ -248,7 +259,7 @@ public class Boat : MonoBehaviour
 
     bool CheckIfReachedNextTile(bool goingBackwards)
     {
-        Vector3 toTarget = nextTile.position - transform.position;
+        Vector3 toTarget = nextTile.Position - transform.position;
 
         if (goingBackwards)
         {
@@ -265,8 +276,8 @@ public class Boat : MonoBehaviour
             Debug.Log("current or next tile == null: Boat.cs: DecideSpeed()");
             return movementSpeed;
         }
-        float maxDistance = Vector3.Distance(currentTile.position, nextTile.position);
-        float distance = Vector3.Distance(transform.position, nextTile.position);
+        float maxDistance = Vector3.Distance(currentTile.Position, nextTile.Position);
+        float distance = Vector3.Distance(transform.position, nextTile.Position);
         float d = distance / maxDistance;
         if (nextTile == rotationTile && step == BoatSequence.MoveTowardsRotationTile) //slow down as we are arriving to rotation tile
         {
@@ -286,7 +297,7 @@ public class Boat : MonoBehaviour
         else if(currentTile == rotationTile && step == BoatSequence.Leave) // accelerate for 3 tiles
         {
             maxDistance = 3f;
-            distance = Vector3.Distance(transform.position, currentTile.position);
+            distance = Vector3.Distance(transform.position, currentTile.Position);
             d = Mathf.Clamp01(distance / maxDistance);
             return Mathf.Lerp(minMovementSpeed, maxMovementSpeed, d);
         }
@@ -302,7 +313,10 @@ public class Boat : MonoBehaviour
         float movementSpeed = DecideSpeed();
 
         //move and rotate
-        Vector3 direction = nextTile.position - currentTile.position;
+        Vector3 nextPos = nextTile.Position;
+        nextPos.y = boatPosY;
+
+        Vector3 direction = nextPos - transform.position;
         direction.Normalize();
 
         Vector3 moveDirection = transform.forward;
@@ -338,12 +352,14 @@ public class Boat : MonoBehaviour
 
     bool CheckIfReachedRotation(Quaternion rotation)
     {
-        return Quaternion.Angle(transform.rotation, rotation) < 1f;
+        return Quaternion.Angle(transform.rotation, rotation) < 0.03f;
     }
 
     void BoatRotate()
     {
-        Vector3 direction = nextTile.position - transform.position;
+        Vector3 nextPos = nextTile.Position;
+        nextPos.y = boatPosY;
+        Vector3 direction = nextPos - transform.position;
         direction.Normalize();
         Quaternion targetRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 30f * Time.deltaTime);

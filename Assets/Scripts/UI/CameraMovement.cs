@@ -42,7 +42,7 @@ public class CameraMovement : MonoBehaviour
     [SerializeField, ReadOnly] private InputAction zoomAction;
     [SerializeField, ReadOnly] private InputAction angleAction;
     [Space]
-    [Header("Test Pan to point")]
+    [Header("Pan to point")]
     [SerializeField] private bool testPanToPoint = false;
 
     private Vector3 currentVelocity = Vector3.zero;
@@ -86,7 +86,15 @@ public class CameraMovement : MonoBehaviour
         }
 
         targetYaw = transform.eulerAngles.y;
+    }
 
+    // when switching scenes, make sure the singleton is cleared so it can be reinitialized in the new scene
+    private void OnDestroy()
+    {
+        if (Instance == this)
+        {
+            Instance = null;
+        }
     }
 
     private void OnEnable()

@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Environment
 {
-    public class IslandNoise : MonoBehaviour
+    public class IslandNoise : SingletonManager<IslandNoise>
     {
         [Serializable]
         private struct NoiseDetailLevels
@@ -37,7 +37,8 @@ namespace Assets.Scripts.Environment
             }
         }
 
-        public static IslandNoise Instance = null;
+        private TileManager tileManager;
+
         [SerializeField] private int seed = -1;
 
         [Space]
@@ -64,16 +65,17 @@ namespace Assets.Scripts.Environment
         [Header("Terrain")]
         [SerializeField] private NoiseDetailLevels terrainNoiseLevels = new NoiseDetailLevels(0.01f, 0, 0.03f, 100f, 0.08f, 200f);
 
-        public float MaxIslandRadius => islandRadius * (1 + coastlineVariation);
+        [Space]
 
-        private void Awake()
-        {
-            if (Instance == null)
-                IslandNoise.Instance = this;
-        }
+        [Header("Ocean")]
+        [SerializeField] private bool slopeOceanFloor = true;
+
+        public float MaxIslandRadius => islandRadius * (1 + coastlineVariation);
 
         void Start()
         {
+            tileManager = TileManager.Instance;
+
             if (seed < 0)
             {
                 //seed = (int)System.DateTime.Now.Ticks;
@@ -213,31 +215,37 @@ namespace Assets.Scripts.Environment
             else
             {
                 type = TileType.Ocean;
+                //heightResult = coastlineRadius / distance;
+                if (slopeOceanFloor)
+                    heightResult = - (distance - coastlineRadius) / coastlineRadius;
             }
 
             return heightResult;
         }
 #if UNITY_EDITOR
-        //private void OnValidate()
-        //{
-        //    if (!Application.isPlaying || TileManager.Instance == null)
-        //        return;
+        private void OnValidate()
+        {
+            if (!Application.isPlaying || tileManager == null)
+                return;
 
-        //    foreach (Chunk chunk in TileManager.Instance.chunks)
-        //    {
-        //        for (int x = 0; x < chunk.Size; x++)
-        //        {
-        //            for (int z = 0; z < chunk.Size; z++)
-        //            {
-        //                TileType type = TileType.Ocean;
-        //                float y = useNoise ? IslandNoise.Instance.GetHeight(x + chunk.position.x, z + position.y, out type) : 0f;
-        //                tiles[x, z] = new Tile(new Vector3(x + position.x, y, z + position.y), new Vector3(x, y, z), type);
-        //            }
-        //        }
+            for (int i = 0; i < tileManager.chunks.Count; i++)
+            {
+                Chunk chunk = tileManager.chunks[i];
 
-        //        chunk.isDirty = true;
-        //    }
-        //}
+                //for (int x = 0; x < chunk.Size; x++)
+                //{
+                //    for (int z = 0; z < chunk.Size; z++)
+                //    {
+                //        TileType type = TileType.Ocean;
+                //        float y = useNoise ? IslandNoise.Instance.GetHeight(x + chunk.position.x, z + position.y, out type) : 0f;
+                //        tiles[x, z] = new Tile(new Vector3(x + position.x, y, z + position.y), new Vector3(x, y, z), type);
+                //    }
+                //}
+                tileManager.chunks[i] = new Chunk(chunk.position, chunk.Size);
+
+                tileManager.chunks[i].isDirty = true;
+            }
+        }
 #endif
     }
 }

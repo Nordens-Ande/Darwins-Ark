@@ -45,3 +45,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::InventoryManager
   playerInventory: {fileID: 0}
+  availableSeeds:
+  - {fileID: 11400000, guid: 42167007bfab8f24d8342dfdbba35906, type: 2}
+  - {fileID: 11400000, guid: 6a4b03f2864f2d241ac27b3e9f7d652e, type: 2}
+  - {fileID: 11400000, guid: 8d7003815eb7a454fb19fdc49179823f, type: 2}
+  debugAddRandomSeeds: 0
+  amountToSpawn: 7

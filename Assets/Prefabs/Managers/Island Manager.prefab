@@ -49,7 +49,9 @@ MonoBehaviour:
   chunkObjects: []
   chunkSize: 8
   chunkGridSize: {x: 8, y: 8}
-  gridLineMaterial: {fileID: 0}
+  createWater: 1
+  waterLevel: 0.45
+  waterMaterial: {fileID: 2100000, guid: bbfea793355d22b4998dbc051bcd2de8, type: 2}
 --- !u!114 &3712244531883561027
 MonoBehaviour:
   m_ObjectHideFlags: 0

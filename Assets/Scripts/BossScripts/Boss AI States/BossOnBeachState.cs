@@ -2,11 +2,18 @@ using Assets.Scripts.Environment;
 using System;
 using UnityEngine;
 
+[Serializable]
 public class BossOnBeachState : BossAIState
 {
     TileManager tileManager = TileManager.Instance;
     public BossOnBeachState(Boss boss) : base(boss)
     {
+        container = new BossOnBeachContainer();
+    }
+
+    public override void Initialize(Boss boss)
+    {
+        this.boss = boss;
         container = new BossOnBeachContainer();
     }
 

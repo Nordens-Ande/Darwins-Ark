@@ -15,37 +15,39 @@ public class BossEscapeContainer : Container<Boss>
         //health
         //distance to closest animal, hmm
 
-        if (boss.ClosestPlantTilePath == null)
+        if (boss.ClosestAttackTilePath == null)
         {
             distanceTile = 0f;
         }
         else
         {
-            Tile plantTile = boss.ClosestPlantTilePath[boss.ClosestPlantTilePath.Count - 1];
+            Tile plantTile = boss.ClosestAttackTilePath[boss.ClosestAttackTilePath.Count - 1];
             if (plantTile == null)
             {
                 distanceTile = 0f;
             }
             else
             {
-                float distance = Vector3.Distance(boss.transform.position, plantTile.position);
-                distanceTile = distance / boss.SightDistanceToTiles;
+                float distance = Vector3.Distance(boss.transform.position, plantTile.Position);
+                distanceTile = Mathf.Clamp01(distance / boss.SightDistanceToTiles);
             }
         }
 
-        health = boss.HealthScript.Health / boss.HealthScript.MaxHealth;
+        health = 1 - boss.HealthScript.Health / boss.HealthScript.MaxHealth;
 
         List<AnimalAI> animal = boss.FindClosestAnimals(1);
         if (animal.Count == 0)
         {
-            distanceAnimal = 1f;
+            distanceAnimal = 0f;
         }
         else
         {
             float distance = Vector3.Distance(boss.transform.position, animal[0].transform.position);
-            distanceAnimal = distance / boss.SightDistanceToAnimals;
+            distanceAnimal = Mathf.Clamp01(1 - distance / boss.SightDistanceToAnimals);
         }
+        if (boss.DebugScores)
+            Debug.Log("Boss escape score: " + Mathf.Clamp01(0.3f * distanceTile + 0.2f * health + 0.6f * distanceAnimal));
 
-        return Mathf.Clamp01(1 - distanceTile - health + distanceAnimal);
+        return Mathf.Clamp01(0.3f * distanceTile + 0.2f * health + 0.6f * distanceAnimal);
     }
 }

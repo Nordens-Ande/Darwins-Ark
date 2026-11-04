@@ -46,7 +46,7 @@ public class Inventory : MonoBehaviour
 
                     if (amount <= 0)
                     {
-                        OnInventoryChanged?.Invoke();
+                        Debug.Log($"Successfully added seed to inventory");
                         return true;
                     }
                 }
@@ -65,12 +65,14 @@ public class Inventory : MonoBehaviour
 
                 if (amount <= 0)
                 {
-                    return true;
+                    Debug.Log($"Successfully added seed to inventory");
+                    return true;              
                 }
             }
         }
 
         // if the inventory is full
+        Debug.LogWarning($"Could not added seed to inventory");
         return amount == 0;
 
     }
