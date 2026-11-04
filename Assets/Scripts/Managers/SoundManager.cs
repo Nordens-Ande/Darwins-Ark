@@ -8,7 +8,6 @@ public class SoundManager : SingletonManager<SoundManager>
 {
 
     //public static SoundManager Instance = null;
-
     [SerializeField] private AudioClip backgroundMusic;
     [SerializeField] private AudioSource backgroundMusicPlayer; //Where the backgroundmusic will be played 
 

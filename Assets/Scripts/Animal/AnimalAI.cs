@@ -216,7 +216,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     {
         transform.localPosition = Vector3.zero;
         tileManager = TileManager.Instance;
-        mutationManager = MutationManager.instance;
+        mutationManager = MutationManager.Instance;
         animalManager = AnimalManager.Instance;
         soundManager = SoundManager.Instance;
         vfxManager = VFXManager.instance;

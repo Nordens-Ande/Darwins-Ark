@@ -6,7 +6,7 @@ using System.Collections;
 
 public class MutationManager : SingletonManager<MutationManager>
 {
-    //public static MutationManager instance = null;
+    //public static MutationManager Instance = null;
     [SerializeField] private List<SO_AnimalMutation> mutationsList = new List<SO_AnimalMutation>();
     [SerializeField] private ParticleSystem mutationParticleSystem;
 
@@ -15,10 +15,10 @@ public class MutationManager : SingletonManager<MutationManager>
         get => mutationsList;
         set => mutationsList = value;
     }
-    
+
     //private void Awake()
     //{
-    //    if(MutationManager.instance == null) 
+    //    if (MutationManager.instance == null)
     //    {
     //        MutationManager.instance = this;
     //    }
