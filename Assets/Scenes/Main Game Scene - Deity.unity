@@ -396,6 +396,28 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 49bf9852b5669f5439855a75ef9f512b, type: 3}
+--- !u!114 &388268488 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7040246200480507033, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+  m_PrefabInstance: {fileID: 1043283273}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99a92350d1706994dad74bf108608b90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RainDeityManager
+--- !u!114 &388268491 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6673440682305440526, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+  m_PrefabInstance: {fileID: 1043283273}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da01ae59d0cf9004796ff8404a00b1a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WindCreationManager
 --- !u!114 &550361599 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 6597558973163832552, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
@@ -430,42 +452,26 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1077366064}
+    - target: {fileID: 2359242660973088191, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 388268491}
     - target: {fileID: 2592037811632828041, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1077366067}
-    - target: {fileID: 2592037811632828041, guid: c28093db3f3fc164c817751265095100, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ToggleInventory
-      objectReference: {fileID: 0}
     - target: {fileID: 2612151053017479632, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1077366067}
-    - target: {fileID: 2612151053017479632, guid: c28093db3f3fc164c817751265095100, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: EnterTerraform
-      objectReference: {fileID: 0}
     - target: {fileID: 3180928342312727073, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1077366067}
-    - target: {fileID: 3180928342312727073, guid: c28093db3f3fc164c817751265095100, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ExitTerraform
-      objectReference: {fileID: 0}
-    - target: {fileID: 3180928342312727073, guid: c28093db3f3fc164c817751265095100, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: UIButtonToggle, Assembly-CSharp
-      objectReference: {fileID: 0}
     - target: {fileID: 4519108996941649215, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1077366067}
-    - target: {fileID: 4519108996941649215, guid: c28093db3f3fc164c817751265095100, type: 3}
-      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ToggleBoss
-      objectReference: {fileID: 0}
     - target: {fileID: 5842827387484725755, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -550,6 +556,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas
       objectReference: {fileID: 0}
+    - target: {fileID: 7627115596303852835, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 388268488}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -885,22 +895,6 @@ PrefabInstance:
     - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7040246200480507033, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
-      propertyPath: emissionRate
-      value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 7040246200480507033, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
-      propertyPath: gravityScale
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 7040246200480507033, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
-      propertyPath: particleLifetime
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 7040246200480507033, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
-      propertyPath: particleSystemPos.y
-      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 7807982612777725063, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
       propertyPath: m_Name

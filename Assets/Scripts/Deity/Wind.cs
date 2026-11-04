@@ -40,7 +40,7 @@ public class Wind
     private List<Tile> OrderList(List<Tile> list)
     {
         List<Tile> result = new List<Tile>();
-        if (direction.x > direction.y)
+        if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
         {
             if (direction.x > 0)
             {

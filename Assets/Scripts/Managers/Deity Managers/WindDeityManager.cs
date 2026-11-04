@@ -4,6 +4,7 @@ using Assets.Scripts.Environment;
 using System.Collections.Generic;
 using UnityEditor;
 using static UnityEngine.InputManagerEntry;
+using System.Linq;
 
 public class WindDeityManager : SingletonManager<WindDeityManager>
 {
@@ -33,7 +34,7 @@ public class WindDeityManager : SingletonManager<WindDeityManager>
 
         baseCost = 10;
 
-        windWidth = 6f;
+        windWidth = 50f;
         windHeight = 2;
         maxWindStrength = 10; 
     }
@@ -83,15 +84,15 @@ public class WindDeityManager : SingletonManager<WindDeityManager>
     {
         //List<List<Tile>> windStrips = new List<List<Tile>>();
         Dictionary<int, List<Tile>> windStrips = new Dictionary<int, List<Tile>>();
-        
+
         List<Tile> tilesAffectedByWind = FindTilesInWindZone(anchorPoint, direction);
 
-        if(tilesAffectedByWind.Count <= 0) return null;
+        if (tilesAffectedByWind.Count <= 0) return null;
 
         (int, int) rangeX = tileManager.GetTilePositionRangeX();
         (int, int) rangeZ = tileManager.GetTilePositionRangeZ();
 
-        if (Math.Abs(direction.x) > Math.Abs(direction.y)) 
+        if (Math.Abs(direction.x) > Math.Abs(direction.y))
         {
             int minZ = rangeZ.Item1;
             int maxZ = rangeZ.Item2;

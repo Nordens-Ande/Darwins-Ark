@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3305523542588127624}
   - component: {fileID: 4069735928302417439}
+  - component: {fileID: 6673440682305440526}
   - component: {fileID: 7040246200480507033}
   m_Layer: 0
   m_Name: Deity Managers
@@ -45,11 +46,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5ce1e62b8926c64499e3ddacbfef85ec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WindDeityManager
-  windWidth: 0
-  windHeight: 0
-  maxWindStrength: 0
-  windOffset: 0
   triggerWind: 0
+--- !u!114 &6673440682305440526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7807982612777725063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da01ae59d0cf9004796ff8404a00b1a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WindCreationManager
 --- !u!114 &7040246200480507033
 MonoBehaviour:
   m_ObjectHideFlags: 0
