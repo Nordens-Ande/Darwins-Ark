@@ -47,6 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Environment.TerraformManager
   isActive: 0
   modifySelectionEnabled: 0
+  doubleClickTimer: 0
 --- !u!114 &5547338016526990173
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -60,6 +61,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileSelectionManager
   visibilityMode: 1
+  doubleClickTime: 0.2
   mouseMoveThreshold: 20
   selectHeld: 0
   isAddingTiles: 0
+  doubleClickTimer: 0

@@ -19,6 +19,8 @@ public class TileSelectionManager : SingletonManager<TileSelectionManager>
     //[SerializeField] private float doubleTapTime = 0.3f;
     [SerializeField] private TileGridVisibilityMode visibilityMode = TileGridVisibilityMode.AllTiles;
 
+    [SerializeField] private float doubleClickTime = 0.2f;
+
     [SerializeField, ReadOnly] private Vector2Int? highlightedTile;
 
     private HashSet<Vector2Int> selectedTiles = new HashSet<Vector2Int>();
@@ -50,6 +52,15 @@ public class TileSelectionManager : SingletonManager<TileSelectionManager>
         gameManager.OnGameModeChanged += HandleModeChange;
 
         SetGridVisible(false);
+    }
+
+    [SerializeField, ReadOnly] float doubleClickTimer = 0;
+    private void Update()
+    {
+        if (doubleClickTimer < doubleClickTime)
+        {
+            doubleClickTimer += Time.deltaTime;
+        }
     }
 
     //private void Update()
@@ -248,6 +259,17 @@ public class TileSelectionManager : SingletonManager<TileSelectionManager>
                 }
 
                 RefreshGrids();
+            }
+
+
+            if (doubleClickTimer < doubleClickTime)
+            {
+                //Debug.Log("Double click occured");
+                ClearSelection();
+            }
+            else
+            {
+                doubleClickTimer = 0;
             }
 
             //ToggleHighlightedTile();
