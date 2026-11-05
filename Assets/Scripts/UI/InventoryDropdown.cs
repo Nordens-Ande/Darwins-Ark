@@ -1,4 +1,5 @@
 
+using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -13,12 +14,18 @@ public class InventoryDropdown : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
     private List<string> inventoryItems = new List<string>(); //temporary list to test if functionality works
 
+    [SerializeField, ReadOnly] private bool isOpen = false;
+
+    private Coroutine animation;
+    private float targetHeight;
+
     public void Start()
     {
         inventoryItems.Add("Test");
         inventoryItems.Add("Long Test");
         inventoryItems.Add("Longer Test");
 
+        RefreshInventory();
         inventoryPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 0f);
     }
 
@@ -26,13 +33,17 @@ public class InventoryDropdown : MonoBehaviour, IPointerEnterHandler, IPointerEx
     public void OnPointerEnter(PointerEventData eventData)
     {
         //inventoryPanel.gameObject.SetActive(true);'
-        OpenInventory();
+        //OpenInventory();
+        isOpen = true;
+        AnimateInventory();
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
         //inventoryPanel.gameObject.SetActive(false);
-        CloseInventory();
+        //CloseInventory();
+        isOpen = false;
+        AnimateInventory();
     }
 
 
@@ -57,6 +68,44 @@ public class InventoryDropdown : MonoBehaviour, IPointerEnterHandler, IPointerEx
         inventoryPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 0f);
     }
 
+    private void AnimateInventory()
+    {
+        if (animation != null)
+            StopCoroutine(animation);
+
+        animation = StartCoroutine(AnimateItems());
+    }
+
+    private IEnumerator AnimateItems()
+    {
+        LayoutRebuilder.ForceRebuildLayoutImmediate(itemContainer);
+
+        targetHeight = isOpen ? LayoutUtility.GetPreferredHeight(itemContainer) : 0f;
+
+        float startHeight = inventoryPanel.rect.height;
+        float elapsed = 0f;
+        float animationDuration = 0.25f;
+
+        while (elapsed < animationDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+
+            float time = Mathf.Clamp01(elapsed / animationDuration);
+
+            // smooth ease animation
+            float smoothT = 1f - Mathf.Pow(1f - time, 3f);
+
+            float height = Mathf.Lerp(startHeight, targetHeight, smoothT);
+
+            inventoryPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
+
+            yield return null;
+        }
+
+        inventoryPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, targetHeight);
+
+        animation = null;
+    }
 
     public void RefreshInventory()
     {
