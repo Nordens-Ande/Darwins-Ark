@@ -9,7 +9,7 @@ public class Wind
 {
     private bool windComplete = false;
 
-    private Dictionary<int, List<Tile>> windStrips;
+    private Dictionary<int, SortedDictionary<int, List<Tile>>> windStrips;
 
     private Vector2 direction;    
 
@@ -17,14 +17,16 @@ public class Wind
     private float maxWindStrength;
 
     private Dictionary<Tile, float> windStrengthAtTile;
-    
+
+    private int minTileIndex;
+    private int maxTileIndex;
     private int currentIndexToUpdate;
     private const float timeBetweenTile = 0.05f;
     private float updateTimer = 0;
 
     public bool WindComplete => windComplete;
 
-    public Wind(Dictionary<int, List<Tile>> windStrips, Vector2 direction, float maxWindHeight, float maxWindStrength)
+    public Wind(Dictionary<int, SortedDictionary<int, List<Tile>>> windStrips, Vector2 direction, float maxWindHeight, float maxWindStrength)
     {
         this.windStrips = windStrips;
         this.direction = direction;
@@ -34,7 +36,10 @@ public class Wind
         windStrengthAtTile = new Dictionary<Tile, float>();
         CalculateWindStrengths();
 
-        currentIndexToUpdate = 0;
+        minTileIndex = windStrips.Values.SelectMany(strip => strip.Keys).Min();
+        maxTileIndex = windStrips.Values.SelectMany(strip => strip.Keys).Max();
+
+        currentIndexToUpdate = minTileIndex;
     }
 
     private List<Tile> OrderList(List<Tile> list)
@@ -68,10 +73,16 @@ public class Wind
 
     private void CalculateWindStrengths()
     {
-        for(int i = 0; i < windStrips.Count; i++)
+        foreach (var strip in windStrips.Values)
         {
-            windStrips[i] = OrderList(windStrips[i]);
-            TraverseList(windStrips[i]);
+            List<Tile> tiles = new List<Tile>();
+
+            foreach (var bucket in strip.Values)
+            {
+                tiles.AddRange(bucket);
+            }
+
+            TraverseList(tiles);
         }
     }
 
@@ -151,24 +162,37 @@ public class Wind
         }
         updateTimer = 0;
 
-        int amountUpdated = 0;
-        for(int i = 0; i < windStrips.Count; i++)
+        bool tilesRemaining = false;
+
+        foreach(var strip in windStrips.Values)
         {
-            if (!windStrips.ContainsKey(i)) continue;
-            
-            if(windStrips[i].Count - 1 >= currentIndexToUpdate)
+            if(strip.TryGetValue(currentIndexToUpdate, out List<Tile> tiles))
             {
-                ApplyWindEffect(windStrips[i][currentIndexToUpdate]);
-                amountUpdated++;
+                foreach(Tile tile in tiles)
+                {
+                    ApplyWindEffect(tile);
+                }
+                tilesRemaining = true;
             }
         }
-        //Debug.Log("amount updwted" + amountUpdated);
-        if(amountUpdated == 0)
+
+        if(!tilesRemaining)
         {
-            //Debug.Log("wind complete");
+            foreach(var strip in windStrips.Values)
+            {
+                if(strip.Keys.Any(key => key > currentIndexToUpdate))
+                {
+                    tilesRemaining = true;
+                }
+            }
+        }
+
+        if (!tilesRemaining)
+        {
             windComplete = true;
             return;
         }
+
         currentIndexToUpdate++;
     }
 }

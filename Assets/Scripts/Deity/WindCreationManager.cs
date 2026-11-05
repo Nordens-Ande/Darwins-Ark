@@ -23,7 +23,6 @@ public class WindCreationManager : MonoBehaviour
 
     private Camera mainCamera;
 
-    private bool creatingWind = false;
     private Vector3 initialMousePosition;
 
     void Start()

@@ -552,6 +552,22 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6013628543586171937, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1890176985}
+    - target: {fileID: 6013628543586171937, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnCreateLightning
+      objectReference: {fileID: 0}
+    - target: {fileID: 6013628543586171937, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: LightningDeityManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 6013628543586171937, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 7199079725259759060, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_Name
       value: Canvas
@@ -1191,6 +1207,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 31b52c025b807a9498ae23a3c3f96908, type: 3}
+--- !u!114 &1890176985 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5218102155610698157, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+  m_PrefabInstance: {fileID: 1043283273}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6627c4e18ae4c1949852a8374c85ce3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightningDeityManager
 --- !u!1001 &1913357771
 PrefabInstance:
   m_ObjectHideFlags: 0
