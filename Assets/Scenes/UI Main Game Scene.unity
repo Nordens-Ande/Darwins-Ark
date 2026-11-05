@@ -119,6 +119,59 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &7066542
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7066544}
+  - component: {fileID: 7066543}
+  m_Layer: 0
+  m_Name: Cloud Generator
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &7066543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7066542}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2506ba10d340f8447b51b2057fb85e39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PerlinCloudGenerator
+  resolution: 128
+  noiseScale: 3
+  threshold: 0
+  opacityStrength: 2.24
+  edgeFadeStrength: 2.26
+  cloudWidth: 1.65
+  cloudHeight: 1.46
+  centerStrength: 0.6
+  centerFallOff: 2
+--- !u!4 &7066544
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7066542}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &89447502 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 4388204363613784201, guid: c28093db3f3fc164c817751265095100, type: 3}
@@ -127,6 +180,11 @@ GameObject:
 --- !u!1 &169882638 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7361029169324942920, guid: c28093db3f3fc164c817751265095100, type: 3}
+  m_PrefabInstance: {fileID: 577010345}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &173199374 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 5842827387484725755, guid: c28093db3f3fc164c817751265095100, type: 3}
   m_PrefabInstance: {fileID: 577010345}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &189979610
@@ -557,7 +615,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 5842827387484725755, guid: c28093db3f3fc164c817751265095100, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2012343178}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 7361029169324942920, guid: c28093db3f3fc164c817751265095100, type: 3}
       insertIndex: -1
@@ -831,6 +892,37 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 696510951}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &759967884
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 759967885}
+  m_Layer: 0
+  m_Name: ========== GENERATORS==========
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &759967885
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 759967884}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
@@ -1310,6 +1402,114 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
+--- !u!1 &2012343177
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2012343178}
+  - component: {fileID: 2012343181}
+  - component: {fileID: 2012343180}
+  - component: {fileID: 2012343182}
+  - component: {fileID: 2012343183}
+  m_Layer: 5
+  m_Name: CloudPreview
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2012343178
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2012343177}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 173199374}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 300, y: 200}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2012343180
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2012343177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Texture: {fileID: 0}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+--- !u!222 &2012343181
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2012343177}
+  m_CullTransparentMesh: 1
+--- !u!114 &2012343182
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2012343177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b44ec56c4eef07448d9900b8c74407d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UiCloudDecorator
+  cloudGenerator: {fileID: 7066543}
+  extraSize: {x: 0, y: 0}
+  morphSpeed: 1
+  updateInterval: 0.1
+  offset: {x: 0, y: 0}
+  seed: 100
+  placeBehindElement: 1
+--- !u!114 &2012343183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2012343177}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 19dd84bce479590458857b23afd08968, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CloudPreview
+  generator: {fileID: 7066543}
+  rawImage: {fileID: 2012343180}
+  seed: 100
 --- !u!1 &2029357346
 GameObject:
   m_ObjectHideFlags: 0
@@ -1683,6 +1883,8 @@ SceneRoots:
   - {fileID: 696510952}
   - {fileID: 648648879}
   - {fileID: 203844589}
+  - {fileID: 759967885}
+  - {fileID: 7066544}
   - {fileID: 189979611}
   - {fileID: 906424419826848620}
   - {fileID: 1225263738}
