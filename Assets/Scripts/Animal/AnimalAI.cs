@@ -37,8 +37,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     [SerializeField] private float maxIdleTime = 5f;
     [SerializeField, ReadOnly] private float currentIdleTime = 0;
 
-    //[SerializeField] private float maxAttackTime = 2;
-    //[SerializeField, ReadOnly] private float currentAttackTime = 0;
+    [SerializeField] private float maxAttackTime = 2;
+    [SerializeField, ReadOnly] private float currentAttackTime = 0;
 
     [SerializeField] private float clockCycleTime = 10; //How long before points deteriate
     [SerializeField, ReadOnly] private float clockCycleTimeCurrent;
@@ -46,10 +46,14 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     [SerializeField] private float sleepTimeMax = 10;
     [SerializeField, ReadOnly] private float currentSleepTime = 0;
 
+    private float standStillTimerMax = 0;
+    private float standstillTimerCurrent = 0;
+
     //[Header("Boss")]
     //[Space]
-    ////bossFight
-    //[SerializeField] private float attackDistance = 3;
+    //bossFight
+    [SerializeField] private float attackDistance = 3;
+    private float seeBossRange = 25;
 
     //Seeds that animal can spawn
     [Header("Seeds that can spawn")]
@@ -60,6 +64,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
     [Header("DebugMode")]
     [SerializeField] private bool TestMutation = false;
+    [SerializeField] GameObject popupUI;
 
     //Manager instances 
     private TileManager tileManager;
@@ -67,6 +72,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     private AnimalManager animalManager;
     private SoundManager soundManager;
     private VFXManager vfxManager;
+    private BossManager bossManager;
 
     //Boat Spawning
     private bool unloaded = false;
@@ -119,6 +125,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     private List<Tile> activePath;
     private Vector3 activePathTarget;
     private int pathStage = 0;
+
+
 
 
     //Properties
@@ -220,6 +228,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         animalManager = AnimalManager.Instance;
         soundManager = SoundManager.Instance;
         vfxManager = VFXManager.instance;
+        bossManager = BossManager.Instance;
         activeBosses = new List<Boss>();
         //maxAttackTime = 2;
         tileCheckSize = 1;
@@ -337,11 +346,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         {
             currentIdleTime = 0;
             isIdle = false;
-            //Vector3 temp = FindWalkPoint();
-            //activePath = PathfindingMovement(temp);
             pathStage = 0;
             PathfindingWalk();
-            //WalkAround();
         }
     }
 
@@ -451,7 +457,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
             {
                 if (activePath[pathStage] != null && hasSetPath)
                 {
-                    AnimalWalkMoveTowards(activePathTarget);
+                    AnimalWalkMoveTowards(activePathTarget, walkSpeed);
                 }
             }
         }
@@ -490,7 +496,6 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
                 hasSetPath = true;
                 walkPoint = FindWalkPoint();
             }
-            //AnimalWalkMoveTowards(walkPoint);
 
             if (Vector3.Distance(transform.position, walkPoint) < 1f)
             {
@@ -501,7 +506,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
             if (!WillCollideWithNeighbour())
             {
-                AnimalWalkMoveTowards(walkPoint);
+                AnimalWalkMoveTowards(walkPoint, WalkSpeed);
             }
         }
     }
@@ -639,12 +644,6 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     {
         GameObject poopObj = Instantiate(poopPrefab, transform.position, Quaternion.identity);
         return;
-
-        //if (poop.Count > 0)
-        //{
-        //    int choosenPoop = Random.Range(0, poop.Count);
-        //    GameObject waste = Instantiate(poop[choosenPoop], transform.position, Quaternion.identity);
-        //}
     }
 
 
@@ -667,31 +666,80 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
     }
     //Prototype can only handle one enemy in the sceen, can be changed later
+
+    Boss GetNearestEnemy(List<Boss> bossList) 
+    {
+        //Method for getting the nearest enemy
+        if (bossList.Count == 0 || bossList == null) 
+        {
+            return null;
+        }
+        Boss closestBoss = bossList[0];
+        float bestDistance = Vector3.Distance(transform.position, closestBoss.transform.position);
+        foreach(Boss boss in bossList) 
+        {
+            
+            if(closestBoss == boss) continue;
+
+            float distance = Vector3.Distance(transform.position, boss.transform.position);
+            if(distance < bestDistance) 
+            { 
+                closestBoss = boss;
+                bestDistance = distance;
+            }
+        }
+
+        BossMovement bossMovement = closestBoss.GetComponent<BossMovement>();
+
+        //If distance is to high then the animal shouldent "see" the boss
+        if (Vector3.Distance(transform.position, closestBoss.transform.position) > seeBossRange)
+        {
+            //closestBoss.MovementScript.IsBossTraversable(bossTile);
+            closestBoss = null;
+            return closestBoss;
+        }
+        //More expensive calulation but if the boss isnet on a traversable tile (water) then the animal will ignore it
+        else if (!bossMovement.IsBossTraversable(tileManager.GetTile(closestBoss.transform.position)))
+        {
+            closestBoss = null;
+            return closestBoss;
+        }
+
+
+            return closestBoss;
+    }
+
     void BossFigth() // commented out because BossManager now supports multiple bosses, the CurrentBoss property no longer exists.
     {
+
         if (health > 25)
         {
-            //currentAttackTime += Time.deltaTime;
-            //Vector3 bossPosition = BossManager.Instance.CurrentBoss.transform.position;
-            //bossPosition.y = 0.5f;
-            //Vector3 directionToBoss = Vector3.Normalize(bossPosition - transform.position);
-            
-            //transform.LookAt(bossPosition);
-            //transform.position = Vector3.MoveTowards(transform.position, bossPosition - directionToBoss, runSpeed * Time.deltaTime);
-            //float distanceToBoss = Vector3.Distance(bossPosition, transform.position);
+            currentAttackTime += Time.deltaTime;
+            Boss nearestBoss = GetNearestEnemy(activeBosses); //Gets the nearest enemy and chooses to attack it
+            if(nearestBoss == null) 
+            {
+                PathfindingWalk(); //If nothing the animal should walk around
+                return;
+            }
+            Vector3 bossposition = nearestBoss.transform.position;
+            Vector3 directionToBoss = Vector3.Normalize(bossposition - transform.position);
 
-            //if(distanceToBoss < attackDistance)
-            //{
-            //    if(currentAttackTime >= maxAttackTime)
-            //    {
-            //        BossHealth bossHealth = BossManager.Instance.CurrentBoss.GetComponent<BossHealth>();
-            //        if(bossHealth != null)
-            //        {
-            //            bossHealth.TakeDamage(damage);
-            //            currentAttackTime = 0;
-            //        }
-            //    }
-            //}
+            transform.LookAt(bossposition);
+            AnimalWalkMoveTowards((bossposition - directionToBoss), runSpeed);
+            float distanceToBoss = Vector3.Distance(bossposition, transform.position);
+
+            if (distanceToBoss < attackDistance)
+            {
+                if (currentAttackTime >= maxAttackTime)
+                {
+                    BossHealth bossHealth = nearestBoss.GetComponent<BossHealth>();
+                    if (bossHealth != null)
+                    {
+                        bossHealth.TakeDamage(damage);
+                        currentAttackTime = 0;
+                    }
+                }
+            }
         }
     }
 
@@ -705,6 +753,20 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     //Overload incase of wanting to play VFX on the animal when they stand still
     void StandStill(ParticleSystem VFX) 
     { 
+
+    }
+
+    void standstill(float waitTime) 
+    { 
+        standStillTimerMax = waitTime;
+        standstillTimerCurrent += 1 * Time.deltaTime;
+
+        if (standstillTimerCurrent > standStillTimerMax) 
+        {
+            standstillTimerCurrent = 0;
+            //Anther utility value called shocked or something that can be called from deity powers
+        }
+    
     }
 
     void Sleep() 
@@ -825,16 +887,17 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     }
 
     //Can be called to make animals have a set point
-    public void AnimalWalkMoveTowards(Vector3 point) 
+    public void AnimalWalkMoveTowards(Vector3 point, float speed) 
     {
-        transform.LookAt(point);
+        transform.LookAt(new Vector3(point.x, transform.position.y, point.z));
+        //transform.LookAt(point);
 
         //Makes sure the animal stays at the tileheight its on
         Vector2 currentPostion = new Vector2((int)transform.position.x,(int) transform.position.z);
         Tile currentTile = tileManager.GetTile(currentPostion);
         //Vector3 newPoint = new Vector3(point.x, currentTile.position.y + transform.localScale.y / 2, point.z);
         Vector3 newPoint = new Vector3(point.x, currentTile.GetHeight() + transform.localScale.y / 2, point.z);
-        transform.position = Vector3.MoveTowards(transform.position, newPoint, walkSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, newPoint, speed * Time.deltaTime);
 
         //Makes sure the animal moves fast enough to the top of the tile, otherwise it will move through the tile
 
@@ -875,6 +938,14 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         return info;
     }
 
+
+    //Started making the popup logic
+    public void InstantiatePopUp() 
+    { 
+        AnimalGUIInfo displayInfo = GetAnimalGUIInformation();
+
+    }
+
     //If we decide to have animals lose health
     public void TakeDMG(float amount) 
     { 
@@ -892,7 +963,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     }
 
     //For later standstill when deity to call it
-    public void InvokeStandStill() 
+    public void InvokeStandStill(float time) 
     {
         StandStill();
     }
