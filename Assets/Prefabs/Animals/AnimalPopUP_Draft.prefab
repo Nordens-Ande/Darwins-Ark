@@ -193,6 +193,7 @@ GameObject:
   - component: {fileID: 7697402994543250046}
   - component: {fileID: 3328025316759431243}
   - component: {fileID: 7423958772450001167}
+  - component: {fileID: 2484867878673257649}
   m_Layer: 0
   m_Name: CustomMutation_Button
   m_TagString: Untagged
@@ -294,6 +295,18 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &2484867878673257649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1262401671141264820}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b1729a3f888a3e47a55edd341906723, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Popup_customButton
 --- !u!1 &1951085030344926509
 GameObject:
   m_ObjectHideFlags: 0

@@ -419,7 +419,7 @@ MonoBehaviour:
   - {fileID: 5212644513495774897, guid: a7db1c59c01addb40b02cf2d8d146946, type: 3}
   poopPrefab: {fileID: 0}
   TestMutation: 0
-  popupUI: {fileID: 0}
+  popUpBubble: {fileID: 0}
 --- !u!135 &252306909
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -6170,7 +6170,7 @@ MonoBehaviour:
   - {fileID: 5212644513495774897, guid: a7db1c59c01addb40b02cf2d8d146946, type: 3}
   poopPrefab: {fileID: 0}
   TestMutation: 0
-  popupUI: {fileID: 0}
+  popUpBubble: {fileID: 0}
 --- !u!135 &1952803388
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -6316,6 +6316,10 @@ PrefabInstance:
     - target: {fileID: 3064282692239602218, guid: 67bdeac5ab4a8f54d9c20f5f1d0267c0, type: 3}
       propertyPath: m_Name
       value: AnimalPopUP_Draft
+      objectReference: {fileID: 0}
+    - target: {fileID: 6831275700374691870, guid: 67bdeac5ab4a8f54d9c20f5f1d0267c0, type: 3}
+      propertyPath: m_text
+      value: 'Animal: '
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

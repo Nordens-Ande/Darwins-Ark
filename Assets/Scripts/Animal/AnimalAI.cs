@@ -1,8 +1,9 @@
 using Assets.Scripts.Environment;
-
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 
@@ -64,7 +65,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
     [Header("DebugMode")]
     [SerializeField] private bool TestMutation = false;
-    [SerializeField] GameObject popupUI;
+    //[SerializeField] GameObject popupUI;
 
     //Manager instances 
     private TileManager tileManager;
@@ -126,8 +127,10 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     private Vector3 activePathTarget;
     private int pathStage = 0;
 
-
-
+    //PopupBubble 
+    [Header("Popup bubble")]
+    [SerializeField] private GameObject popUpBubble;
+    private bool HasPopupBubble = false;
 
     //Properties
     public Transform Transform => transform;
@@ -943,7 +946,50 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     public void InstantiatePopUp() 
     { 
         AnimalGUIInfo displayInfo = GetAnimalGUIInformation();
+        if(popUpBubble != null && !HasPopupBubble) 
+        { 
+            GameObject bubble = Instantiate(popUpBubble, transform);
+            bubble.transform.position = new Vector3(transform.position.x - 2, transform.position.y + 3, transform.position.z);
+            bubble.transform.SetParent(transform, false);
+            GetSetChildrenTMP(bubble, displayInfo);
+            HasPopupBubble = true;
+            bubble.transform.LookAt(Camera.main.transform);
+            StartCoroutine(PopRemove(bubble));
+        }
+    }
 
+    void GetSetChildrenTMP(GameObject popup, AnimalGUIInfo info) 
+    {
+        TextMeshPro Title = transform.Find("Background/ForeGroundBackground/Title_TMP").GetComponent<TextMeshPro>();
+        TextMeshPro happiness = transform.Find("Background/ForeGroundBackground/Happiness_TMP").GetComponent<TextMeshPro>();
+        TextMeshPro hunger = transform.Find("Background/ForeGroundBackground/Hunger_TMP").GetComponent<TextMeshPro>();
+        TextMeshPro sleepy = transform.Find("Background/ForeGroundBackground/Sleepy_TMP").GetComponent<TextMeshPro>();
+        TextMeshPro tired = transform.Find("Background/ForeGroundBackground/Tired_TMP").GetComponent<TextMeshPro>();
+        TextMeshPro mating = transform.Find("Background/ForeGroundBackground/Mating_TMP").GetComponent<TextMeshPro>();
+
+        if (Title == null || happiness == null || hunger == null || sleepy ==null || tired == null || mating == null) 
+        {
+            Debug.Log("GetSetChildrenTMP; didnet get the textmeshpro to values");
+            return;
+        }
+        Title.text = "Animal";
+        hunger.text += info.Hunger.ToString();
+        sleepy.text += info.Tired.ToString();
+        tired.text += info.Tired.ToString();
+        mating.text += info.MatingSeason.ToString();
+    }
+
+    IEnumerator PopRemove(GameObject bubble) 
+    {
+        yield return new WaitForSeconds(10);
+        HasPopupBubble = false;
+        DestroyPopUp(bubble);
+        
+    }
+
+    void DestroyPopUp(GameObject bubble) 
+    {
+        Destroy(bubble);
     }
 
     //If we decide to have animals lose health

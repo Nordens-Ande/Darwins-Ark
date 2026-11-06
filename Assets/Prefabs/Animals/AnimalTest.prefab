@@ -141,15 +141,19 @@ MonoBehaviour:
   MutationMax: 100
   maxIdleTime: 5
   currentIdleTime: 0
+  maxAttackTime: 2
+  currentAttackTime: 0
   clockCycleTime: 30
   clockCycleTimeCurrent: 0
   sleepTimeMax: 10
   currentSleepTime: 0
+  attackDistance: 3
   poop:
   - {fileID: 7206990565552924369, guid: 9d83281e4b6364a4bbce31d9758ccd88, type: 3}
   - {fileID: 5212644513495774897, guid: a7db1c59c01addb40b02cf2d8d146946, type: 3}
   poopPrefab: {fileID: 5218845567725868596, guid: 4d2b5e6ca07d5264486edc0abacee57d, type: 3}
   TestMutation: 0
+  popUpBubble: {fileID: 3064282692239602218, guid: 67bdeac5ab4a8f54d9c20f5f1d0267c0, type: 3}
 --- !u!114 &-6405640087756652402
 MonoBehaviour:
   m_ObjectHideFlags: 0
