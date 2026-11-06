@@ -1,4 +1,5 @@
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -12,23 +13,132 @@ public class InventoryDropdown : MonoBehaviour, IPointerEnterHandler, IPointerEx
     [SerializeField] private RectTransform itemContainer;
     [SerializeField] private GameObject inventoryItemPrefab;
 
+    [Space]
+
+    [SerializeField] private RectTransform.Axis expandDirection = RectTransform.Axis.Vertical;
+    private bool isVertical => expandDirection == RectTransform.Axis.Vertical;
+    private bool isHorizontal => expandDirection == RectTransform.Axis.Horizontal;
+
     private List<string> inventoryItems = new List<string>(); //temporary list to test if functionality works
 
     [SerializeField, ReadOnly] private bool isOpen = false;
 
     private Coroutine animation;
-    private float targetHeight;
+    private float targetPos;
 
     public void Start()
     {
+        CreateItemPanel();
+        CreateItemContainer();
+
         inventoryItems.Add("Test");
         inventoryItems.Add("Long Test");
         inventoryItems.Add("Longer Test");
 
         RefreshInventory();
-        inventoryPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, 0f);
+        inventoryPanel.SetSizeWithCurrentAnchors(expandDirection, 0f);
+        inventoryPanel.SetSizeWithCurrentAnchors(expandDirection, 0f);
     }
 
+
+    private void CreateItemPanel()
+    {
+        // Object setup
+        Type layoutType = isVertical ? typeof(VerticalLayoutGroup) : typeof(HorizontalLayoutGroup);
+        inventoryPanel = new GameObject("Item Panel", typeof(RectTransform), typeof(RectMask2D), typeof(ContentSizeFitter), layoutType).GetComponent<RectTransform>();
+        inventoryPanel.transform.parent = transform;
+
+        // UI position/alignment setup
+        inventoryPanel.anchorMin = isVertical ? new Vector2(0, 1) : new Vector2(0, 0);
+        inventoryPanel.anchorMax = isVertical ? new Vector2(1, 1) : new Vector2(0, 1);
+        inventoryPanel.pivot     = isVertical ? new Vector2(0, 1) : new Vector2(0, 1);
+        inventoryPanel.anchoredPosition = Vector2.zero;
+        inventoryPanel.localScale = Vector3.one;
+
+        // Content Size Fitter setup
+        ContentSizeFitter fitter = inventoryPanel.GetComponent<ContentSizeFitter>();
+
+        fitter.horizontalFit = !isHorizontal ? ContentSizeFitter.FitMode.PreferredSize : ContentSizeFitter.FitMode.Unconstrained;
+        fitter.verticalFit = !isVertical ? ContentSizeFitter.FitMode.PreferredSize : ContentSizeFitter.FitMode.Unconstrained;
+
+        // Layout Group setup
+        if (isVertical)
+        {
+            VerticalLayoutGroup layout = inventoryPanel.GetComponent<VerticalLayoutGroup>();
+
+            layout.childAlignment = TextAnchor.UpperLeft;
+
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = true;
+        }
+        else
+        {
+            HorizontalLayoutGroup layout = inventoryPanel.GetComponent<HorizontalLayoutGroup>();
+
+            layout.childAlignment = TextAnchor.UpperLeft;
+
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = true;
+        }
+    }
+    private void CreateItemContainer()
+    {
+        if (inventoryPanel == null)
+        {
+            Debug.LogWarning("Attempting to create Item Container before creating proper Item Panel.\nCreating an item panel now before proceeding with Item Container");
+            CreateItemPanel();
+        }
+
+        // Object setup
+        Type layoutType = isVertical ? typeof(VerticalLayoutGroup) : typeof(HorizontalLayoutGroup);
+        itemContainer = new GameObject("Item Container", typeof(ContentSizeFitter), layoutType /*typeof(VerticalLayoutGroup)*/ /*DONT FORGET TO UPDATE THIS*/).GetComponent<RectTransform>();
+        itemContainer.transform.parent = inventoryPanel.transform;
+
+        // UI position/alignment setup
+        itemContainer.anchorMin = new Vector2(0, 1);
+        itemContainer.anchorMax = new Vector2(0, 1);
+        itemContainer.pivot     = new Vector2(0, 1);
+        itemContainer.anchoredPosition = Vector2.zero;
+        itemContainer.localScale = Vector3.one;
+
+        // Content Size Fitter setup
+        ContentSizeFitter fitter = itemContainer.GetComponent<ContentSizeFitter>();
+        
+        fitter.horizontalFit = isHorizontal ? ContentSizeFitter.FitMode.PreferredSize : ContentSizeFitter.FitMode.Unconstrained;
+        fitter.verticalFit = isVertical ? ContentSizeFitter.FitMode.PreferredSize : ContentSizeFitter.FitMode.Unconstrained;
+
+        // Layout Group setup
+        if (isVertical)
+        {
+            VerticalLayoutGroup layout = itemContainer.GetComponent<VerticalLayoutGroup>();
+
+            layout.childAlignment = TextAnchor.UpperLeft;
+
+            layout.childControlWidth  = isHorizontal;
+            layout.childControlHeight = isVertical;
+
+            layout.childScaleWidth  = !isHorizontal;
+            layout.childScaleHeight = !isVertical;
+        }
+        else
+        {
+            HorizontalLayoutGroup layout = itemContainer.GetComponent<HorizontalLayoutGroup>();
+
+            layout.childAlignment = TextAnchor.UpperLeft;
+
+            layout.childControlWidth  = isHorizontal;
+            layout.childControlHeight = isVertical;
+
+            layout.childScaleWidth  = !isHorizontal;
+            layout.childScaleHeight = !isVertical;
+        }
+    }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
@@ -80,9 +190,15 @@ public class InventoryDropdown : MonoBehaviour, IPointerEnterHandler, IPointerEx
     {
         LayoutRebuilder.ForceRebuildLayoutImmediate(itemContainer);
 
-        targetHeight = isOpen ? LayoutUtility.GetPreferredHeight(itemContainer) : 0f;
+        //targetHeight = isOpen ? isVertical ? LayoutUtility.GetPreferredHeight(itemContainer) : LayoutUtility.GetPreferredWidth(itemContainer) : 0f;
+        targetPos = expandDirection switch
+        {
+            RectTransform.Axis.Vertical when isOpen => LayoutUtility.GetPreferredHeight(itemContainer),
+            RectTransform.Axis.Horizontal when isOpen => LayoutUtility.GetPreferredWidth(itemContainer),
+            _ => 0f
+        };
 
-        float startHeight = inventoryPanel.rect.height;
+        float startPos = isVertical ? inventoryPanel.rect.height : inventoryPanel.rect.width;
         float elapsed = 0f;
         float animationDuration = 0.25f;
 
@@ -95,14 +211,14 @@ public class InventoryDropdown : MonoBehaviour, IPointerEnterHandler, IPointerEx
             // smooth ease animation
             float smoothT = 1f - Mathf.Pow(1f - time, 3f);
 
-            float height = Mathf.Lerp(startHeight, targetHeight, smoothT);
+            float newPos = Mathf.Lerp(startPos, targetPos, smoothT);
 
-            inventoryPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, height);
+            inventoryPanel.SetSizeWithCurrentAnchors(expandDirection, newPos);
 
             yield return null;
         }
 
-        inventoryPanel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical, targetHeight);
+        inventoryPanel.SetSizeWithCurrentAnchors(expandDirection, targetPos);
 
         animation = null;
     }
