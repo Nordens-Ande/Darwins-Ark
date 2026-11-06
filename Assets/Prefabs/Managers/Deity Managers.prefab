@@ -85,3 +85,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6627c4e18ae4c1949852a8374c85ce3a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LightningDeityManager
+  material: {fileID: 2100000, guid: 748838321f84bfa479da80f70588fb0e, type: 2}
