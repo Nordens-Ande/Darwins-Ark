@@ -7,7 +7,7 @@ using Unity.VisualScripting;
 
 public class Lightning
 {
-    [SerializeField] private Material material;
+    private Material material;
 
     private Transform managerTransform;
 
@@ -30,12 +30,13 @@ public class Lightning
 
     private bool lightningComplete = false;
 
-    public Lightning(Transform transform, Tile tile, List<Tile> affectedTiles)
+    public Lightning(Material material, Transform transform, Tile tile, List<Tile> affectedTiles)
     {
         Debug.Log("lightning class created");
         tileDistanceDictionary = new Dictionary<float, List<Tile>>();
         distances = new List<float>();
         
+        this.material = material;
         this.managerTransform = transform;
         this.tile = tile;
         this.affectedTiles = affectedTiles;
@@ -52,7 +53,7 @@ public class Lightning
         {
             float distance = Vector3.Distance(affectedTile.Position, tile.Position);
 
-            distance = Mathf.Round(distance * 100f) / 100f;
+            distance = Mathf.Round(distance * 10f) / 10f;
 
             if(!tileDistanceDictionary.ContainsKey(distance))
             {
@@ -66,9 +67,8 @@ public class Lightning
 
     private LineRenderer CreateLightning(Tile tile)
     {
-        Debug.Log("created big light");
         float displacement = 1f;
-        float width = 0.2f;
+        float width = 0.4f;
         Color color = Color.lightBlue;
 
         Vector3 tilePos = tile.Position;
@@ -111,9 +111,8 @@ public class Lightning
 
     private LineRenderer CreateSmallLightning(Tile tile)
     {
-        Debug.Log("created small light");
         Vector3 tilePos = tile.Position;
-        Vector3 randPos = tilePos += new Vector3(Random.Range(-0.5f, 0.5f), 0.1f, Random.Range(-0.5f, 0.5f));
+        Vector3 randPos = tilePos + new Vector3(Random.Range(-0.5f, 0.5f), 0.1f, Random.Range(-0.5f, 0.5f));
         float displacement = 0.3f;
         float width = 0.1f;
         Color color = Color.lightBlue;
@@ -155,7 +154,7 @@ public class Lightning
 
     private IEnumerator DestroyLine(LineRenderer line)
     {
-        yield return new WaitForSeconds(timeBetweenTile * 2f);
+        yield return new WaitForSeconds(timeBetweenTile * ((distances.Count + 1) * 0.5f));
         Object.Destroy(line.gameObject);
     }
     

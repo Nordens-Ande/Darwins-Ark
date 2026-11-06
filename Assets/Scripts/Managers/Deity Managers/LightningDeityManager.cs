@@ -16,6 +16,8 @@ public class LightningDeityManager : SingletonManager<LightningDeityManager>
 
     LightningCreationState state = LightningCreationState.None;
 
+    [SerializeField] Material material;
+
     private List<Lightning> lightnings = new List<Lightning>();
 
     private GameManager gameManager;
@@ -23,7 +25,7 @@ public class LightningDeityManager : SingletonManager<LightningDeityManager>
     private TileManager tileManager;
     private WindDeityManager windDeityManager;
 
-    private int lightningEffectRadius = 4;
+    private float lightningEffectRadius = 2.5f;
 
     public event Action<LightningEventData> OnLightningTriggered;
 
@@ -63,7 +65,7 @@ public class LightningDeityManager : SingletonManager<LightningDeityManager>
 
     private void TriggerLightning(List<Tile> affectedTiles, Tile tile)
     {
-        Lightning lightning = new Lightning(transform, tile, affectedTiles);
+        Lightning lightning = new Lightning(material, transform, tile, affectedTiles);
         lightnings.Add(lightning);
         SetGridVisible(false);
         state = LightningCreationState.None;
