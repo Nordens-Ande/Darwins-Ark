@@ -63,6 +63,11 @@ namespace Assets.Scripts.Environment
         }
 
         public TileType Type => type;
+
+        public bool IsWater => type == TileType.River || type == TileType.Lake || type == TileType.Ocean;
+        public bool IsSweetWater => type == TileType.River || type == TileType.Lake;
+        public bool IsSaltWater => type == TileType.Ocean;
+
         public Plant CurrentPlant => currentPlant;
 
         public bool IsWetFromRain => isWetFromRain;
