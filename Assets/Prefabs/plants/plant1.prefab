@@ -100,6 +100,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1719205602315115581}
   - component: {fileID: 3703582345733772566}
+  - component: {fileID: -3322766923011822937}
   m_Layer: 0
   m_Name: plant1
   m_TagString: Untagged
@@ -139,8 +140,30 @@ MonoBehaviour:
   health: 100
   timeSinceLastGrowth: 0
   canBeEaten: 0
+  PlantSmellRadius: 5
+  isCloseToWaterRange: 4
+  isCloseToWater: 0
   currentStage: 0
   seedPrefab: {fileID: 7830422347145701087, guid: a9e2b5eed467b4b47a5bfd3a88449812, type: 3}
   sproutPrefab: {fileID: 2400619782314774504, guid: 6ebf64091d05b004fb107b3adb4ba3cb, type: 3}
   growthlingPrefab: {fileID: 8471146969150592048, guid: eb756988dcc5f384c916244302ae2a06, type: 3}
   grownPrefab: {fileID: 8136419842393320447, guid: fe76ee1cd9afe3846bfdc7190340df0f, type: 3}
+--- !u!114 &-3322766923011822937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7206990565552924369}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2630153a969aba14b9f84b85f7ec2421, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlantParticleSystem
+  gravityScale: 1
+  minEmissionRate: 2
+  maxEmissionRate: 40
+  minWindSpeed: 0.5
+  maxWindSpeed: 8
+  particleLifetime: 2
+  particleSize: 0.1

@@ -32,6 +32,7 @@ namespace Assets.Scripts.Environment
 
         public Vector3 Position => position;
         public Vector3 LocalPosition => localPosition;
+
         public float Height
         {
             get => Position.y;
@@ -45,6 +46,7 @@ namespace Assets.Scripts.Environment
                 //CleanUpTile();
             }
         }
+
         public float WaterHeight
         {
             get => waterHeight;
@@ -176,20 +178,21 @@ namespace Assets.Scripts.Environment
                         isWetFromRain = false;
                         runRainTimer = false;
                         wetTimer = 0;
-                        return;
+                        
                     }
-                    wetTimer += dt;
+                    else
+                    {
+                        wetTimer += dt;
+                    }
                 }
             }
-            if (windStrength <= 0) return;
-            windStrength -= 1 * Time.deltaTime;
+            if (windStrength <= 0) return; // dont return if we add stuff below later
+            windStrength -= 2 * Time.deltaTime;
             if(windStrength <= 0)
             {
                 windStrength = 0;
                 windDirection = Vector3.zero;
             }
-            //if(position.x == 0 && position.z == 0)
-            //    Debug.Log(windStrength);
         }
 
         // This method is called every time the tile gets dirty, currently the tile itself will call this, but it could be more applicable in future to only have the chunk do it

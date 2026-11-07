@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5476495299597650437}
   - component: {fileID: 1564520648447910268}
+  - component: {fileID: 5198472881279275852}
   m_Layer: 0
   m_Name: InventoryManager
   m_TagString: Untagged
@@ -51,3 +52,17 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8d7003815eb7a454fb19fdc49179823f, type: 2}
   debugAddRandomSeeds: 0
   amountToSpawn: 7
+--- !u!114 &5198472881279275852
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3735348127664365050}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f38589420a563f4bb0f450d33e38f7a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Inventory
+  maxSlots: 16
+  slots: []

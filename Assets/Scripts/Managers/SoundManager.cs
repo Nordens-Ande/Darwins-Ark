@@ -4,11 +4,10 @@ using UnityEngine.Audio;
 
 using System.Collections.Generic;
 
-public class SoundManager : MonoBehaviour
+public class SoundManager : SingletonManager<SoundManager>
 {
 
-    public static SoundManager Instance = null;
-
+    //public static SoundManager Instance = null;
     [SerializeField] private AudioClip backgroundMusic;
     [SerializeField] private AudioSource backgroundMusicPlayer; //Where the backgroundmusic will be played 
 
@@ -22,29 +21,41 @@ public class SoundManager : MonoBehaviour
     [SerializeField] private Dictionary<MixerType, AudioMixerGroup> mixerIndex = new Dictionary<MixerType, AudioMixerGroup>();
 
 
-    private void Awake()
-    {
-        if (Instance == null) 
-        {
-            Instance = this;
-        }
-        else 
-        {
-            Destroy(this);
-        }
+    //private void Awake()
+    //{
+    //    if (Instance == null) 
+    //    {
+    //        Instance = this;
+    //    }
+    //    else 
+    //    {
+    //        Destroy(this);
+    //    }
 
-        //Populates the dictonary with the scripble objects, connecting the type to the clip
+    //    //Populates the dictonary with the scripble objects, connecting the type to the clip
+    //    foreach (SO_SoundEffect audio in soundEffectsList)
+    //    {
+    //        if (audio.Clip == null) continue;
+    //        soundIndex.Add(audio.AudioType, audio.Clip);
+    //    }
+    //}
+
+    private void Start()
+    {
         foreach (SO_SoundEffect audio in soundEffectsList)
         {
             if (audio.Clip == null) continue;
             soundIndex.Add(audio.AudioType, audio.Clip);
         }
+
+        StartBackgroundMusic(0.1f);
     }
 
     //Starts the backgroundmusic
-    public void StartBackgroundMusic() 
+    public void StartBackgroundMusic(float volume) 
     { 
         backgroundMusicPlayer.clip = backgroundMusic;
+        backgroundMusicPlayer.volume = volume;
         backgroundMusicPlayer.Play();
     }
 
@@ -83,34 +94,34 @@ public class SoundManager : MonoBehaviour
     }
 
     //Gets the soundeffect of type and then plays from set audiosource
-    public void PlaySoundeffectFromIndex(AudioSource source, AudioType type) 
+    public void PlaySoundeffectFromIndex(AudioSource source, AudioType type, float volume) 
     { 
         AudioClip clip = GetAudioClipFromIndex(type);
-        source.PlayOneShot(clip);
+        source.PlayOneShot(clip,volume);
     }
 
     //Made customized playclipatpoint but so the audiomixer and mindistance and maxdistance are included
-    public void PlaySoundEffectAtVec3(Vector3 position, AudioClip clip, float minDistance, float maxDistance, MixerType mixerType) 
+    public void PlaySoundEffectAtVec3(Vector3 position, AudioClip clip, float minDistance, float maxDistance, float volume /*MixerType mixerType*/) 
     {
         GameObject audioObj = new GameObject("Temp audio");
         audioObj.transform.position = position;
         AudioSource audioSource = audioObj.transform.AddComponent<AudioSource>();
-        audioSource.outputAudioMixerGroup = mixerIndex[mixerType]; //Can be unstable, no check if it exists
+        //audioSource.outputAudioMixerGroup = mixerIndex[mixerType]; //Can be unstable, no check if it exists
         audioSource.clip = clip;
         audioSource.minDistance = minDistance;
         audioSource.maxDistance = maxDistance;
         audioSource.loop = false;
         audioSource.playOnAwake = true;
-        InstantiateSoundEffect(audioObj, clip);
+        InstantiateSoundEffect(audioObj, clip, volume);
     }
 
     //Creates and destroyes the temporery gameobject after the clip finished playing
     //OBS used in PlaySOundEffectAtVec3
-    private void InstantiateSoundEffect(GameObject source, AudioClip clip) 
+    private void InstantiateSoundEffect(GameObject source, AudioClip clip, float volume) 
     { 
         Instantiate(source);
         AudioSource audio = source.GetComponent<AudioSource>();
-        audio.PlayOneShot(clip);
+        audio.PlayOneShot(clip, volume);
         Destroy(source, clip.length);
     }
 
@@ -130,5 +141,10 @@ public class SoundManager : MonoBehaviour
         backgroundMusic = soundIndex[AudioType.backgroundMusic_Idle];
         backgroundMusicPlayer.clip = backgroundMusic;
         backgroundMusicPlayer.Play();
+    }
+
+    public void SetBackgroundMusicVolume(float volume) 
+    { 
+        backgroundMusicPlayer.volume = volume;
     }
 }
