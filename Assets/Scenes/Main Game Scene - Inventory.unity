@@ -1786,7 +1786,7 @@ MonoBehaviour:
   inventoryPanel: {fileID: 113454469}
   itemContainer: {fileID: 729829425}
   inventoryItemPrefab: {fileID: 281722521}
-  expandDirection: 0
+  expandDirection: 1
   isOpen: 0
 --- !u!1 &1560061570
 GameObject:
