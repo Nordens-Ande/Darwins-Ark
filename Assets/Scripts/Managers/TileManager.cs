@@ -258,7 +258,7 @@ namespace Assets.Scripts.Environment
             }
         }
 
-        private void GenerateSaltWater()
+        public void GenerateSaltWater()
         {
             if (!createWater)
                 return;
