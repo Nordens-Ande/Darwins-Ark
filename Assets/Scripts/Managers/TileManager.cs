@@ -89,13 +89,13 @@ namespace Assets.Scripts.Environment
             GenerateSaltWater();
 
             // Temp water creation
-            Tile[] sourceWaters = new Tile[] { GetTile(new Vector2Int(0, 0)), GetTile(new Vector2Int(1, 0)), GetTile(new Vector2Int(-1, 0)), GetTile(new Vector2Int(0, 1)), GetTile(new Vector2Int(0, -1)) };
-            foreach (Tile sourceWater in sourceWaters)
-            {
-                sourceWater.WaterHeight = sourceWater.Height - 0.15f;
-                sourceWater.Height = 0;
-                sourceWater.SetType(TileType.Lake);
-            }
+            //Tile[] sourceWaters = new Tile[] { GetTile(new Vector2Int(0, 0)), GetTile(new Vector2Int(1, 0)), GetTile(new Vector2Int(-1, 0)), GetTile(new Vector2Int(0, 1)), GetTile(new Vector2Int(0, -1)) };
+            //foreach (Tile sourceWater in sourceWaters)
+            //{
+            //    sourceWater.WaterHeight = sourceWater.Height - 0.15f;
+            //    sourceWater.Height = 0;
+            //    sourceWater.SetType(TileType.Lake);
+            //}
 
             GenerateSweetWater();
         }

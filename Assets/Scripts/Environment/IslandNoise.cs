@@ -86,6 +86,13 @@ namespace Assets.Scripts.Environment
             }
 
             UnityEngine.Random.InitState(seed);
+
+
+            IntializeLakeMap();
+            for (int i = 0; i < lakeIterations; i++)
+            {
+                SimulateLakeStep();
+            }
         }
 
         void Start()
@@ -98,11 +105,11 @@ namespace Assets.Scripts.Environment
             //    seed = UnityEngine.Random.Range(short.MinValue, short.MaxValue);
             //}
 
-            IntializeLakeMap();
-            for (int i = 0; i < lakeIterations; i++)
-            {
-                SimulateLakeStep();
-            }
+            //IntializeLakeMap();
+            //for (int i = 0; i < lakeIterations; i++)
+            //{
+            //    SimulateLakeStep();
+            //}
         }
 
         // Update is called once per frame
@@ -257,6 +264,7 @@ namespace Assets.Scripts.Environment
 
         // True = Lake Tile
         private bool[,] lakeMap;
+        //public bool[,] LakeMap => lakeMap;
 
         [Header("Lakes")]
         // What tiles the lake can be generated on
@@ -274,6 +282,26 @@ namespace Assets.Scripts.Environment
         [SerializeField] private int MaxLakeNeighborsForLakeToLand = 3;
         [SerializeField] private int MinLakeNeighborsForLandToLake = 5;
 
+        public bool IsLake(int x, int z, Space space = Space.World)
+        {
+            int size = lakeMap.GetLength(0);
+
+            if (space == Space.World)
+            {
+                int halfSize = size / 2;
+                x += halfSize;
+                z += halfSize;
+
+                //if (x < -halfSize || x >= halfSize || z < -halfSize || z >= halfSize)
+                //    return false;
+            }
+            
+            if (x < 0 || x >= size || z < 0 || z >= size)
+                return false;
+            
+
+            return lakeMap[x, z];
+        }
 
         private void IntializeLakeMap()
         {
