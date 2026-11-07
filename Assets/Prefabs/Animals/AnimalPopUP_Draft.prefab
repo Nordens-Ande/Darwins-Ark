@@ -617,6 +617,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 851072263158800810}
+  - component: {fileID: 3979760631314298818}
   m_Layer: 0
   m_Name: AnimalPopUP_Draft
   m_TagString: Untagged
@@ -640,6 +641,23 @@ Transform:
   - {fileID: 2733766171576722748}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3979760631314298818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3064282692239602218}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4acb9a4a90baffe4a892a410691d624a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PopupScript
+  titleTMP: {fileID: 6831275700374691870}
+  happinessTMP: {fileID: 2965792968504376535}
+  hungerTMP: {fileID: 9141076837879119354}
+  tiredTMP: {fileID: 5964391742515661996}
+  matingTMP: {fileID: 8732621866885251167}
 --- !u!1 &5481089973775655268
 GameObject:
   m_ObjectHideFlags: 0

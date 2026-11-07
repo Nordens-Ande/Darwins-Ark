@@ -1,4 +1,6 @@
+using Assets.Enums.GameTransitions;
 using Assets.Scripts.Environment;
+using Assets.Scripts.Managers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
@@ -6,6 +8,7 @@ using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+//using UnityEngine.Tilemaps;
 
 public class AnimalAI : MonoBehaviour, IBoatSpawning
 {
@@ -21,14 +24,15 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     [Header("Animal Stats")]
     [Space]
     //Animal stats
-    [SerializeField] private float walkSpeed = 1f;
-    [SerializeField] private float runSpeed = 3;
+    [SerializeField] private float walkSpeed = 0.75f;
+    [SerializeField] private float runSpeed = 1.3f;
+    [SerializeField] private float waterSpeed = 0.5f;
     [SerializeField] private float damage = 10;
     [SerializeField] private float health = 100; //0-100
     [SerializeField] private float hungerDeteration = 1;
     [SerializeField] private float MutationRate = 1;
     [SerializeField, ReadOnly] private float currentMutationValue = 0;
-    [SerializeField] private float MutationMax = 100;
+    [SerializeField] private float MutationMax = 60;
     //[SerializeField] private float Defence = 1; //Do nothing at the moment
 
 
@@ -50,8 +54,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     private float standStillTimerMax = 0;
     private float standstillTimerCurrent = 0;
 
-    //[Header("Boss")]
-    //[Space]
+    [Header("Boss")]
+    [Space]
     //bossFight
     [SerializeField] private float attackDistance = 3;
     private float seeBossRange = 25;
@@ -74,6 +78,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     private SoundManager soundManager;
     private VFXManager vfxManager;
     private BossManager bossManager;
+    private GameManager gameManager;
+    private LightningDeityManager lightningDeityManager;
 
     //Boat Spawning
     private bool unloaded = false;
@@ -131,6 +137,9 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     [Header("Popup bubble")]
     [SerializeField] private GameObject popUpBubble;
     private bool HasPopupBubble = false;
+
+    //Deity
+    private int lightningHitCount = 0;
 
     //Properties
     public Transform Transform => transform;
@@ -225,6 +234,10 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
     void Start()
     {
+        walkSpeed = 0.75f;
+        runSpeed = 1.3f;
+        waterSpeed = 0.30f;
+        hungerDeteration = 10;
         transform.localPosition = Vector3.zero;
         tileManager = TileManager.Instance;
         mutationManager = MutationManager.Instance;
@@ -232,14 +245,20 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         soundManager = SoundManager.Instance;
         vfxManager = VFXManager.instance;
         bossManager = BossManager.Instance;
+        gameManager = GameManager.Instance;
         activeBosses = new List<Boss>();
         //maxAttackTime = 2;
         tileCheckSize = 1;
         BossThreat = 0;
         matingSeason = 0;
+        MutationMax = 60;
         //pathFinder = new PathFinding();
         activePath = new List<Tile>();
         pathFinder = new PathFinding();
+
+        tileManager.ChunksCleaned += IslandIsTerraformed;
+        //lightningDeityManager.OnLightningTriggered += HitByLightning;
+
         InstantiateUtilityBrain();
     }
 
@@ -270,8 +289,11 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     {
         if (!unloaded) return;
 
-        utilityBrain.DecisionProcess();
-        ClockCycleDeteriation();
+        if (gameManager.CurrentState == GameState.Playing && gameManager.CurrentMode != GameMode.Terraform) 
+        {
+            utilityBrain.DecisionProcess();
+            ClockCycleDeteriation();
+        }
     }
 
     //Creates and feeds all the possible action in relation to its value to the utility brain
@@ -409,6 +431,21 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         List<Tile> path = new List<Tile>();
         path = pathFinder.GetPathAStar(currentPos, targetPos, TravesableTile, maxHeightDifference, iterations);
         return path;
+    }
+
+    void IslandIsTerraformed(Chunk[] chunks) 
+    { 
+        if(walkPoint != null) 
+        {
+            activePath = PathfindingMovement(walkPoint);
+            if(activePath != null) 
+            {
+                Debug.Log("AnimalAi=>IslandIsTerraformed: Registrerd the terraform change");
+                pathStage = 0;
+                activePathTarget = activePath[pathStage].Position;
+                PathfindingWalk();
+            }
+        }
     }
 
     //Upgraded walk method, with pathfinding 
@@ -746,6 +783,22 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         }
     }
 
+    //DeityLogic
+    //void HitByLightning(Tile tile) 
+    void HitByLightning(LightningEventData tile) 
+    { 
+        if(tileManager.GetTile(transform.position) == tile.Tile && lightningHitCount < 1) 
+        {
+            tired = 1;
+            lightningHitCount++;
+        }
+        else if(tileManager.GetTile(transform.position) == tile.Tile && lightningHitCount >= 2) 
+        {
+            Happiness = 0;
+        }
+    }
+
+
     //Method for making the animal stand in place
     void StandStill()
     {
@@ -778,6 +831,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         currentSleepTime += Time.deltaTime;
         if (currentSleepTime > sleepTimeMax)
         {
+            lightningHitCount = 0;
             tired = 0;
             currentSleepTime = 0;
         }
@@ -900,7 +954,11 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         Tile currentTile = tileManager.GetTile(currentPostion);
         //Vector3 newPoint = new Vector3(point.x, currentTile.position.y + transform.localScale.y / 2, point.z);
         Vector3 newPoint = new Vector3(point.x, currentTile.GetHeight() + transform.localScale.y / 2, point.z);
-        transform.position = Vector3.MoveTowards(transform.position, newPoint, speed * Time.deltaTime);
+
+        //Test speed
+        float activeSpeed = ActiveSpeed(currentTile);
+
+        transform.position = Vector3.MoveTowards(transform.position, newPoint, activeSpeed * Time.deltaTime);
 
         //Makes sure the animal moves fast enough to the top of the tile, otherwise it will move through the tile
 
@@ -911,6 +969,23 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         else if (transform.position.y > currentTile.GetHeight() + transform.localScale.y / 2)
         {
             transform.position -= new Vector3(0, 0.5f, 0) * Time.deltaTime;
+        }
+    }
+
+    //Checks which speed that should be applied for movement
+    float ActiveSpeed(Tile tile) 
+    {
+        if(BossThreat >= 1) 
+        {
+            return runSpeed;
+        }
+        else if (tile.Type == TileType.Lake) 
+        {
+            return waterSpeed;
+        }
+        else 
+        {
+            return walkSpeed;
         }
     }
 
@@ -951,33 +1026,38 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
             GameObject bubble = Instantiate(popUpBubble, transform);
             bubble.transform.position = new Vector3(transform.position.x - 2, transform.position.y + 3, transform.position.z);
             bubble.transform.SetParent(transform, false);
-            GetSetChildrenTMP(bubble, displayInfo);
+            //GetSetChildrenTMP(bubble, displayInfo);
+            PopupScript bubblePopup = bubble.GetComponent<PopupScript>();
+            if (bubblePopup != null)
+            {
+                bubblePopup.SetPopupValues(displayInfo);
+            }
             HasPopupBubble = true;
             bubble.transform.LookAt(Camera.main.transform);
             StartCoroutine(PopRemove(bubble));
         }
     }
 
-    void GetSetChildrenTMP(GameObject popup, AnimalGUIInfo info) 
-    {
-        TextMeshPro Title = transform.Find("Background/ForeGroundBackground/Title_TMP").GetComponent<TextMeshPro>();
-        TextMeshPro happiness = transform.Find("Background/ForeGroundBackground/Happiness_TMP").GetComponent<TextMeshPro>();
-        TextMeshPro hunger = transform.Find("Background/ForeGroundBackground/Hunger_TMP").GetComponent<TextMeshPro>();
-        TextMeshPro sleepy = transform.Find("Background/ForeGroundBackground/Sleepy_TMP").GetComponent<TextMeshPro>();
-        TextMeshPro tired = transform.Find("Background/ForeGroundBackground/Tired_TMP").GetComponent<TextMeshPro>();
-        TextMeshPro mating = transform.Find("Background/ForeGroundBackground/Mating_TMP").GetComponent<TextMeshPro>();
+    //void GetSetChildrenTMP(GameObject popup, AnimalGUIInfo info) 
+    //{
+    //    TextMeshPro Title = transform.Find("Background/ForeGroundBackground/Title_TMP").GetComponent<TextMeshPro>();
+    //    TextMeshPro happiness = transform.Find("Background/ForeGroundBackground/Happiness_TMP").GetComponent<TextMeshPro>();
+    //    TextMeshPro hunger = transform.Find("Background/ForeGroundBackground/Hunger_TMP").GetComponent<TextMeshPro>();
+    //    TextMeshPro sleepy = transform.Find("Background/ForeGroundBackground/Sleepy_TMP").GetComponent<TextMeshPro>();
+    //    TextMeshPro tired = transform.Find("Background/ForeGroundBackground/Tired_TMP").GetComponent<TextMeshPro>();
+    //    TextMeshPro mating = transform.Find("Background/ForeGroundBackground/Mating_TMP").GetComponent<TextMeshPro>();
 
-        if (Title == null || happiness == null || hunger == null || sleepy ==null || tired == null || mating == null) 
-        {
-            Debug.Log("GetSetChildrenTMP; didnet get the textmeshpro to values");
-            return;
-        }
-        Title.text = "Animal";
-        hunger.text += info.Hunger.ToString();
-        sleepy.text += info.Tired.ToString();
-        tired.text += info.Tired.ToString();
-        mating.text += info.MatingSeason.ToString();
-    }
+    //    if (Title == null || happiness == null || hunger == null || sleepy ==null || tired == null || mating == null) 
+    //    {
+    //        Debug.Log("GetSetChildrenTMP; didnet get the textmeshpro to values");
+    //        return;
+    //    }
+    //    Title.text = "Animal";
+    //    hunger.text += info.Hunger.ToString();
+    //    sleepy.text += info.Tired.ToString();
+    //    tired.text += info.Tired.ToString();
+    //    mating.text += info.MatingSeason.ToString();
+    //}
 
     IEnumerator PopRemove(GameObject bubble) 
     {
