@@ -31,7 +31,7 @@ public class MutationManager : SingletonManager<MutationManager>
     }
     public void MutateAnimal_SetMutation(AnimalAI thisAnimal, SO_AnimalMutation thisMutation)
     {
-        if (thisAnimal.HasMutated) { return; }
+        if (thisAnimal.IsMutated) { return; }
         if (mutationsList.Count != 0)
         {
             SO_AnimalMutation mutation = thisMutation;
@@ -49,7 +49,7 @@ public class MutationManager : SingletonManager<MutationManager>
                  thisAnimal.transform.localScale.y + mutation.Localsize,
                  thisAnimal.transform.localScale.z + mutation.Localsize);
 
-            thisAnimal.HasMutated = true;
+            //thisAnimal.HasMutated = true;
         }
 
         //Visual indicator that mutation happend

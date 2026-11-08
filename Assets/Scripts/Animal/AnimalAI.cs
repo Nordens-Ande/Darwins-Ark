@@ -232,6 +232,12 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         set => MutationRate = value;
     }
 
+    public bool IsMutated 
+    { 
+        get => isMutated;
+        set => isMutated = value;
+    }
+
     void Start()
     {
         walkSpeed = 0.75f;
@@ -243,7 +249,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         mutationManager = MutationManager.Instance;
         animalManager = AnimalManager.Instance;
         soundManager = SoundManager.Instance;
-        vfxManager = VFXManager.instance;
+        vfxManager = VFXManager.Instance;
         bossManager = BossManager.Instance;
         gameManager = GameManager.Instance;
         activeBosses = new List<Boss>();
@@ -358,8 +364,9 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         currentMutationValue += MutationRate * Time.deltaTime;
         if(currentMutationValue > MutationMax) 
         { 
-            isMutated = true;
             mutationManager.MutateAnimal_RandomMutation(this);
+            vfxManager.GetSetAndDestroyVFX(VFXenum.animal_mate, transform.position);
+            isMutated = true;
         }
     }
     
@@ -671,11 +678,11 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     //eatplant 
     void EatFood(Plant plant) 
     {
-        choosenPlant = null;
         plant.EatPlant();
-        //soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.cowEat), 1, 100, 0.5f);
-        //vfxManager.GetSetAndDestroyVFX(VFXenum.animal_eat, transform.position);
+        soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.cowEat), 1, 100, 0.001f);
+        vfxManager.GetSetAndDestroyVFX(VFXenum.animal_eat, transform.position);
         hunger = 0;
+        choosenPlant = null;
         Poop();
     }
 
@@ -828,12 +835,14 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     void Sleep() 
     {
         StandStill();
+        vfxManager.Subscribe_ContinousPlay(this.gameObject, vfxManager.GetParticleSystem(VFXenum.animal_sleep));
         currentSleepTime += Time.deltaTime;
         if (currentSleepTime > sleepTimeMax)
         {
             lightningHitCount = 0;
             tired = 0;
             currentSleepTime = 0;
+            vfxManager.UnSubscribe_StopContiniousPlay(this.gameObject);
         }
     }
 
@@ -906,7 +915,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
             if (distance < 1.5f)
             {
-                //vfxManager.GetSetAndDestroyVFX(VFXenum.animal_mate, transform.position);
+                vfxManager.GetSetAndDestroyVFX(VFXenum.animal_mate, transform.position);
+                soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.cowMoo), 1, 100, 0.5f);
 
                 //Instantiate new animal
                 Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
