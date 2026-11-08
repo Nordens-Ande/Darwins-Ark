@@ -146,11 +146,12 @@ namespace Assets.Scripts.Environment
                     //Tile tile = GetTile(x, z, Space.Self);
                     Tile tile = tiles[x, z];
                     // Rules for Tile conversion
-                    if (tile.Height > tile.WaterHeight /*&& tile.Type != TileType.Grass*/)
+                    if (tile.IsSweetWater && tile.Height > tile.WaterHeight)
                     {
                         tile.SetType(TileType.Grass);
                     }
-                    if (tile.Type == TileType.River)
+
+                    if (tile.HasPlant && tile.IsWater)
                     {
                         tile.ClearPlant();
                     }
