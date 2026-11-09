@@ -258,6 +258,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Plant Manager Pre-Prod
       objectReference: {fileID: 0}
+    - target: {fileID: 3489458411088962456, guid: 31b52c025b807a9498ae23a3c3f96908, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6610535007613461231, guid: 31b52c025b807a9498ae23a3c3f96908, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.31686
@@ -314,6 +318,10 @@ PrefabInstance:
     - target: {fileID: 2488961226690007087, guid: 057009c85e41927418c08b9f1e2e8ad5, type: 3}
       propertyPath: m_Name
       value: AnimalTest (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 2488961226690007087, guid: 057009c85e41927418c08b9f1e2e8ad5, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7885054901704669100, guid: 057009c85e41927418c08b9f1e2e8ad5, type: 3}
       propertyPath: m_LocalPosition.x
@@ -379,7 +387,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &252306908
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -399,6 +407,7 @@ MonoBehaviour:
   tired: 0
   walkSpeed: 1
   runSpeed: 0
+  waterSpeed: 0.5
   damage: 10
   health: 100
   hungerDeteration: 1
@@ -765,7 +774,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 515219464}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 52acc1e03f873ac4a96f6356effd77e9, type: 3}
   m_Name: 
@@ -6019,6 +6028,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SoundManager
       objectReference: {fileID: 0}
+    - target: {fileID: 8517451649650472163, guid: 3f62d270140e3ea48b238d01796ee048, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -6130,7 +6143,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1952803387
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6150,6 +6163,7 @@ MonoBehaviour:
   tired: 0
   walkSpeed: 1
   runSpeed: 0
+  waterSpeed: 0.5
   damage: 10
   health: 100
   hungerDeteration: 1
@@ -6317,6 +6331,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: AnimalPopUP_Draft
       objectReference: {fileID: 0}
+    - target: {fileID: 3064282692239602218, guid: 67bdeac5ab4a8f54d9c20f5f1d0267c0, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6831275700374691870, guid: 67bdeac5ab4a8f54d9c20f5f1d0267c0, type: 3}
       propertyPath: m_text
       value: 'Animal: '
@@ -6324,25 +6342,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 5945075317073639526, guid: 67bdeac5ab4a8f54d9c20f5f1d0267c0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 8189394302685694228, guid: 67bdeac5ab4a8f54d9c20f5f1d0267c0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 6864778274510221700, guid: 67bdeac5ab4a8f54d9c20f5f1d0267c0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 2323201373309467170, guid: 67bdeac5ab4a8f54d9c20f5f1d0267c0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 5481089973775655268, guid: 67bdeac5ab4a8f54d9c20f5f1d0267c0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
-    - targetCorrespondingSourceObject: {fileID: 788796826847229750, guid: 67bdeac5ab4a8f54d9c20f5f1d0267c0, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 0}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 67bdeac5ab4a8f54d9c20f5f1d0267c0, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
