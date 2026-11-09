@@ -124,6 +124,63 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 4388204363613784201, guid: c28093db3f3fc164c817751265095100, type: 3}
   m_PrefabInstance: {fileID: 577010345}
   m_PrefabAsset: {fileID: 0}
+--- !u!1001 &121510528
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.05775
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.09249
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.03287
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7807982612777725063, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_Name
+      value: Deity Managers
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
 --- !u!1 &189979610
 GameObject:
   m_ObjectHideFlags: 0
@@ -780,9 +837,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileSelectionManager
   visibilityMode: 1
+  doubleClickTime: 0.2
   mouseMoveThreshold: 20
   selectHeld: 0
   isAddingTiles: 0
+  doubleClickTimer: 0
 --- !u!4 &695006196
 Transform:
   m_ObjectHideFlags: 0
@@ -1801,3 +1860,4 @@ SceneRoots:
   - {fileID: 1360664633}
   - {fileID: 695006196}
   - {fileID: 3081133408783360977}
+  - {fileID: 121510528}

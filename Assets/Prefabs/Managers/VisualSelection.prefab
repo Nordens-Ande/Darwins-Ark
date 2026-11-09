@@ -44,3 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fbe36e643796e4c48bc5b946a79f50df, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GenernalVisualSelection
+  selectionAssetPrefab: {fileID: 0}
+  selectionSprite: {fileID: 21300000, guid: 4ae28a62c8bbb954ca802112049ea3ec, type: 3}
+  sortingOrder: 100
+  debug: 0
+  debugPosition: {x: 100, y: 100}
+  debugSize: {x: 200, y: 200}

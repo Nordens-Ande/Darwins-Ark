@@ -11,11 +11,20 @@ using UnityEngine.UI;
 
 public class GenernalVisualSelection : MonoBehaviour
 {
-    [SerializeField] GameObject selectionAssetPrefab;
+    [SerializeField] Sprite selectionSprite; // image to use for the selection marker
+    [SerializeField, ReadOnly] int sortingOrder = 100;
+
+    [Header("Debug")]
+    [SerializeField] bool debug = false; // debug toggle
+    [SerializeField] Vector2 debugPosition = new Vector2(950, 600);
+    [SerializeField] Vector2 debugSize = new Vector2(500, 200);
 
     private Canvas canvas;
     private RectTransform selectionRect;
     private GameObject activeSelectionInstance;
+    private bool debugWasShown = false;
+
+    private readonly Vector3[] corners = new Vector3[4];
 
 
 
@@ -25,64 +34,123 @@ public class GenernalVisualSelection : MonoBehaviour
     {
         // gameobject to hold the canvas component
         GameObject canvasSelectionObject = new GameObject("VisualSelectionCanvas");
+        canvasSelectionObject.transform.SetParent(this.transform, false);
 
         canvas = canvasSelectionObject.AddComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = sortingOrder;
 
         // Add the CanvasScaler for responsive UI scaling
         CanvasScaler canvasScaler = canvasSelectionObject.AddComponent<CanvasScaler>();
         canvasScaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         canvasScaler.referenceResolution = new Vector2(1920, 1080);
 
-        canvasSelectionObject.AddComponent<GraphicRaycaster>();
-        canvasSelectionObject.transform.SetParent(this.transform, false);
+        // The marker must never block clicks on the UI underneath it.
+        // That is why there is no GraphicRaycaster here, and why the CanvasGroup doesn't block raycasts.
+        CanvasGroup group = canvasSelectionObject.AddComponent<CanvasGroup>();
+        group.blocksRaycasts = false;
+        group.interactable = false;
 
-        // Instantiate the selection visual inside the canvas if assigned
-        if (selectionAssetPrefab != null)
+        if (selectionSprite != null)
         {
-            activeSelectionInstance = Instantiate(selectionAssetPrefab, canvas.transform);
-            selectionRect = activeSelectionInstance.GetComponent<RectTransform>();
+            // no prefab, so we build a simple Image from the sprite
+            activeSelectionInstance = new GameObject("SelectionMarker", typeof(RectTransform), typeof(Image));
+            activeSelectionInstance.transform.SetParent(canvas.transform, false);
 
-            // Initially hide it until an element is selected
-            activeSelectionInstance.SetActive(false);
+            Image image = activeSelectionInstance.GetComponent<Image>();
+            image.sprite = selectionSprite;
+            image.type = Image.Type.Sliced; // if the sprite has 9-slice borders the corners won't stretch
+            image.raycastTarget = false;
         }
+        else
+        {
+            Debug.LogWarning("GenernalVisualSelection: assign a selectionAssetPrefab or a selectionSprite.");
+            return;
+        }
+
+        selectionRect = activeSelectionInstance.GetComponent<RectTransform>();
+
+        // anchored to the bottom left corner of the screen with the pivot in the middle,
+        // so anchoredPosition = where the center of the marker is
+        selectionRect.anchorMin = Vector2.zero;
+        selectionRect.anchorMax = Vector2.zero;
+        selectionRect.pivot = new Vector2(0.5f, 0.5f);
+        selectionRect.localScale = Vector3.one;
+
+        // Initially hide it until an element is selected
+        activeSelectionInstance.SetActive(false);
     }
 
 
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
+        // debug: show the marker at a fixed position so we can see how the png looks
+        if (debug)
         {
-            DetectAndSelectUIElemnt();
+            ShowAtCanvasPosition(debugPosition, debugSize);
+            debugWasShown = true;
+        }
+        else if (debugWasShown)
+        {
+            Hide();
+            debugWasShown = false;
         }
     }
 
-
-
-    void DetectAndSelectUIElemnt()
-    {
-        // lowkey i dont know how to do this yet. so we wait a little :skull:
-
-
-    }
-
-
-    // draw the rect asset on the right pos
-    void PositionSelectionOverElement(RectTransform target)
+    // show the marker at a fixed position, in canvas units
+    void ShowAtCanvasPosition(Vector2 position, Vector2 size)
     {
         if (selectionRect == null)
             return;
 
-        // make the selection active
         activeSelectionInstance.SetActive(true);
 
+        selectionRect.anchoredPosition = position;
+        selectionRect.sizeDelta = size;
+    }
 
-        // we position the rect where it is supposed to be
-        selectionRect.position = target.position;
-        selectionRect.sizeDelta = target.sizeDelta;
-        selectionRect.localScale = target.localScale;
 
+    public void Hide()
+    {
+        if (activeSelectionInstance != null)
+        {
+            activeSelectionInstance.SetActive(false);
+        }
+    }
+
+
+    // draw the rect asset on the right pos
+    // call this with any UI element and the marker will cover it
+    public void PositionSelectionOverElement(RectTransform target)
+    {
+        if (selectionRect == null || target == null)
+            return;
+
+        // if the target is in a camera canvas we need that camera to get the screen position
+        Camera targetCamera = null;
+        Canvas targetCanvas = target.GetComponentInParent<Canvas>();
+        if (targetCanvas != null)
+        {
+            targetCanvas = targetCanvas.rootCanvas;
+            if (targetCanvas.renderMode != RenderMode.ScreenSpaceOverlay)
+            {
+                targetCamera = targetCanvas.worldCamera;
+            }
+        }
+
+        // the corners of the target in screen pixels
+        // (this works even if the two canvases use different scaling, unlike copying sizeDelta)
+        target.GetWorldCorners(corners);
+        Vector2 min = RectTransformUtility.WorldToScreenPoint(targetCamera, corners[0]);
+        Vector2 max = RectTransformUtility.WorldToScreenPoint(targetCamera, corners[2]);
+
+        // pixels -> units of our own canvas
+        float scale = canvas.scaleFactor;
+
+        activeSelectionInstance.SetActive(true);
+        selectionRect.anchoredPosition = ((min + max) * 0.5f) / scale;
+        selectionRect.sizeDelta = (max - min) / scale;
     }
 
 }
