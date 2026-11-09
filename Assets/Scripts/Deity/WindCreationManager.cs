@@ -1,5 +1,6 @@
 using Assets.Scripts.Environment;
 using Assets.Scripts.Managers;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -19,11 +20,11 @@ public class WindCreationManager : MonoBehaviour
     private TileManager tileManager;
     private WindDeityManager windDeityManager;
 
-    private Tile tile;
+    private Tile initialTile;
+    private Tile directionTile;
 
-    private Camera mainCamera;
-
-    private Vector3 initialMousePosition;
+    private Vector2Int? highlightedTileInitial;
+    private Vector2Int? highlightedTileDirection;
 
     void Start()
     {
@@ -31,27 +32,22 @@ public class WindCreationManager : MonoBehaviour
         mousePositionManager = MousePositionManager.Instance;
         tileManager = TileManager.Instance;
         windDeityManager = WindDeityManager.Instance;
-        mainCamera = GameObject.FindGameObjectWithTag("MainCamera").GetComponent<Camera>();
     }
 
     public void OnCreateWind() // call from ui
     {
         if (state != WindCreationState.None) return;
-        if(mainCamera == null)
-        {
-            Debug.LogWarning("camera not found for wind deity");
-            return;
-        }
 
-        tile = null;
-        
+        initialTile = null;
+        directionTile = null;
+
+        SetGridVisible(true);
+
         state = WindCreationState.SelectTile;
     }
 
     private void HandleSelectTile()
     {
-        if (!Input.GetMouseButtonDown(0)) return;
-
         if (mousePositionManager == null) Debug.Log("mouseposmanager null. from wind creation manager");
 
         if (!mousePositionManager.TryGetWorldPosition(out Vector3 pos)) return;
@@ -59,8 +55,12 @@ public class WindCreationManager : MonoBehaviour
         Tile tile = tileManager.GetTile(pos);
         if (tile == null) return;
 
-        this.tile = tile;
-        initialMousePosition = Input.mousePosition;
+        highlightedTileInitial = tile.GridPosition;
+        tileManager.SetHighlightGridTiles(new HashSet<Vector2Int> { highlightedTileInitial.Value });
+
+        if (!Input.GetMouseButtonDown(0)) return;
+
+        initialTile = tile;
 
         state = WindCreationState.SelectDirection;
 
@@ -68,25 +68,47 @@ public class WindCreationManager : MonoBehaviour
 
     private void HandleSelectDirection()
     {
-        Vector3 mouseDelta = Input.mousePosition - initialMousePosition;
+        if (!mousePositionManager.TryGetWorldPosition(out Vector3 pos)) return;
 
-        Vector3 cameraForward = mainCamera.transform.forward;
-        Vector3 cameraRight = mainCamera.transform.right;
-        cameraForward.y = 0;
-        cameraRight.y = 0;
-        cameraForward.Normalize();
-        cameraRight.Normalize();
+        Tile tile = tileManager.GetTile(pos);
+        if (tile == null) return;
 
-        Vector3 windDirection = (cameraForward * mouseDelta.y + cameraRight * mouseDelta.x).normalized;
+        highlightedTileDirection = tile.GridPosition;
+        tileManager.SetHighlightGridTiles(new HashSet<Vector2Int> { highlightedTileInitial.Value, highlightedTileDirection.Value });
 
-        if (mouseDelta.sqrMagnitude < 1) return;
+        if (tile == initialTile) return;
 
         if (!Input.GetMouseButtonDown(0)) return;
 
+        directionTile = tile;
 
-        windDeityManager.TriggerWind(tile, windDirection);
-        tile = null;
+        Vector3 windDirection = directionTile.Position - initialTile.Position;
+        windDirection.y = 0;
+
+        windDeityManager.TriggerWind(tile, windDirection.normalized);
+        initialTile = null;
+        directionTile = null;
         state = WindCreationState.None;
+        SetGridVisible(false);
+    }
+
+    public void SetGridVisible(bool visible)
+    {
+        if (tileManager == null)
+        {
+            Debug.LogError("Could not set grid visibility for tiles, TileManager.Instance does not exist or has not been found.");
+            return;
+        }
+
+        GameObject cursorGrid = tileManager.transform.Find("Highlight Grid").gameObject;
+        if (cursorGrid != null)
+        {
+            cursorGrid.SetActive(visible);
+        }
+        else
+        {
+            Debug.LogWarning($"{cursorGrid.name} object could not set visibility because it was not found.");
+        }
     }
 
     void Update()
