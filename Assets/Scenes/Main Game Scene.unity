@@ -430,6 +430,14 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1077366064}
+    - target: {fileID: 2359242660973088191, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 2028429422}
+    - target: {fileID: 2359242660973088191, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnCreateWind
+      objectReference: {fileID: 0}
     - target: {fileID: 2592037811632828041, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -445,6 +453,18 @@ PrefabInstance:
     - target: {fileID: 2612151053017479632, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: EnterTerraform
+      objectReference: {fileID: 0}
+    - target: {fileID: 2767687705770553676, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_text
+      value: Rain
+      objectReference: {fileID: 0}
+    - target: {fileID: 2767687705770553676, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_fontSize
+      value: 22
+      objectReference: {fileID: 0}
+    - target: {fileID: 2767687705770553676, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 22
       objectReference: {fileID: 0}
     - target: {fileID: 3180928342312727073, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -465,6 +485,18 @@ PrefabInstance:
     - target: {fileID: 4519108996941649215, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
       value: ToggleBoss
+      objectReference: {fileID: 0}
+    - target: {fileID: 5790044841502428000, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_text
+      value: Wind
+      objectReference: {fileID: 0}
+    - target: {fileID: 5790044841502428000, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_fontSize
+      value: 22
+      objectReference: {fileID: 0}
+    - target: {fileID: 5790044841502428000, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 22
       objectReference: {fileID: 0}
     - target: {fileID: 5842827387484725755, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_Pivot.x
@@ -546,9 +578,45 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6013628543586171937, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 2028429420}
+    - target: {fileID: 6013628543586171937, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnCreateLightning
+      objectReference: {fileID: 0}
+    - target: {fileID: 6013628543586171937, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: LightningDeityManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 6013628543586171937, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 6270981957273504001, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_text
+      value: Lightning
+      objectReference: {fileID: 0}
+    - target: {fileID: 6270981957273504001, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_fontSize
+      value: 22
+      objectReference: {fileID: 0}
+    - target: {fileID: 6270981957273504001, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_fontSizeBase
+      value: 22
+      objectReference: {fileID: 0}
     - target: {fileID: 7199079725259759060, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_Name
       value: Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 7627115596303852835, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 2028429421}
+    - target: {fileID: 7627115596303852835, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: TriggerRain
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1310,6 +1378,96 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: cb5c8d2496e19db47abab7cad08d359f, type: 3}
+--- !u!1001 &2028429419
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7807982612777725063, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_Name
+      value: Deity Managers
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+--- !u!114 &2028429420 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5218102155610698157, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+  m_PrefabInstance: {fileID: 2028429419}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6627c4e18ae4c1949852a8374c85ce3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightningDeityManager
+--- !u!114 &2028429421 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7040246200480507033, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+  m_PrefabInstance: {fileID: 2028429419}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99a92350d1706994dad74bf108608b90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RainDeityManager
+--- !u!114 &2028429422 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6673440682305440526, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+  m_PrefabInstance: {fileID: 2028429419}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da01ae59d0cf9004796ff8404a00b1a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WindCreationManager
 --- !u!1 &2029357346
 GameObject:
   m_ObjectHideFlags: 0
@@ -1696,6 +1854,7 @@ SceneRoots:
   - {fileID: 1785858073}
   - {fileID: 2140703911}
   - {fileID: 1913357771}
+  - {fileID: 2028429419}
   - {fileID: 2144296029}
   - {fileID: 4788988855420494937}
   - {fileID: 1915027300}
