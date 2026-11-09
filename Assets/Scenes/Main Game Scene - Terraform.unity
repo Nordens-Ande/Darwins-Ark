@@ -387,6 +387,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5928225880126638516, guid: 49bf9852b5669f5439855a75ef9f512b, type: 3}
+      propertyPath: lakeMask.Array.size
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8073856895723802328, guid: 49bf9852b5669f5439855a75ef9f512b, type: 3}
       propertyPath: m_Name
       value: Island Manager

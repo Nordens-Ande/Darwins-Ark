@@ -1,5 +1,6 @@
 using Assets.Scripts.Environment;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Mathematics;
@@ -93,6 +94,8 @@ namespace Assets.Scripts.Environment
             {
                 SimulateLakeStep();
             }
+
+            CreateLakeObjects();
         }
 
         void Start()
@@ -254,6 +257,20 @@ namespace Assets.Scripts.Environment
 
         // ------------ THE METHODS BELOW WERE CREATED FOR THE PCG CELLULAR AUTOMATA ASSIGNMENT //Elliot Nord -------------------
 
+        public class Lake
+        {
+            public HashSet<Vector2Int> lakeTiles = new HashSet<Vector2Int>();
+            public float lowestNeighborGroundTile;
+            public bool hasTouchedOcean;
+
+            public Lake(HashSet<Vector2Int> lakeTiles, float lowestNeighborGroundTile, bool hasTouchedOcean)
+            {
+                this.lakeTiles = lakeTiles;
+                this.lowestNeighborGroundTile = lowestNeighborGroundTile;
+                this.hasTouchedOcean = hasTouchedOcean;
+            }
+        }
+
         private enum LakeNeighborhood
         {
             Moore,
@@ -268,6 +285,7 @@ namespace Assets.Scripts.Environment
 
         [Header("Lakes")]
         // What tiles the lake can be generated on
+        [SerializeField] private List<Lake> lakeObjects = new List<Lake>();
         [SerializeField] private TileType[] lakeMask = new TileType[] { TileType.Grass, TileType.Beach };
 
         [Space]
@@ -301,6 +319,22 @@ namespace Assets.Scripts.Environment
             
 
             return lakeMap[x, z];
+        }
+        public float GetLakeWaterHeight(int x, int z, Space space = Space.World)
+        {
+            int size = lakeMap.GetLength(0);
+
+            if (space == Space.World)
+            {
+                int halfSize = size / 2;
+                x += halfSize;
+                z += halfSize;
+            }
+
+            if (x < 0 || x >= size || z < 0 || z >= size)
+                throw new IndexOutOfRangeException();
+
+            return lakeObjects.Find(lake => lake.lakeTiles.Contains(new Vector2Int(x, z))).lowestNeighborGroundTile;
         }
 
         private void IntializeLakeMap()
@@ -419,24 +453,109 @@ namespace Assets.Scripts.Environment
             return count;
         }
 
-        private void OnDrawGizmos()
+        private void CreateLakeObjects()
         {
-            if (!Application.isPlaying)
-                return;
+            lakeObjects = new List<Lake>();
+
+            Vector2Int[] directions =
+            {
+                Vector2Int.up,
+                Vector2Int.down,
+                Vector2Int.left,
+                Vector2Int.right
+            };
 
             int size = lakeMap.GetLength(0);
             int halfSize = size / 2;
 
-            Gizmos.color = new Color(1, 1, 1, 0.5f);
+            Queue<Vector2Int> queue = new Queue<Vector2Int>();
+
+            HashSet<Vector2Int> allLakeTiles = new HashSet<Vector2Int>();
             for (int x = 0; x < size; x++)
             {
                 for (int z = 0; z < size; z++)
                 {
                     if (lakeMap[x, z])
-                        Gizmos.DrawCube(new Vector3(x - halfSize, 2.5f, z - halfSize), new Vector3(1f, 0.01f, 1f));
+                        allLakeTiles.Add(new Vector2Int(x, z));
                 }
             }
+
+            HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+
+            while (allLakeTiles.Count > 0)
+            {
+                HashSet<Vector2Int> lakeTileSet = new HashSet<Vector2Int>();
+                Vector2Int startTile = allLakeTiles.ElementAt(UnityEngine.Random.Range(0, allLakeTiles.Count));
+                
+                queue.Enqueue(startTile);
+                visited.Add(startTile);
+                lakeTileSet.Add(startTile);
+                allLakeTiles.Remove(startTile);
+
+                bool hasTouchedOcean = false;
+                float lowestNeighborGroundTile = 10f;
+
+                while (queue.Count > 0)
+                {
+                    Vector2Int current = queue.Dequeue();
+
+                    foreach (Vector2Int direction in directions)
+                    {
+                        Vector2Int neighbour = current + direction;
+
+                        if (visited.Contains(neighbour))
+                            continue;
+
+                        if (neighbour.x < 0 || neighbour.x >= size || neighbour.y < 0 || neighbour.y >= size)
+                            continue;
+
+                        visited.Add(neighbour);
+                        
+                        if (lakeMap[neighbour.x, neighbour.y])
+                        {
+                            lakeTileSet.Add(neighbour);
+                            allLakeTiles.Remove(neighbour);
+
+                            queue.Enqueue(neighbour);
+                        }
+                        else
+                        {
+                            float neighborHeight = GetHeight(new Vector2Int(neighbour.x - halfSize, neighbour.y - halfSize), out TileType type);
+                            if (type == TileType.Ocean)
+                            {
+                                hasTouchedOcean = true;
+                                lowestNeighborGroundTile = 0.45f; // Hardcoded water height, please resolve this (move water height from TileManager to IslandNoise?)
+                            }
+                            else if (!hasTouchedOcean)
+                            {
+                                lowestNeighborGroundTile = Mathf.Min(lowestNeighborGroundTile, neighborHeight - 0.15f); // Hardcoded lake waterHeight
+                            }
+                        }
+                    }
+                }
+
+                lakeObjects.Add(new Lake(lakeTileSet, lowestNeighborGroundTile, hasTouchedOcean));
+            }
         }
+
+        //private void OnDrawGizmos()
+        //{
+        //    if (!Application.isPlaying)
+        //        return;
+
+        //    int size = lakeMap.GetLength(0);
+        //    int halfSize = size / 2;
+
+        //    Gizmos.color = new Color(1, 1, 1, 0.5f);
+        //    for (int x = 0; x < size; x++)
+        //    {
+        //        for (int z = 0; z < size; z++)
+        //        {
+        //            if (lakeMap[x, z])
+        //                Gizmos.DrawCube(new Vector3(x - halfSize, 2.5f, z - halfSize), new Vector3(1f, 0.01f, 1f));
+        //        }
+        //    }
+        //}
 
 
 #if UNITY_EDITOR
@@ -452,6 +571,7 @@ namespace Assets.Scripts.Environment
             {
                 SimulateLakeStep();
             }
+            CreateLakeObjects();
 
             for (int i = 0; i < tileManager.chunks.Count; i++)
             {

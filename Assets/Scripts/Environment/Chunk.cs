@@ -61,7 +61,8 @@ namespace Assets.Scripts.Environment
                     // Currently we are checking every tile if it could be a lake (event the ocean) this could be optimized
                     if (noise.IsLake(Mathf.RoundToInt(x + position.x), Mathf.RoundToInt(z + position.y)))
                     {
-                        tiles[x, z] = new Tile(this, new Vector2Int(x, z), new Vector3(x + position.x, y - 1f, z + position.y), new Vector3(x, y, z), y - 0.15f);
+                        float waterHeight = noise.GetLakeWaterHeight(Mathf.RoundToInt(x + position.x), Mathf.RoundToInt(z + position.y));
+                        tiles[x, z] = new Tile(this, new Vector2Int(x, z), new Vector3(x + position.x, waterHeight - 0.65f, z + position.y), new Vector3(x, waterHeight - 0.65f, z), waterHeight);
                     }
                     else
                     {
