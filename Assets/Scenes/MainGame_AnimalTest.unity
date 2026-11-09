@@ -209,6 +209,7 @@ Transform:
   - {fileID: 220312483}
   - {fileID: 168995023}
   - {fileID: 192658486}
+  - {fileID: 221519546}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &192658486 stripped
@@ -348,6 +349,22 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 8000975710709692750, guid: 3f62d270140e3ea48b238d01796ee048, type: 3}
   m_PrefabInstance: {fileID: 1905640046}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &221519546 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+  m_PrefabInstance: {fileID: 1067840354}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &221519547 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5218102155610698157, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+  m_PrefabInstance: {fileID: 1067840354}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6627c4e18ae4c1949852a8374c85ce3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightningDeityManager
 --- !u!1001 &338747713
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -553,6 +570,42 @@ PrefabInstance:
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 1077366064}
+    - target: {fileID: 2359242660973088191, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2359242660973088191, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2359242660973088191, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_Mode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2359242660973088191, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 221519547}
+    - target: {fileID: 2359242660973088191, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2359242660973088191, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 2359242660973088191, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnCreateLightning
+      objectReference: {fileID: 0}
+    - target: {fileID: 2359242660973088191, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: LightningDeityManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 2359242660973088191, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
+      value: WindCreationManager, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 2592037811632828041, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -672,6 +725,18 @@ PrefabInstance:
     - target: {fileID: 7199079725259759060, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_Name
       value: Canvas
+      objectReference: {fileID: 0}
+    - target: {fileID: 7627115596303852835, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1082656604}
+    - target: {fileID: 7627115596303852835, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnCreateWind
+      objectReference: {fileID: 0}
+    - target: {fileID: 7627115596303852835, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: WindCreationManager, Assembly-CSharp
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1019,6 +1084,63 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 5eaca66088b9f3244a083d78718af76e, type: 3}
+--- !u!1001 &1067840354
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 189979611}
+    m_Modifications:
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.28
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.8303
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.16698
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3305523542588127624, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7807982612777725063, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+      propertyPath: m_Name
+      value: Deity Managers
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
 --- !u!1 &1077366064 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1342489718245465309, guid: c10ebdafd916ec546875c1b285015a12, type: 3}
@@ -1035,6 +1157,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b9a4b2a32b13aa43b558a94a670222b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonToggle
+--- !u!114 &1082656604 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6673440682305440526, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+  m_PrefabInstance: {fileID: 1067840354}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da01ae59d0cf9004796ff8404a00b1a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WindCreationManager
 --- !u!1 &1205895019 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6453027670666206484, guid: c28093db3f3fc164c817751265095100, type: 3}

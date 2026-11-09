@@ -4,6 +4,14 @@ using UnityEngine;
 public class Poop : MonoBehaviour
 {
     Seed seed;
+    private bool shouldMutate;
+    MutationManager mutationManager = MutationManager.Instance;
+
+    public bool ShouldMutate 
+    { 
+        get => shouldMutate; 
+        set => shouldMutate = value;
+    }
 
     private void Start()
     {
@@ -16,7 +24,14 @@ public class Poop : MonoBehaviour
         seed = SeedManager.Instance.GetRandomSeed();
         if (seed != null) 
         {
-            seed.AddToInventory(Random.Range(1,3));
+            if (shouldMutate) 
+            {
+                mutationManager.MutatePlant_Random(seed);
+            }
+            else 
+            {
+                seed.AddToInventory(Random.Range(1, 3));
+            }
         }
 
         StartCoroutine(PoopDesolve());

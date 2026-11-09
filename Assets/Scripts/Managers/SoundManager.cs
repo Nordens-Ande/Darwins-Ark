@@ -20,26 +20,6 @@ public class SoundManager : SingletonManager<SoundManager>
     //Dictonary for mixertype, used in Playsoundeffectscript
     [SerializeField] private Dictionary<MixerType, AudioMixerGroup> mixerIndex = new Dictionary<MixerType, AudioMixerGroup>();
 
-
-    //private void Awake()
-    //{
-    //    if (Instance == null) 
-    //    {
-    //        Instance = this;
-    //    }
-    //    else 
-    //    {
-    //        Destroy(this);
-    //    }
-
-    //    //Populates the dictonary with the scripble objects, connecting the type to the clip
-    //    foreach (SO_SoundEffect audio in soundEffectsList)
-    //    {
-    //        if (audio.Clip == null) continue;
-    //        soundIndex.Add(audio.AudioType, audio.Clip);
-    //    }
-    //}
-
     private void Start()
     {
         foreach (SO_SoundEffect audio in soundEffectsList)
@@ -110,6 +90,7 @@ public class SoundManager : SingletonManager<SoundManager>
         audioSource.clip = clip;
         audioSource.minDistance = minDistance;
         audioSource.maxDistance = maxDistance;
+        audioSource.volume = volume;
         audioSource.loop = false;
         audioSource.playOnAwake = true;
         InstantiateSoundEffect(audioObj, clip, volume);
@@ -121,8 +102,8 @@ public class SoundManager : SingletonManager<SoundManager>
     { 
         Instantiate(source);
         AudioSource audio = source.GetComponent<AudioSource>();
-        audio.PlayOneShot(clip, volume);
-        Destroy(source, clip.length);
+        audio.PlayOneShot(clip);
+        Destroy(source);
     }
 
     //When eventsystem is implemented this method can subscribe to it 

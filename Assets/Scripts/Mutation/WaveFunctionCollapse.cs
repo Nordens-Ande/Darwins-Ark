@@ -357,14 +357,23 @@ public class WaveFunctionCollapse : MonoBehaviour
         WFCcell[,] cells = new WFCcell[fatherTex.width, fatherTex.height];
         GetPossibleColors(fatherTex, motherTex, cells, isnetCollapsedCells);
 
-        //cellsArray = cells;
+        //Failsafe
+        int currentIteration = 0;
+        int maxIteration = 200; 
 
-
-        while (isnetCollapsedCells.Count != 0)
+        while (isnetCollapsedCells.Count != 0 && currentIteration < maxIteration)
         {
             WFCcell cell = GetLowestEntropy(cells, isnetCollapsedCells);
             CollapseCell(cell, isnetCollapsedCells);
             RulesOfNeighbor(cell, fatherTex.width, fatherTex.height, cells);
+        }
+
+        if (isnetCollapsedCells != null) 
+        { 
+            foreach(WFCcell cell in isnetCollapsedCells) 
+            {
+                cell.CellColor = possibleColorsFather[0];
+            }
         }
 
         PaintTheFinalResult(cells, fatherTex.width, fatherTex.height);

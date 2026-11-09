@@ -9,6 +9,7 @@ public class MutationManager : SingletonManager<MutationManager>
     //public static MutationManager Instance = null;
     [SerializeField] private List<SO_AnimalMutation> mutationsList = new List<SO_AnimalMutation>();
     [SerializeField] private ParticleSystem mutationParticleSystem;
+    SeedManager seedManager = SeedManager.Instance;
 
     public List<SO_AnimalMutation> MutationList 
     {
@@ -61,6 +62,53 @@ public class MutationManager : SingletonManager<MutationManager>
             StartCoroutine(DestroyParticleSystem(obj));
 
         }
+    }
+
+    //Mutates the seed and adds it to inventory
+    public void MutatePlant_Random(Seed seed) 
+    {
+        Seed mutatedSeed = Instantiate(seed);
+        Plant mutatedPlant = AssignNewPlantMutation(seed.plantPrefab);
+        mutatedSeed = AssingNewSeedMutation(mutatedSeed, mutatedPlant);
+
+        if (mutatedSeed == null) 
+        {
+            Debug.Log("Problem with mutatePlant_Random");
+            seed.AddToInventory(Random.Range(0, 3));
+        }
+        else 
+        { 
+            mutatedSeed.AddToInventory(Random.Range(0, 3));
+        }
+    }
+
+    //Mutates the scriptableobject so the inventory will show relevant data
+    Seed AssingNewSeedMutation(Seed seed, Plant plant) 
+    { 
+        Seed newSeed = new Seed();
+        newSeed.plantPrefab = plant;
+        return newSeed;
+
+        //Need values to be get and set for me to be able to change them here, rework the seed scriptable object
+    }
+
+    //Mutates the plant prefab so the visual effects and logic will be visualised
+    Plant AssignNewPlantMutation(Plant plant) 
+    {
+        Plant newplant = Instantiate(plant);
+        Renderer renderer = newplant.GetComponent<Renderer>();
+        if (newplant == null || renderer == null)
+        {
+            return plant;
+        }
+        //TODO i also need the different prefab stages to be able to change its color and visuals. They need to be gettable
+
+        //plant.GrowthSpeed = 2;
+        //plant.PlantSmellRadiusValue = 2;
+        //renderer.material.color = Color.white;
+        //plant.Health += 10;
+        //plant.IsCloseToWaterRange = 10;
+        return newplant;
     }
 
     IEnumerator DestroyParticleSystem(ParticleSystem particle) 

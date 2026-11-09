@@ -244,6 +244,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         runSpeed = 1.3f;
         waterSpeed = 0.30f;
         hungerDeteration = 10;
+        lightningHitCount = 0;
         transform.localPosition = Vector3.zero;
         tileManager = TileManager.Instance;
         mutationManager = MutationManager.Instance;
@@ -252,6 +253,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         vfxManager = VFXManager.Instance;
         bossManager = BossManager.Instance;
         gameManager = GameManager.Instance;
+        lightningDeityManager = LightningDeityManager.Instance;
         activeBosses = new List<Boss>();
         //maxAttackTime = 2;
         tileCheckSize = 1;
@@ -263,7 +265,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         pathFinder = new PathFinding();
 
         tileManager.ChunksCleaned += IslandIsTerraformed;
-        //lightningDeityManager.OnLightningTriggered += HitByLightning;
+        lightningDeityManager.OnLightningTriggered += HitByLightning; //Added as subscriber to lightning
 
         InstantiateUtilityBrain();
     }
@@ -366,6 +368,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         { 
             mutationManager.MutateAnimal_RandomMutation(this);
             vfxManager.GetSetAndDestroyVFX(VFXenum.animal_mate, transform.position);
+            soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.mutation), 1, 100, 0.1f);
             isMutated = true;
         }
     }
@@ -679,7 +682,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     void EatFood(Plant plant) 
     {
         plant.EatPlant();
-        soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.cowEat), 1, 100, 0.001f);
+        soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.cowEat), 1, 100, 0.1f);
         vfxManager.GetSetAndDestroyVFX(VFXenum.animal_eat, transform.position);
         hunger = 0;
         choosenPlant = null;
@@ -690,6 +693,11 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     void Poop()
     {
         GameObject poopObj = Instantiate(poopPrefab, transform.position, Quaternion.identity);
+        Poop poop = poopObj.GetComponent<Poop>();
+        if(poop != null) 
+        {
+            poop.ShouldMutate = isMutated;
+        }
         return;
     }
 
@@ -791,17 +799,19 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     }
 
     //DeityLogic
-    //void HitByLightning(Tile tile) 
     void HitByLightning(LightningEventData tile) 
-    { 
-        if(tileManager.GetTile(transform.position) == tile.Tile && lightningHitCount < 1) 
+    {
+        if (tileManager.GetTile(transform.position) == tile.Tile && lightningHitCount >= 1)
         {
-            tired = 1;
-            lightningHitCount++;
-        }
-        else if(tileManager.GetTile(transform.position) == tile.Tile && lightningHitCount >= 2) 
-        {
+            Debug.LogWarning("Happiness should be zero");
             Happiness = 0;
+        }
+        else if (tileManager.GetTile(transform.position) == tile.Tile && lightningHitCount < 1) 
+        {
+            lightningHitCount++;
+            Debug.LogWarning(lightningHitCount);
+            tired = 100;
+            lightningHitCount++;
         }
     }
 
@@ -839,12 +849,13 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         currentSleepTime += Time.deltaTime;
         if (currentSleepTime > sleepTimeMax)
         {
-            lightningHitCount = 0;
             tired = 0;
             currentSleepTime = 0;
+            lightningHitCount = 0;
             vfxManager.UnSubscribe_StopContiniousPlay(this.gameObject);
         }
     }
+
 
     /// <summary>
     /// ///////////////////////////////////Procreation
@@ -916,7 +927,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
             if (distance < 1.5f)
             {
                 vfxManager.GetSetAndDestroyVFX(VFXenum.animal_mate, transform.position);
-                soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.cowMoo), 1, 100, 0.5f);
+                soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.cowMoo), 1, 100, 0.1f);
 
                 //Instantiate new animal
                 Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
@@ -960,7 +971,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         //transform.LookAt(point);
 
         //Makes sure the animal stays at the tileheight its on
-        Vector2 currentPostion = new Vector2((int)transform.position.x,(int) transform.position.z);
+        //Vector2 currentPostion = new Vector2((int)transform.position.x,(int) transform.position.z);
+        Vector2 currentPostion = new Vector2(transform.position.x, transform.position.z);
         Tile currentTile = tileManager.GetTile(currentPostion);
         //Vector3 newPoint = new Vector3(point.x, currentTile.position.y + transform.localScale.y / 2, point.z);
         Vector3 newPoint = new Vector3(point.x, currentTile.GetHeight() + transform.localScale.y / 2, point.z);
