@@ -13,7 +13,7 @@ public class Inventory : MonoBehaviour
     [SerializeField, ReadOnly] int maxSlots = 16;
     [SerializeField, ReadOnly] List<InventorySlot> slots = new List<InventorySlot>();
 
-
+    public System.Action OnInventoryChanged;
 
     private void Awake()
     {
@@ -27,7 +27,6 @@ public class Inventory : MonoBehaviour
             }
         }
     }
-
 
     // true if the full amount we wanted to add could be added, else false
     public bool AddSeed(Seed seedToAdd, int amount = 1)
@@ -47,7 +46,10 @@ public class Inventory : MonoBehaviour
 
                     if (amount <= 0)
                     {
-                        //Debug.Log($"Successfully added seed to inventory");
+                        Debug.Log($"Successfully added seed to inventory");
+
+                        OnInventoryChanged?.Invoke();
+
                         return true;
                     }
                 }
@@ -67,6 +69,9 @@ public class Inventory : MonoBehaviour
                 if (amount <= 0)
                 {
                     Debug.Log($"Successfully added seed to inventory");
+
+                    OnInventoryChanged?.Invoke();
+
                     return true;              
                 }
             }
@@ -101,7 +106,7 @@ public class Inventory : MonoBehaviour
             slot.Clear();
         }
 
-
+        OnInventoryChanged?.Invoke();
 
         return true;
     }

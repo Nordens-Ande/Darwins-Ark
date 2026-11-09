@@ -2,7 +2,7 @@ using UnityEngine;
 
 
 /// <summary>
-/// this script is what each sot in the inventory has
+/// this script is what each slot in the inventory has
 /// </summary>
 
 

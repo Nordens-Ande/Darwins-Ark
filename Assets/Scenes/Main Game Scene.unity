@@ -553,7 +553,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7361029169324942920, guid: c28093db3f3fc164c817751265095100, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1601344216}
   m_SourcePrefab: {fileID: 100100000, guid: c28093db3f3fc164c817751265095100, type: 3}
 --- !u!1001 &631922138
 PrefabInstance:
@@ -780,9 +783,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::TileSelectionManager
   visibilityMode: 1
+  doubleClickTime: 0.2
   mouseMoveThreshold: 20
   selectHeld: 0
   isAddingTiles: 0
+  doubleClickTimer: 0
 --- !u!4 &695006196
 Transform:
   m_ObjectHideFlags: 0
@@ -829,6 +834,11 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &751710579 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7361029169324942920, guid: c28093db3f3fc164c817751265095100, type: 3}
+  m_PrefabInstance: {fileID: 577010345}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &946562603
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1115,6 +1125,20 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5348371199016110994, guid: c28093db3f3fc164c817751265095100, type: 3}
   m_PrefabInstance: {fileID: 577010345}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1601344216
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 751710579}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 32af48897b3db474dbde38241bdb44ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InventoryUI
+  gridParent: {fileID: 1601344214}
+  slotPrefab: {fileID: 0}
 --- !u!1001 &1785858073
 PrefabInstance:
   m_ObjectHideFlags: 0
