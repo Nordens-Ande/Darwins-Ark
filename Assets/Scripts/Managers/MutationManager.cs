@@ -37,7 +37,7 @@ public class MutationManager : SingletonManager<MutationManager>
         if (mutationsList.Count != 0)
         {
             SO_AnimalMutation mutation = thisMutation;
-            Renderer animalRenderer = thisAnimal.GetComponent<Renderer>();
+            Renderer animalRenderer = thisAnimal.AnimalObj.GetComponent<Renderer>();
             if (animalRenderer != null)
             {
                 animalRenderer.material.color = mutation.MaterialColor;

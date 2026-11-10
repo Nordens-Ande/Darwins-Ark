@@ -12,6 +12,9 @@ using UnityEngine;
 
 public class AnimalAI : MonoBehaviour, IBoatSpawning
 {
+    [Header("Animaltype")]
+    [SerializeField] private GameObject animalObj;
+
     [Header("Utility points")]
     [Space]
     //Utility points
@@ -236,6 +239,12 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     { 
         get => isMutated;
         set => isMutated = value;
+    }
+
+    public GameObject AnimalObj 
+    {
+        get => animalObj;
+        set => animalObj = value;
     }
 
     void Start()
@@ -506,7 +515,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
             //lastly just move towards the tileposition in the list
             else
             {
-                if (activePath[pathStage] != null && hasSetPath)
+                if (activePath[pathStage] != null && hasSetPath && !WillCollideWithNeighbour())
                 {
                     AnimalWalkMoveTowards(activePathTarget, walkSpeed);
                 }
