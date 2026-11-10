@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 
 using System.Collections.Generic;
+using System.Collections;
 
 public class SoundManager : SingletonManager<SoundManager>
 {
@@ -10,6 +11,16 @@ public class SoundManager : SingletonManager<SoundManager>
     //public static SoundManager Instance = null;
     [SerializeField] private AudioClip backgroundMusic;
     [SerializeField] private AudioSource backgroundMusicPlayer; //Where the backgroundmusic will be played 
+    [SerializeField] private List<AudioClip> backgroundMusicList = new List<AudioClip>();
+    private List<AudioClip> tempBackgroundList = new List<AudioClip>();
+    [SerializeField] private int silenceOffsetMin = 5;
+    [SerializeField] private int silenceOffsetMax = 20;
+    private bool backgroundMusicIsPlaying = false;
+    private bool isShuffling = false;
+    private float currentSongLeangth = 0;
+    private float songLeangthMax;
+
+    [SerializeField] private bool debugMusicShuffleSkip = false;
 
     //List that holds all the audio in form of scriptable objects created 
     [SerializeField] private List<SO_SoundEffect> soundEffectsList;
@@ -28,7 +39,68 @@ public class SoundManager : SingletonManager<SoundManager>
             soundIndex.Add(audio.AudioType, audio.Clip);
         }
 
-        StartBackgroundMusic(0.1f);
+        InstantiateShuffle();
+    }
+
+    void InstantiateShuffle() 
+    {
+        isShuffling = true;
+        songLeangthMax = backgroundMusic.length;
+        tempBackgroundList.AddRange(backgroundMusicList);
+        StartCoroutine(ShuffleSongs());
+        ShuffleBackgroundMusic();
+        //StartBackgroundMusic(1f);
+    }
+
+    void ShuffleBackgroundMusic() 
+    {
+        if (isShuffling) 
+        {
+            return;
+        }
+
+        else if (backgroundMusicIsPlaying) 
+        {
+            currentSongLeangth += Time.deltaTime;
+            if(currentSongLeangth > songLeangthMax) 
+            {
+                isShuffling = true;
+                backgroundMusicIsPlaying = false;
+                currentSongLeangth = 0;
+                StopBackgroundMusic();
+                StartCoroutine(ShuffleSongs());
+
+            }
+        
+        }
+    }
+
+    IEnumerator ShuffleSongs() 
+    {
+        tempBackgroundList.Remove(backgroundMusic);
+
+        yield return new WaitForSeconds(Random.Range(silenceOffsetMin, silenceOffsetMax));
+
+        if(tempBackgroundList.Count == 0) 
+        {
+            tempBackgroundList.AddRange(backgroundMusicList);
+            AudioClip clip = tempBackgroundList[Random.Range(0, tempBackgroundList.Count)];
+            backgroundMusic = clip;
+            songLeangthMax = clip.length;
+            StartBackgroundMusic(1f);
+            backgroundMusicIsPlaying = true;
+            isShuffling = false;
+        }
+        else 
+        {
+            AudioClip clip = tempBackgroundList[Random.Range(0, tempBackgroundList.Count)];
+            backgroundMusic = clip;
+            songLeangthMax = clip.length;
+            StartBackgroundMusic(1f);
+            backgroundMusicIsPlaying = false;
+            isShuffling = false;
+        }
+
     }
 
     //Starts the backgroundmusic
@@ -127,5 +199,16 @@ public class SoundManager : SingletonManager<SoundManager>
     public void SetBackgroundMusicVolume(float volume) 
     { 
         backgroundMusicPlayer.volume = volume;
+    }
+
+    private void Update()
+    {
+        ShuffleBackgroundMusic();
+
+        if (debugMusicShuffleSkip) 
+        { 
+            currentSongLeangth = songLeangthMax;
+            debugMusicShuffleSkip = false;
+        }
     }
 }

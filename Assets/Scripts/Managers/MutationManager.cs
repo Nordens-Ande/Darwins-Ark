@@ -3,6 +3,7 @@ using UnityEngine;
 
 using System.Collections.Generic;
 using System.Collections;
+using Unity.VisualScripting;
 
 public class MutationManager : SingletonManager<MutationManager>
 {
@@ -36,7 +37,7 @@ public class MutationManager : SingletonManager<MutationManager>
         if (mutationsList.Count != 0)
         {
             SO_AnimalMutation mutation = thisMutation;
-            Renderer animalRenderer = thisAnimal.GetComponent<Renderer>();
+            Renderer animalRenderer = thisAnimal.AnimalObj.GetComponent<Renderer>();
             if (animalRenderer != null)
             {
                 animalRenderer.material.color = mutation.MaterialColor;
@@ -96,18 +97,50 @@ public class MutationManager : SingletonManager<MutationManager>
     Plant AssignNewPlantMutation(Plant plant) 
     {
         Plant newplant = Instantiate(plant);
-        Renderer renderer = newplant.GetComponent<Renderer>();
-        if (newplant == null || renderer == null)
+        //Renderer renderer = newplant.GetComponent<Renderer>();
+
+        GameObject seed = Instantiate(plant.SeedPrefab);
+        GameObject sprout = Instantiate(plant.SproutPrefab);
+        GameObject growthling = Instantiate(plant.GrowthlingPrefab);
+        GameObject grown = Instantiate(plant.GrownPrefab);
+
+        newplant.SeedPrefab = seed;
+        newplant.SproutPrefab = sprout;
+        newplant.GrowthlingPrefab = growthling;
+        newplant.GrownPrefab = grown;
+
+        Renderer rendSeed = newplant.SeedPrefab.GetComponent<Renderer>();
+        Renderer rendSproout = newplant.SeedPrefab.GetComponent<Renderer>();
+        Renderer rendGrowthling = newplant.GrowthlingPrefab.GetComponent<Renderer>();
+        Renderer rendGrowth = newplant.GrownPrefab.GetComponent<Renderer>();
+        if (newplant == null)
         {
+            Debug.Log("plant not there");
+            return plant;
+        }
+
+        if(rendSeed == null || rendSproout == null|| rendGrowthling == null|| rendGrowth == null) 
+        {
+            Debug.Log("Renderers are null");
             return plant;
         }
         //TODO i also need the different prefab stages to be able to change its color and visuals. They need to be gettable
 
-        //plant.GrowthSpeed = 2;
-        //plant.PlantSmellRadiusValue = 2;
-        //renderer.material.color = Color.white;
-        //plant.Health += 10;
-        //plant.IsCloseToWaterRange = 10;
+        newplant.GrowthSpeed = 2;
+        newplant.PlantSmellRadiusValue = 2;
+
+        //rendSeed.AddComponent<Renderer>().material.color = Color.red;
+        //rendGrowthling.AddComponent<Renderer>().material.color = Color.red;
+        //rendGrowth.AddComponent<Renderer>().material.color = Color.red;
+        //rendSproout.AddComponent<Renderer>().material.color = Color.red;
+        rendSeed.material.color = Color.red;
+        rendSproout.material.color = Color.red;
+        rendGrowthling.material.color = Color.red;
+        rendGrowth.material.color = Color.red;
+        newplant.Health += 10;
+        newplant.IsCloseToWaterRange = 10;
+
+        Debug.Log("Sucsesfull seed mutation");
         return newplant;
     }
 

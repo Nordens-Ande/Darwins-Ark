@@ -47,6 +47,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SoundManager
   backgroundMusic: {fileID: 8300000, guid: 90bffea002c3e3a488d52cb582d0abff, type: 3}
   backgroundMusicPlayer: {fileID: 6640755651773422998}
+  backgroundMusicList:
+  - {fileID: 8300000, guid: 701eba46a2ad3bc48b753de5207b9c6b, type: 3}
+  - {fileID: 8300000, guid: 269657b412e05124b89bd29707d544a1, type: 3}
+  - {fileID: 8300000, guid: f4ca54b03d20cf041b6423477ca0c112, type: 3}
+  silenceOffsetMin: 5
+  silenceOffsetMax: 20
   soundEffectsList:
   - {fileID: 11400000, guid: b94bfe67a1d5b0246b94f14d42443a82, type: 2}
   - {fileID: 11400000, guid: e955e1a849efdd64a9cdfd8f95684354, type: 2}
