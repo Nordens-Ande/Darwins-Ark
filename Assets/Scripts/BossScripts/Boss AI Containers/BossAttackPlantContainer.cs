@@ -13,8 +13,8 @@ public class BossAttackPlantContainer : Container<Boss>
         if(distance >= boss.SightDistanceToTiles) return 0f; // too far
 
         if(boss.DebugScores)
-            Debug.Log("Boss attack plant score: " + (1 - distance / boss.SightDistanceToTiles));
+            Debug.Log("Boss attack plant score: " + (1 - distance / boss.SightDistanceToTiles) * 0.5f);
 
-        return 1 - distance / boss.SightDistanceToTiles; //should be 1 - distance / boss bla bla
+        return (1 - distance / boss.SightDistanceToTiles) * 0.5f; //should be 1 - distance / boss bla bla
     }
 }
