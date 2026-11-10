@@ -48,10 +48,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Environment.TileManager
   chunkObjects: []
   chunkSize: 8
-  chunkGridSize: {x: 8, y: 8}
+  chunkGridSize: {x: 18, y: 18}
   createWater: 1
   waterLevel: 0.45
+  waterFlowDistance: 6
   waterMaterial: {fileID: 2100000, guid: bbfea793355d22b4998dbc051bcd2de8, type: 2}
+  oceanObject: {fileID: 0}
+  waterObject: {fileID: 0}
 --- !u!114 &3712244531883561027
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -80,10 +83,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Environment.IslandNoise
   seed: -1
   islandRadius: 18
-  coastlineFrequency: 1
-  coastlineVariation: 0.15
+  coastlineFrequency: 0.65
+  coastlineVariation: 0.65
   coastlineNoiseLevels:
-    largeScaler: 2
+    largeScaler: 1.56
     largeOffset: 0
     mediumScaler: 4
     mediumOffset: 100
@@ -98,3 +101,4 @@ MonoBehaviour:
     mediumOffset: 100
     smallScaler: 0.08
     smallOffset: 200
+  slopeOceanFloor: 1

@@ -39,7 +39,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
     public List<Tile> ClosestAttackTilePath => closestAttackTilePath;
 
 
-    public bool DebugScores => false;
+    public bool DebugScores => true;
 
 
 

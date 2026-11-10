@@ -6,8 +6,8 @@ using System;
 [Serializable]
 public class BossEscapeState : BossAIState
 {
-    TileManager tileManager = TileManager.Instance;
-    static int escapeDistance = 3;
+    TileManager tileManager;
+    static int escapeDistance = 5;
     static int searchRange = 5;
 
     public BossEscapeState(Boss boss) : base(boss)
@@ -19,6 +19,7 @@ public class BossEscapeState : BossAIState
     {
         this.boss = boss;
         container = new BossEscapeContainer();
+        tileManager = TileManager.Instance;
     }
 
     public override bool OnEnterState()
@@ -58,7 +59,7 @@ public class BossEscapeState : BossAIState
     /// <returns>Path to the reachable tile</returns>
     List<Tile> FindReachableTile(Vector3 direction, List<AnimalAI> animals)
     {
-        List<Tile> path = new List<Tile>();
+        List<Tile> path;
 
         Vector3 startTile = boss.transform.position + (direction * escapeDistance);
 
@@ -73,7 +74,10 @@ public class BossEscapeState : BossAIState
             }
             else
             {
+
+                Debug.Log("boss pos: " + boss.transform.position);
                 Debug.Log("escape tile position for boss" + tile.Position);
+                
             }
             path = boss.MovementScript.PathFinder.GetPathAStar(tileManager.GetTile(boss.transform.position), tile, boss.MovementScript.IsBossTraversable, boss.MovementScript.MaxHeightDifference, (escapeDistance + searchRange) * 2);
             if (path != null)

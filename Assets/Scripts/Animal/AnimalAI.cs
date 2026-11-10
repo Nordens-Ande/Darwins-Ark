@@ -57,8 +57,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     [Header("Boss")]
     [Space]
     //bossFight
-    [SerializeField] private float attackDistance = 3;
-    private float seeBossRange = 25;
+    [SerializeField] private float attackDistance = 1;
+    private float seeBossRange = 10;
 
     //Seeds that animal can spawn
     [Header("Seeds that can spawn")]
