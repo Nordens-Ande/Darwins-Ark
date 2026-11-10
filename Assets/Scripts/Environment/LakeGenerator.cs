@@ -437,24 +437,24 @@ namespace Assets.Scripts.Environment
         }
 
 
-        //private void OnDrawGizmos()
-        //{
-        //    if (!Application.isPlaying)
-        //        return;
+        private void OnDrawGizmos()
+        {
+            if (!Application.isPlaying)
+                return;
 
-        //    int size = lakeMap.GetLength(0);
-        //    int halfSize = size / 2;
+            int size = lakeMap.GetLength(0);
+            int halfSize = size / 2;
 
-        //    Gizmos.color = new Color(1, 1, 1, 0.5f);
-        //    for (int x = 0; x < size; x++)
-        //    {
-        //        for (int z = 0; z < size; z++)
-        //        {
-        //            if (lakeMap[x, z])
-        //                Gizmos.DrawCube(new Vector3(x - halfSize, 2.5f, z - halfSize), new Vector3(1f, 0.01f, 1f));
-        //        }
-        //    }
-        //}
+            Gizmos.color = new Color(1, 1, 1, 0.5f);
+            for (int x = 0; x < size; x++)
+            {
+                for (int z = 0; z < size; z++)
+                {
+                    if (lakeMap[x, z])
+                        Gizmos.DrawCube(new Vector3(x - halfSize, noise.GetHeight(x, z) + 0.01f, z - halfSize), new Vector3(1f, 0.01f, 1f));
+                }
+            }
+        }
 
     }
 
