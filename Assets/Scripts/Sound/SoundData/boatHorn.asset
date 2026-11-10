@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f59ca8eec44ec4e4d97e43230d66df9d, type: 3}
   m_Name: boatHorn
   m_EditorClassIdentifier: Assembly-CSharp::SO_SoundEffect
-  audioType: 5
+  audioType: 6
   clip: {fileID: 8300000, guid: b1d8bc9db08a0f040b53c14ff30626f4, type: 3}

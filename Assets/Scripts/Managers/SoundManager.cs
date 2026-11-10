@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.Audio;
 
 using System.Collections.Generic;
+using System.Collections;
 
 public class SoundManager : SingletonManager<SoundManager>
 {
@@ -10,6 +11,16 @@ public class SoundManager : SingletonManager<SoundManager>
     //public static SoundManager Instance = null;
     [SerializeField] private AudioClip backgroundMusic;
     [SerializeField] private AudioSource backgroundMusicPlayer; //Where the backgroundmusic will be played 
+    [SerializeField] private List<AudioClip> backgroundMusicList = new List<AudioClip>();
+    private List<AudioClip> tempBackgroundList = new List<AudioClip>();
+    [SerializeField] private int silenceOffsetMin = 5;
+    [SerializeField] private int silenceOffsetMax = 20;
+    private bool backgroundMusicIsPlaying = false;
+    private bool isShuffling = false;
+    private float currentSongLeangth = 0;
+    private float songLeangthMax;
+
+    [SerializeField] private bool debugMusicShuffleSkip = false;
 
     //List that holds all the audio in form of scriptable objects created 
     [SerializeField] private List<SO_SoundEffect> soundEffectsList;
@@ -20,26 +31,6 @@ public class SoundManager : SingletonManager<SoundManager>
     //Dictonary for mixertype, used in Playsoundeffectscript
     [SerializeField] private Dictionary<MixerType, AudioMixerGroup> mixerIndex = new Dictionary<MixerType, AudioMixerGroup>();
 
-
-    //private void Awake()
-    //{
-    //    if (Instance == null) 
-    //    {
-    //        Instance = this;
-    //    }
-    //    else 
-    //    {
-    //        Destroy(this);
-    //    }
-
-    //    //Populates the dictonary with the scripble objects, connecting the type to the clip
-    //    foreach (SO_SoundEffect audio in soundEffectsList)
-    //    {
-    //        if (audio.Clip == null) continue;
-    //        soundIndex.Add(audio.AudioType, audio.Clip);
-    //    }
-    //}
-
     private void Start()
     {
         foreach (SO_SoundEffect audio in soundEffectsList)
@@ -48,7 +39,68 @@ public class SoundManager : SingletonManager<SoundManager>
             soundIndex.Add(audio.AudioType, audio.Clip);
         }
 
-        StartBackgroundMusic(0.1f);
+        InstantiateShuffle();
+    }
+
+    void InstantiateShuffle() 
+    {
+        isShuffling = true;
+        songLeangthMax = backgroundMusic.length;
+        tempBackgroundList.AddRange(backgroundMusicList);
+        StartCoroutine(ShuffleSongs());
+        ShuffleBackgroundMusic();
+        //StartBackgroundMusic(1f);
+    }
+
+    void ShuffleBackgroundMusic() 
+    {
+        if (isShuffling) 
+        {
+            return;
+        }
+
+        else if (backgroundMusicIsPlaying) 
+        {
+            currentSongLeangth += Time.deltaTime;
+            if(currentSongLeangth > songLeangthMax) 
+            {
+                isShuffling = true;
+                backgroundMusicIsPlaying = false;
+                currentSongLeangth = 0;
+                StopBackgroundMusic();
+                StartCoroutine(ShuffleSongs());
+
+            }
+        
+        }
+    }
+
+    IEnumerator ShuffleSongs() 
+    {
+        tempBackgroundList.Remove(backgroundMusic);
+
+        yield return new WaitForSeconds(Random.Range(silenceOffsetMin, silenceOffsetMax));
+
+        if(tempBackgroundList.Count == 0) 
+        {
+            tempBackgroundList.AddRange(backgroundMusicList);
+            AudioClip clip = tempBackgroundList[Random.Range(0, tempBackgroundList.Count)];
+            backgroundMusic = clip;
+            songLeangthMax = clip.length;
+            StartBackgroundMusic(1f);
+            backgroundMusicIsPlaying = true;
+            isShuffling = false;
+        }
+        else 
+        {
+            AudioClip clip = tempBackgroundList[Random.Range(0, tempBackgroundList.Count)];
+            backgroundMusic = clip;
+            songLeangthMax = clip.length;
+            StartBackgroundMusic(1f);
+            backgroundMusicIsPlaying = false;
+            isShuffling = false;
+        }
+
     }
 
     //Starts the backgroundmusic
@@ -110,6 +162,7 @@ public class SoundManager : SingletonManager<SoundManager>
         audioSource.clip = clip;
         audioSource.minDistance = minDistance;
         audioSource.maxDistance = maxDistance;
+        audioSource.volume = volume;
         audioSource.loop = false;
         audioSource.playOnAwake = true;
         InstantiateSoundEffect(audioObj, clip, volume);
@@ -121,8 +174,8 @@ public class SoundManager : SingletonManager<SoundManager>
     { 
         Instantiate(source);
         AudioSource audio = source.GetComponent<AudioSource>();
-        audio.PlayOneShot(clip, volume);
-        Destroy(source, clip.length);
+        audio.PlayOneShot(clip);
+        Destroy(source);
     }
 
     //When eventsystem is implemented this method can subscribe to it 
@@ -146,5 +199,16 @@ public class SoundManager : SingletonManager<SoundManager>
     public void SetBackgroundMusicVolume(float volume) 
     { 
         backgroundMusicPlayer.volume = volume;
+    }
+
+    private void Update()
+    {
+        ShuffleBackgroundMusic();
+
+        if (debugMusicShuffleSkip) 
+        { 
+            currentSongLeangth = songLeangthMax;
+            debugMusicShuffleSkip = false;
+        }
     }
 }

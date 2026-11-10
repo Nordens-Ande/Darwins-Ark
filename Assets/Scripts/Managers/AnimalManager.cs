@@ -111,6 +111,8 @@ public class AnimalManager : MonoBehaviour
         if (spawnTimer >= spawnTimerThreshold)
         {
             SpawnAnimal();
+            SpawnAnimal();
+            SpawnAnimal();
             spawnTimer = 0;
         }
     }

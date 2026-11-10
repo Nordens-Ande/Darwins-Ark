@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f59ca8eec44ec4e4d97e43230d66df9d, type: 3}
   m_Name: bossMove
   m_EditorClassIdentifier: Assembly-CSharp::SO_SoundEffect
-  audioType: 3
+  audioType: 4
   clip: {fileID: 8300000, guid: ccf385140e72a1f4dbdf968db53bdce4, type: 3}

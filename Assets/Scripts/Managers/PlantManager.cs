@@ -151,20 +151,19 @@ public class PlantManager : SingletonManager<PlantManager>
                     float randomValue = Random.Range(0f, 100f);
                     if (randomValue <= spawnPlantAllTilesChance)
                     {
-
-                        float randomGrowthSpeed = 1.0f;
                         Plant plant = plantPrefabToSpawn.First();
 
-                        if (useRandomGrowthSpeed)
-                        {
-                            randomGrowthSpeed = Random.Range(minGrowthSpeed, maxGrowthSpeed);
-                        }
                         if (useRandomPlants)
                         {
                             plant = plantPrefabToSpawn[Random.Range(0, plantPrefabToSpawn.Count)];
                         }
                        
                         massSpawning = true;
+                        float randomGrowthSpeed = 1.0f;
+                        if (useRandomGrowthSpeed)
+                        {
+                            randomGrowthSpeed = Random.Range(minGrowthSpeed, maxGrowthSpeed);
+                        }
 
                         SpawnPlantOnThisTile(plant, chunk.GetTile(tilePos.x, tilePos.y), randomGrowthSpeed);
 
@@ -233,6 +232,11 @@ public class PlantManager : SingletonManager<PlantManager>
             newPlant.SetGrowthStage(Plant.GrowthStage.grown);
         }
 
+        //if we want to use a random growth speed for the plant
+        if (useRandomGrowthSpeed)
+        {
+            CustomGrowSpeed = Random.Range(minGrowthSpeed, maxGrowthSpeed);
+        }
 
         // set the growth speed of the plant
         newPlant.GrowthSpeed = CustomGrowSpeed;
@@ -261,29 +265,39 @@ public class PlantManager : SingletonManager<PlantManager>
     {
         if (plant == null || plant.CurrentTile == null || tileManager == null)
             return false;
-        
 
-        // detta �r inte superbra, om man m�ste optimera kan man kolla h�r
-        // men det borde funka
+
+        // this isn't the best way to do this, but it works for now.
+        // if we need to optimize we can look at this later.
 
         foreach (Chunk chunk in tileManager.chunks)
         {
             // we get all rivertiles to check if the plant is close to water
-            HashSet<Vector2Int> waterTiles = chunk[TileType.River];
+            HashSet<Vector2Int> riverTiles = chunk[TileType.River];
+            // we get all source tiles to check if the plant is close to water
+            HashSet<Vector2Int> lakeTiles = chunk[TileType.Lake];
+
+            // we combine the two sets of tiles into one list
+            List<Vector2Int> waterTiles = new List<Vector2Int>();
+            if (riverTiles != null)
+                waterTiles.AddRange(riverTiles);
+            if (lakeTiles != null)
+                waterTiles.AddRange(lakeTiles);
+
             if (waterTiles == null || waterTiles.Count == 0)
             {
                 continue;
             }
 
             // we check if the plant is close to any of the water tiles
-            foreach (Vector2Int waterTilePos in waterTiles)
+            foreach (Vector2Int pos in waterTiles)
             {
-                Tile waterTile = chunk.GetTile(waterTilePos.x, waterTilePos.y);
+                Tile thisTile = chunk.GetTile(pos.x, pos.y);
 
-                if (waterTile == null)
+                if (thisTile == null)
                     continue;
 
-                float distanceToWater = Vector3.Distance(plant.CurrentTile.Position, waterTile.Position);
+                float distanceToWater = Vector3.Distance(plant.CurrentTile.Position, thisTile.Position);
                 if (distanceToWater <= plant.IsCloseToWaterRange)
                 {
                     return true;

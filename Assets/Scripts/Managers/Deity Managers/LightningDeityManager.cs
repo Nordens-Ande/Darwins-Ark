@@ -23,7 +23,6 @@ public class LightningDeityManager : SingletonManager<LightningDeityManager>
     private GameManager gameManager;
     private MousePositionManager mousePositionManager;
     private TileManager tileManager;
-    private WindDeityManager windDeityManager;
 
     private float lightningEffectRadius = 2.5f;
 
@@ -36,7 +35,6 @@ public class LightningDeityManager : SingletonManager<LightningDeityManager>
         gameManager = GameManager.Instance;
         mousePositionManager = MousePositionManager.Instance;
         tileManager = TileManager.Instance;
-        windDeityManager = WindDeityManager.Instance;
 
         state = LightningCreationState.None;
     }
