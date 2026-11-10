@@ -1,6 +1,8 @@
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Net;
 using Assets.Scripts.Environment;
+using NUnit.Framework.Constraints;
 using UnityEngine;
 
 public interface IBoatSpawning
@@ -151,7 +153,8 @@ public class Boat : MonoBehaviour
         }
 
         Tile tile = null;
-        for(int i = 1; i < 20; i++)
+        int iterations = (int)(IslandNoise.Instance.MaxIslandRadius + distanceFromCoast) * 2 + 1; //+1 for safe measure (:
+        for (int i = 1; i < iterations; i++)
         {
             tile = TileManager.Instance.GetTile(tPos + direction * i);
             if(tile == null)
@@ -176,8 +179,6 @@ public class Boat : MonoBehaviour
 
         for (int i = path.Count - 1; i >= 0; i--) // remove all tiles except every 10th to make path more fluent
         {
-            if (i == 0)
-                path.RemoveAt(i);
             if (i != 0)
             {
                 if (i % 8 != 0)
@@ -187,12 +188,16 @@ public class Boat : MonoBehaviour
             }
         }
 
+        if(path[path.Count - 1] == rotationTile)
+            path.RemoveAt(path.Count - 1);
+
         return path;
     }
 
     void CreatePath()
     {
         List<Tile> calculatedPath = CalculatePath(); // return a path from spawn to the rotationTile, consisting of a few Vector3 points
+
         path.Clear();
         path.AddRange(calculatedPath);
         path.Add(rotationTile);
@@ -352,7 +357,7 @@ public class Boat : MonoBehaviour
 
     bool CheckIfReachedRotation(Quaternion rotation)
     {
-        return Quaternion.Angle(transform.rotation, rotation) < 0.03f;
+        return Quaternion.Angle(transform.rotation, rotation) < 1f;
     }
 
     void BoatRotate()
@@ -360,12 +365,14 @@ public class Boat : MonoBehaviour
         Vector3 nextPos = nextTile.Position;
         nextPos.y = boatPosY;
         Vector3 direction = nextPos - transform.position;
+
         direction.Normalize();
         Quaternion targetRotation = Quaternion.LookRotation(direction);
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, 30f * Time.deltaTime);
 
         if(CheckIfReachedRotation(targetRotation))
         {
+            transform.rotation = targetRotation;
             UpdateStepFromRotate();
         }
     }

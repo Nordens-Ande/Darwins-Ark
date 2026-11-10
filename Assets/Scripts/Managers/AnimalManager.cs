@@ -110,9 +110,12 @@ public class AnimalManager : MonoBehaviour
         spawnTimer += Time.deltaTime;
         if (spawnTimer >= spawnTimerThreshold)
         {
-            SpawnAnimal();
-            SpawnAnimal();
-            SpawnAnimal();
+            for(int i = 0; i < 1; i++) // for debugging boat
+            {
+                SpawnAnimal();
+            }
+            
+            
             spawnTimer = 0;
         }
     }

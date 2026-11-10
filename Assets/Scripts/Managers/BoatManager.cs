@@ -25,8 +25,8 @@ public class BoatManager : SingletonManager<BoatManager>
         float angle = Random.Range(0, Mathf.PI * 2);
         Vector3 direction = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
         Vector3 spawnPos = direction.normalized * spawnDistanceFromCenter;
-        //spawnPos = new Vector3((int)spawnPos.x, 0, (int)spawnPos.z);
-        Debug.Log("boat spawn: " + spawnPos);
+        spawnPos = new Vector3((int)spawnPos.x, 0, (int)spawnPos.z);
+        //Debug.Log("boat spawn: " + spawnPos);
         Tile spawnTile = tileManager.GetTile(spawnPos);
         return spawnTile;
     }
