@@ -21,7 +21,7 @@ public class BoatManager : SingletonManager<BoatManager>
 
     Tile GetSpawnTile()
     {   
-        spawnDistanceFromCenter = (tileManager.ChunkGridSize.x * tileManager.ChunkSize / 2) - 3;
+        spawnDistanceFromCenter = (tileManager.ChunkGridSize.x * tileManager.ChunkSize / 2) - 6;
         float angle = Random.Range(0, Mathf.PI * 2);
         Vector3 direction = new Vector3(Mathf.Cos(angle), 0, Mathf.Sin(angle));
         Vector3 spawnPos = direction.normalized * spawnDistanceFromCenter;

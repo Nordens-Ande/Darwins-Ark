@@ -2,13 +2,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using Assets.Scripts.Environment;
 using System;
+using System.Net;
 
 [Serializable]
 public class BossEscapeState : BossAIState
 {
-    TileManager tileManager;
-    static int escapeDistance = 5;
-    static int searchRange = 5;
+    private TileManager tileManager;
+    private const int escapeDistance = 5;
+    private const int searchRange = 5;
+
+    private int tilesEscaped;
 
     public BossEscapeState(Boss boss) : base(boss)
     {
@@ -25,6 +28,8 @@ public class BossEscapeState : BossAIState
     public override bool OnEnterState()
     {
         TaskCompleted = false;
+
+        tilesEscaped = 0;
 
         List<AnimalAI> animals = boss.FindClosestAnimals(3);
 
@@ -57,7 +62,7 @@ public class BossEscapeState : BossAIState
     /// </summary>
     /// <param name="direction">Escape direction</param>
     /// <returns>Path to the reachable tile</returns>
-    List<Tile> FindReachableTile(Vector3 direction, List<AnimalAI> animals)
+    private List<Tile> FindReachableTile(Vector3 direction, List<AnimalAI> animals) // use surroundtiles
     {
         List<Tile> path;
 
@@ -67,6 +72,9 @@ public class BossEscapeState : BossAIState
         {
             Vector2 position = startTile + direction * i;
             Tile tile = tileManager.GetTile(position);
+
+            if (tile.Type != TileType.Grass || tile.Type != TileType.River || tile.Type != TileType.Concrete) continue;
+
             if (tile == null)
             {
                 Debug.Log("no escape tile found for boss");
@@ -89,10 +97,28 @@ public class BossEscapeState : BossAIState
         return null;
     }
 
-    //List<Tile> GetSurroundingTiles() //maybe better solution
-    //{
-
-    //}
+    private List<Tile> GetSurroundingTiles() //maybe better solution, do this pal, makes smarter escape, choose th etile that is furthest and pathfindable
+    {
+        List<Tile> tiles = new List<Tile>();
+        Tile currentTile = tileManager.GetTile(boss.transform.position);
+        Vector2 currentPos = new Vector2(currentTile.Position.x, currentTile.Position.z);
+        foreach(Chunk chunk in tileManager.chunks)
+        {
+            foreach(Vector2Int tilePos in chunk.GetTiles(TileType.Grass))
+            {
+                float distance = Vector2.Distance(tilePos, currentPos);
+                if (distance < escapeDistance || distance > escapeDistance + searchRange) continue;
+                tiles.Add(tileManager.GetTile(tilePos));
+            }
+            foreach(Vector2Int tilePos in chunk.GetTiles(TileType.Concrete))
+            {
+                float distance = Vector2.Distance(tilePos, currentPos);
+                if (distance < escapeDistance || distance > escapeDistance + searchRange) continue;
+                tiles.Add(tileManager.GetTile(tilePos));
+            }
+        }
+        return tiles;
+    }
 
     public override void Tick()
     {
@@ -100,7 +126,18 @@ public class BossEscapeState : BossAIState
         (bool reachedTargetTile, bool reachedNextTile) = boss.MovementScript.BossMove();
         if (reachedNextTile)
         {
-            CanBeInterupted = true;
+            tilesEscaped += 1;
+            Debug.Log("escape 1 tile");
+            if(tilesEscaped >= escapeDistance)
+            {
+                Debug.Log("escape distance reached");
+                CanBeInterupted = true;
+            }
+            //else //for later to reroll tile, if new animals are closer as we progress, make it smart pal
+            //{
+            //    OnExitState();
+            //    OnEnterState();
+            //}
         }
         if (reachedTargetTile)
         {
