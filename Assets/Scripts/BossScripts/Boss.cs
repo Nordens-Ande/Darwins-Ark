@@ -39,7 +39,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
     public List<Tile> ClosestAttackTilePath => closestAttackTilePath;
 
 
-    public bool DebugScores => false;
+    public bool DebugScores => true;
 
 
 
@@ -246,6 +246,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
                     currentState.OnExitState();
                     if(currentState.OnEnterState())
                     {
+                        Debug.Log("reentered same state " + currentState.ToString());   
                         break;
                     }
                 }
@@ -255,9 +256,9 @@ public class Boss : MonoBehaviour, IBoatSpawning
                     break;
                 }
             }
-
-            if (statesOrderedByScore[i].OnEnterState())
+            else if (statesOrderedByScore[i].OnEnterState())
             {
+                Debug.Log("new boss state " + statesOrderedByScore[i].ToString());
                 currentState.OnExitState();
                 currentState = statesOrderedByScore[i];
                 //Debug.Log("currentState changed to: " + currentState.ToString());

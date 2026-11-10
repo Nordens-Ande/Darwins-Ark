@@ -27,6 +27,7 @@ public class BossEscapeState : BossAIState
 
     public override bool OnEnterState()
     {
+        Debug.Log("tried to enter escape");
         TaskCompleted = false;
 
         tilesEscaped = 0;
@@ -48,6 +49,7 @@ public class BossEscapeState : BossAIState
         List<Tile> path = FindReachableTile(directionToEscape, animals);
         if(path != null)
         {
+            Debug.Log("found path in boss escape its enterable");
             boss.MovementScript.CurrentPath = path;
             return true;
         }
@@ -73,7 +75,7 @@ public class BossEscapeState : BossAIState
             Vector2 position = startTile + direction * i;
             Tile tile = tileManager.GetTile(position);
 
-            if (tile.Type != TileType.Grass || tile.Type != TileType.River || tile.Type != TileType.Concrete) continue;
+            if (tile.Type != TileType.Grass && tile.Type != TileType.River && tile.Type != TileType.Concrete) continue;
 
             if (tile == null)
             {

@@ -179,6 +179,9 @@ public class Boat : MonoBehaviour
 
         for (int i = path.Count - 1; i >= 0; i--) // remove all tiles except every 10th to make path more fluent
         {
+            if(i == 0)
+                path.RemoveAt(i);
+
             if (i != 0)
             {
                 if (i % 8 != 0)
