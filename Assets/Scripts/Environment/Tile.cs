@@ -105,6 +105,23 @@ namespace Assets.Scripts.Environment
             windStrength = 0;
             windDirection = Vector3.zero;
         }
+        public Tile(Chunk owner, Vector2Int index, Vector3 position, Vector3 localPosition, float lakeWaterHeight)
+        {
+            this.owner = owner;
+            this.index = index;
+            this.position = position;
+            this.localPosition = localPosition;
+            waterHeight = lakeWaterHeight;
+            type = TileType.Lake;
+
+            isWetFromRain = false;
+            runRainTimer = false;
+            wetTimer = 0;
+            wetDuration = 60; // 1 minute
+
+            windStrength = 0;
+            windDirection = Vector3.zero;
+        }
 
         public void SetType(TileType newType)
         {
