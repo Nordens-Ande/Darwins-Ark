@@ -25,6 +25,19 @@ public static class PerlinNoiseUI
         return a + t * (b - a);
     }
 
+    private static readonly Vector2[] Gradients =
+    {
+        new Vector2(1f, 0f),
+        new Vector2(-1f, 0f),
+        new Vector2(0f, 1f),
+        new Vector2(0f, -1f),
+
+        new Vector2(0.7071f, 0.7071f),
+        new Vector2(-0.7071f, 0.7071f),
+        new Vector2(0.7071f, -0.7071f),
+        new Vector2(-0.7071f, -0.7071f)
+    };
+
     private static Vector2 Gradient(int x, int y, int seed)
     {
         int hash =
@@ -35,14 +48,10 @@ public static class PerlinNoiseUI
         hash = (hash ^ (hash >> hashShift1)) * hashMixMultiplier;
         hash ^= hash >> hashShift2;
 
-        float angle =
-            (hash & angleMask) / (float)angleMask *
-            Mathf.PI * 2f;
+        int index =
+            Mathf.Abs(hash) % Gradients.Length;
 
-        return new Vector2(
-            Mathf.Cos(angle),
-            Mathf.Sin(angle)
-        );
+        return Gradients[index];
     }
 
     public static float Noise(float x, float y, int seed)

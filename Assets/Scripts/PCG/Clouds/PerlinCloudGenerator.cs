@@ -3,8 +3,11 @@ using UnityEngine;
 
 public class PerlinCloudGenerator : MonoBehaviour
 {
+    private Texture2D texture;
+    private Color32[] pixels;
+
     [Header("Texture")]
-    [SerializeField] private int resolution = 128;
+    [SerializeField] private int resolution = 32;
 
     [Header("Noise")]
     [SerializeField] private float noiseScale = 4f;
@@ -32,19 +35,22 @@ public class PerlinCloudGenerator : MonoBehaviour
     [Range(01f, 5f)]
     [SerializeField] private float centerFallOff = 2f;
 
-
-    public Texture2D GenerateCloud(float shapeTime, int customSeed)
+    private void Awake()
     {
-        Texture2D texture =
-            new Texture2D(
-                resolution,
-                resolution,
-                TextureFormat.RGBA32,
-                false
+        texture = new Texture2D(
+            resolution,
+            resolution,
+            TextureFormat.RGBA32,
+            false
             );
 
         texture.filterMode = FilterMode.Bilinear;
 
+        pixels = new Color32[resolution * resolution];
+    }
+
+    public Texture2D GenerateCloud(float shapeTime, int customSeed)
+    {
         for (int y = 0; y < resolution; y++)
         {
             for (int x = 0; x  < resolution; x++)
@@ -147,8 +153,9 @@ public class PerlinCloudGenerator : MonoBehaviour
                 );
             }
         }
-        
-        texture.Apply();
+
+        texture.SetPixels32(pixels);
+        texture.Apply(false);
 
         return texture;
     }
