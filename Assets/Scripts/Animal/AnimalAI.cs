@@ -240,6 +240,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
     void Start()
     {
+        MutationRate = 10;
         walkSpeed = 0.75f;
         runSpeed = 1.3f;
         waterSpeed = 0.30f;

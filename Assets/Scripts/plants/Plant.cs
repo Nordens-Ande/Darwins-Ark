@@ -304,8 +304,45 @@ public class Plant : MonoBehaviour
 
     public float TimeSinceLastGrowth => timeSinceLastGrowth;
     public bool IsCloseToWater => isCloseToWater;
-    public float IsCloseToWaterRange => isCloseToWaterRange;
-    public float Health => health;
+    public float IsCloseToWaterRange
+    {
+       get => isCloseToWaterRange;
+       set => isCloseToWaterRange = value;
+    } 
+    public float Health
+    { 
+        get => health; 
+        set => health = value;
+    }
+    //[SerializeField] GameObject seedPrefab;
+    //[SerializeField] GameObject sproutPrefab;
+    //[SerializeField] GameObject growthlingPrefab;
+    //[SerializeField] GameObject grownPrefab;
+
+    public GameObject SeedPrefab 
+    { 
+        get => seedPrefab;
+        set => seedPrefab = value;
+    }
+
+    public GameObject SproutPrefab 
+    {
+        get => sproutPrefab;
+        set => sproutPrefab = value;
+    }
+
+    public GameObject GrowthlingPrefab 
+    { 
+        get => growthlingPrefab;
+        set => growthlingPrefab = value;
+    }
+
+    public GameObject GrownPrefab 
+    { 
+        get => grownPrefab;
+        set => grownPrefab = value;
+    }
+
 
     public bool CanBeEaten
     {

@@ -28,7 +28,7 @@ public class SoundManager : SingletonManager<SoundManager>
             soundIndex.Add(audio.AudioType, audio.Clip);
         }
 
-        StartBackgroundMusic(0.1f);
+        StartBackgroundMusic(1f);
     }
 
     //Starts the backgroundmusic
