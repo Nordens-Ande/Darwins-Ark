@@ -387,10 +387,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5928225880126638516, guid: 49bf9852b5669f5439855a75ef9f512b, type: 3}
-      propertyPath: lakeMask.Array.size
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 8073856895723802328, guid: 49bf9852b5669f5439855a75ef9f512b, type: 3}
       propertyPath: m_Name
       value: Island Manager
@@ -398,10 +394,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8073856895723802328, guid: 49bf9852b5669f5439855a75ef9f512b, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1898554968}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 49bf9852b5669f5439855a75ef9f512b, type: 3}
 --- !u!114 &550361599 stripped
 MonoBehaviour:
@@ -1238,35 +1231,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 31b52c025b807a9498ae23a3c3f96908, type: 3}
---- !u!1 &1898554963 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8073856895723802328, guid: 49bf9852b5669f5439855a75ef9f512b, type: 3}
-  m_PrefabInstance: {fileID: 386020338}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1898554968
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1898554963}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 385de3d7865cf75429a4edda55be6ba6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Environment.LakeGenerator
-  seedOffset: 0
-  lakeMask: 02000000
-  lakeIterations: 6
-  initialLakeChance: 0.4
-  resolveLakeAmount: 1
-  minLakeObjectCount: 2
-  maxLakeTileCount: 22
-  lakeNeighborhood: 0
-  customNeighborhood: []
-  MaxLakeNeighborsForLakeToLand: 3
-  MinLakeNeighborsForLandToLake: 5
-  drawGizmo: 0
 --- !u!1001 &1913357771
 PrefabInstance:
   m_ObjectHideFlags: 0
