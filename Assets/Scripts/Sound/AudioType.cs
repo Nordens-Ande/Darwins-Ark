@@ -12,6 +12,8 @@ public enum AudioType
     ////Antilope
     //antilopePoop,
     //antilopeEat,
+    //Mutation
+    mutation,
 
     //Boss
     bossMove,
@@ -25,6 +27,7 @@ public enum AudioType
     //Deity
 
     //UIsoundeffect
+    uiPopupButtonClikc,
     uiButtonClick,
     uiSliderSound,
 

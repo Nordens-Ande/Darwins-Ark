@@ -352,48 +352,28 @@
             ]
         },
         {
-            "name": "Inventory",
-            "id": "b193b543-e32d-4a17-859f-ecedc2ddd02a",
+            "name": "Selecting",
+            "id": "8c283414-6799-4577-b72d-57c68324243a",
             "actions": [
                 {
-                    "name": "PlantSelectTile",
+                    "name": "Selecting",
                     "type": "Button",
-                    "id": "621a6f26-e6bb-4a5a-b30b-0a33d5441f0d",
+                    "id": "4836c63f-de90-4230-a0ae-bfcdf077eabf",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
-                },
-                {
-                    "name": "PlantHoverMove",
-                    "type": "Value",
-                    "id": "9cf18b51-727e-4d4d-a62a-3a94611632ca",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
                 }
             ],
             "bindings": [
                 {
                     "name": "",
-                    "id": "e7382e84-ba75-45a8-b8cd-995e19d57be0",
+                    "id": "fdd8f69a-3662-4872-9668-0511761f4009",
                     "path": "<Mouse>/leftButton",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "PlantSelectTile",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "adf7b972-bce4-4f96-aac3-41796120d1a3",
-                    "path": "<Mouse>/position",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "PlantHoverMove",
+                    "action": "Selecting",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

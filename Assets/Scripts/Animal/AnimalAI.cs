@@ -1,10 +1,14 @@
+using Assets.Enums.GameTransitions;
 using Assets.Scripts.Environment;
-
+using Assets.Scripts.Managers;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+//using UnityEngine.Tilemaps;
 
 public class AnimalAI : MonoBehaviour, IBoatSpawning
 {
@@ -20,14 +24,15 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     [Header("Animal Stats")]
     [Space]
     //Animal stats
-    [SerializeField] private float walkSpeed = 1f;
-    [SerializeField] private float runSpeed = 3;
+    [SerializeField] private float walkSpeed = 0.75f;
+    [SerializeField] private float runSpeed = 1.3f;
+    [SerializeField] private float waterSpeed = 0.5f;
     [SerializeField] private float damage = 10;
     [SerializeField] private float health = 100; //0-100
     [SerializeField] private float hungerDeteration = 1;
     [SerializeField] private float MutationRate = 1;
     [SerializeField, ReadOnly] private float currentMutationValue = 0;
-    [SerializeField] private float MutationMax = 100;
+    [SerializeField] private float MutationMax = 60;
     //[SerializeField] private float Defence = 1; //Do nothing at the moment
 
 
@@ -37,8 +42,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     [SerializeField] private float maxIdleTime = 5f;
     [SerializeField, ReadOnly] private float currentIdleTime = 0;
 
-    //[SerializeField] private float maxAttackTime = 2;
-    //[SerializeField, ReadOnly] private float currentAttackTime = 0;
+    [SerializeField] private float maxAttackTime = 2;
+    [SerializeField, ReadOnly] private float currentAttackTime = 0;
 
     [SerializeField] private float clockCycleTime = 10; //How long before points deteriate
     [SerializeField, ReadOnly] private float clockCycleTimeCurrent;
@@ -46,10 +51,14 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     [SerializeField] private float sleepTimeMax = 10;
     [SerializeField, ReadOnly] private float currentSleepTime = 0;
 
-    //[Header("Boss")]
-    //[Space]
-    ////bossFight
-    //[SerializeField] private float attackDistance = 3;
+    private float standStillTimerMax = 0;
+    private float standstillTimerCurrent = 0;
+
+    [Header("Boss")]
+    [Space]
+    //bossFight
+    [SerializeField] private float attackDistance = 1;
+    private float seeBossRange = 10;
 
     //Seeds that animal can spawn
     [Header("Seeds that can spawn")]
@@ -60,6 +69,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
     [Header("DebugMode")]
     [SerializeField] private bool TestMutation = false;
+    //[SerializeField] GameObject popupUI;
 
     //Manager instances 
     private TileManager tileManager;
@@ -67,6 +77,9 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     private AnimalManager animalManager;
     private SoundManager soundManager;
     private VFXManager vfxManager;
+    private BossManager bossManager;
+    private GameManager gameManager;
+    private LightningDeityManager lightningDeityManager;
 
     //Boat Spawning
     private bool unloaded = false;
@@ -120,6 +133,13 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     private Vector3 activePathTarget;
     private int pathStage = 0;
 
+    //PopupBubble 
+    [Header("Popup bubble")]
+    [SerializeField] private GameObject popUpBubble;
+    private bool HasPopupBubble = false;
+
+    //Deity
+    private int lightningHitCount = 0;
 
     //Properties
     public Transform Transform => transform;
@@ -212,22 +232,42 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         set => MutationRate = value;
     }
 
+    public bool IsMutated 
+    { 
+        get => isMutated;
+        set => isMutated = value;
+    }
+
     void Start()
     {
+        MutationRate = 10;
+        walkSpeed = 0.75f;
+        runSpeed = 1.3f;
+        waterSpeed = 0.30f;
+        hungerDeteration = 10;
+        lightningHitCount = 0;
         transform.localPosition = Vector3.zero;
         tileManager = TileManager.Instance;
         mutationManager = MutationManager.Instance;
         animalManager = AnimalManager.Instance;
         soundManager = SoundManager.Instance;
-        vfxManager = VFXManager.instance;
+        vfxManager = VFXManager.Instance;
+        bossManager = BossManager.Instance;
+        gameManager = GameManager.Instance;
+        lightningDeityManager = LightningDeityManager.Instance;
         activeBosses = new List<Boss>();
         //maxAttackTime = 2;
         tileCheckSize = 1;
         BossThreat = 0;
         matingSeason = 0;
+        MutationMax = 60;
         //pathFinder = new PathFinding();
         activePath = new List<Tile>();
         pathFinder = new PathFinding();
+
+        tileManager.ChunksCleaned += IslandIsTerraformed;
+        lightningDeityManager.OnLightningTriggered += HitByLightning; //Added as subscriber to lightning
+
         InstantiateUtilityBrain();
     }
 
@@ -258,8 +298,11 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     {
         if (!unloaded) return;
 
-        utilityBrain.DecisionProcess();
-        ClockCycleDeteriation();
+        if (gameManager.CurrentState == GameState.Playing && gameManager.CurrentMode != GameMode.Terraform) 
+        {
+            utilityBrain.DecisionProcess();
+            ClockCycleDeteriation();
+        }
     }
 
     //Creates and feeds all the possible action in relation to its value to the utility brain
@@ -324,8 +367,10 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         currentMutationValue += MutationRate * Time.deltaTime;
         if(currentMutationValue > MutationMax) 
         { 
-            isMutated = true;
             mutationManager.MutateAnimal_RandomMutation(this);
+            vfxManager.GetSetAndDestroyVFX(VFXenum.animal_mate, transform.position);
+            soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.mutation), 1, 100, 0.1f);
+            isMutated = true;
         }
     }
     
@@ -337,11 +382,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         {
             currentIdleTime = 0;
             isIdle = false;
-            //Vector3 temp = FindWalkPoint();
-            //activePath = PathfindingMovement(temp);
             pathStage = 0;
             PathfindingWalk();
-            //WalkAround();
         }
     }
 
@@ -402,6 +444,21 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         return path;
     }
 
+    void IslandIsTerraformed(Chunk[] chunks) 
+    { 
+        if(walkPoint != null) 
+        {
+            activePath = PathfindingMovement(walkPoint);
+            if(activePath != null) 
+            {
+                Debug.Log("AnimalAi=>IslandIsTerraformed: Registrerd the terraform change");
+                pathStage = 0;
+                activePathTarget = activePath[pathStage].Position;
+                PathfindingWalk();
+            }
+        }
+    }
+
     //Upgraded walk method, with pathfinding 
     void PathfindingWalk() 
     {
@@ -451,7 +508,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
             {
                 if (activePath[pathStage] != null && hasSetPath)
                 {
-                    AnimalWalkMoveTowards(activePathTarget);
+                    AnimalWalkMoveTowards(activePathTarget, walkSpeed);
                 }
             }
         }
@@ -490,7 +547,6 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
                 hasSetPath = true;
                 walkPoint = FindWalkPoint();
             }
-            //AnimalWalkMoveTowards(walkPoint);
 
             if (Vector3.Distance(transform.position, walkPoint) < 1f)
             {
@@ -501,7 +557,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
             if (!WillCollideWithNeighbour())
             {
-                AnimalWalkMoveTowards(walkPoint);
+                AnimalWalkMoveTowards(walkPoint, WalkSpeed);
             }
         }
     }
@@ -626,11 +682,11 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     //eatplant 
     void EatFood(Plant plant) 
     {
-        choosenPlant = null;
         plant.EatPlant();
-        //soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.cowEat), 1, 100, 0.5f);
-        //vfxManager.GetSetAndDestroyVFX(VFXenum.animal_eat, transform.position);
+        soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.cowEat), 1, 100, 0.1f);
+        vfxManager.GetSetAndDestroyVFX(VFXenum.animal_eat, transform.position);
         hunger = 0;
+        choosenPlant = null;
         Poop();
     }
 
@@ -638,13 +694,12 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     void Poop()
     {
         GameObject poopObj = Instantiate(poopPrefab, transform.position, Quaternion.identity);
+        Poop poop = poopObj.GetComponent<Poop>();
+        if(poop != null) 
+        {
+            poop.ShouldMutate = isMutated;
+        }
         return;
-
-        //if (poop.Count > 0)
-        //{
-        //    int choosenPoop = Random.Range(0, poop.Count);
-        //    GameObject waste = Instantiate(poop[choosenPoop], transform.position, Quaternion.identity);
-        //}
     }
 
 
@@ -667,33 +722,100 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
     }
     //Prototype can only handle one enemy in the sceen, can be changed later
+
+    Boss GetNearestEnemy(List<Boss> bossList) 
+    {
+        //Method for getting the nearest enemy
+        if (bossList.Count == 0 || bossList == null) 
+        {
+            return null;
+        }
+        Boss closestBoss = bossList[0];
+        float bestDistance = Vector3.Distance(transform.position, closestBoss.transform.position);
+        foreach(Boss boss in bossList) 
+        {
+            
+            if(closestBoss == boss) continue;
+
+            float distance = Vector3.Distance(transform.position, boss.transform.position);
+            if(distance < bestDistance) 
+            { 
+                closestBoss = boss;
+                bestDistance = distance;
+            }
+        }
+
+        BossMovement bossMovement = closestBoss.GetComponent<BossMovement>();
+
+        //If distance is to high then the animal shouldent "see" the boss
+        if (Vector3.Distance(transform.position, closestBoss.transform.position) > seeBossRange)
+        {
+            //closestBoss.MovementScript.IsBossTraversable(bossTile);
+            closestBoss = null;
+            return closestBoss;
+        }
+        //More expensive calulation but if the boss isnet on a traversable tile (water) then the animal will ignore it
+        else if (!bossMovement.IsBossTraversable(tileManager.GetTile(closestBoss.transform.position)))
+        {
+            closestBoss = null;
+            return closestBoss;
+        }
+
+
+            return closestBoss;
+    }
+
     void BossFigth() // commented out because BossManager now supports multiple bosses, the CurrentBoss property no longer exists.
     {
+
         if (health > 25)
         {
-            //currentAttackTime += Time.deltaTime;
-            //Vector3 bossPosition = BossManager.Instance.CurrentBoss.transform.position;
-            //bossPosition.y = 0.5f;
-            //Vector3 directionToBoss = Vector3.Normalize(bossPosition - transform.position);
-            
-            //transform.LookAt(bossPosition);
-            //transform.position = Vector3.MoveTowards(transform.position, bossPosition - directionToBoss, runSpeed * Time.deltaTime);
-            //float distanceToBoss = Vector3.Distance(bossPosition, transform.position);
+            currentAttackTime += Time.deltaTime;
+            Boss nearestBoss = GetNearestEnemy(activeBosses); //Gets the nearest enemy and chooses to attack it
+            if(nearestBoss == null) 
+            {
+                PathfindingWalk(); //If nothing the animal should walk around
+                return;
+            }
+            Vector3 bossposition = nearestBoss.transform.position;
+            Vector3 directionToBoss = Vector3.Normalize(bossposition - transform.position);
 
-            //if(distanceToBoss < attackDistance)
-            //{
-            //    if(currentAttackTime >= maxAttackTime)
-            //    {
-            //        BossHealth bossHealth = BossManager.Instance.CurrentBoss.GetComponent<BossHealth>();
-            //        if(bossHealth != null)
-            //        {
-            //            bossHealth.TakeDamage(damage);
-            //            currentAttackTime = 0;
-            //        }
-            //    }
-            //}
+            transform.LookAt(bossposition);
+            AnimalWalkMoveTowards((bossposition - directionToBoss), runSpeed);
+            float distanceToBoss = Vector3.Distance(bossposition, transform.position);
+
+            if (distanceToBoss < attackDistance)
+            {
+                if (currentAttackTime >= maxAttackTime)
+                {
+                    BossHealth bossHealth = nearestBoss.GetComponent<BossHealth>();
+                    if (bossHealth != null)
+                    {
+                        bossHealth.TakeDamage(damage);
+                        currentAttackTime = 0;
+                    }
+                }
+            }
         }
     }
+
+    //DeityLogic
+    void HitByLightning(LightningEventData tile) 
+    {
+        if (tileManager.GetTile(transform.position) == tile.Tile && lightningHitCount >= 1)
+        {
+            Debug.LogWarning("Happiness should be zero");
+            Happiness = 0;
+        }
+        else if (tileManager.GetTile(transform.position) == tile.Tile && lightningHitCount < 1) 
+        {
+            lightningHitCount++;
+            Debug.LogWarning(lightningHitCount);
+            tired = 100;
+            lightningHitCount++;
+        }
+    }
+
 
     //Method for making the animal stand in place
     void StandStill()
@@ -705,18 +827,36 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     //Overload incase of wanting to play VFX on the animal when they stand still
     void StandStill(ParticleSystem VFX) 
     { 
+
+    }
+
+    void standstill(float waitTime) 
+    { 
+        standStillTimerMax = waitTime;
+        standstillTimerCurrent += 1 * Time.deltaTime;
+
+        if (standstillTimerCurrent > standStillTimerMax) 
+        {
+            standstillTimerCurrent = 0;
+            //Anther utility value called shocked or something that can be called from deity powers
+        }
+    
     }
 
     void Sleep() 
     {
         StandStill();
+        vfxManager.Subscribe_ContinousPlay(this.gameObject, vfxManager.GetParticleSystem(VFXenum.animal_sleep));
         currentSleepTime += Time.deltaTime;
         if (currentSleepTime > sleepTimeMax)
         {
             tired = 0;
             currentSleepTime = 0;
+            lightningHitCount = 0;
+            vfxManager.UnSubscribe_StopContiniousPlay(this.gameObject);
         }
     }
+
 
     /// <summary>
     /// ///////////////////////////////////Procreation
@@ -787,7 +927,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
             if (distance < 1.5f)
             {
-                //vfxManager.GetSetAndDestroyVFX(VFXenum.animal_mate, transform.position);
+                vfxManager.GetSetAndDestroyVFX(VFXenum.animal_mate, transform.position);
+                soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.cowMoo), 1, 100, 0.1f);
 
                 //Instantiate new animal
                 Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
@@ -825,16 +966,22 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     }
 
     //Can be called to make animals have a set point
-    public void AnimalWalkMoveTowards(Vector3 point) 
+    public void AnimalWalkMoveTowards(Vector3 point, float speed) 
     {
-        transform.LookAt(point);
+        transform.LookAt(new Vector3(point.x, transform.position.y, point.z));
+        //transform.LookAt(point);
 
         //Makes sure the animal stays at the tileheight its on
-        Vector2 currentPostion = new Vector2((int)transform.position.x,(int) transform.position.z);
+        //Vector2 currentPostion = new Vector2((int)transform.position.x,(int) transform.position.z);
+        Vector2 currentPostion = new Vector2(transform.position.x, transform.position.z);
         Tile currentTile = tileManager.GetTile(currentPostion);
         //Vector3 newPoint = new Vector3(point.x, currentTile.position.y + transform.localScale.y / 2, point.z);
         Vector3 newPoint = new Vector3(point.x, currentTile.GetHeight() + transform.localScale.y / 2, point.z);
-        transform.position = Vector3.MoveTowards(transform.position, newPoint, walkSpeed * Time.deltaTime);
+
+        //Test speed
+        float activeSpeed = ActiveSpeed(currentTile);
+
+        transform.position = Vector3.MoveTowards(transform.position, newPoint, activeSpeed * Time.deltaTime);
 
         //Makes sure the animal moves fast enough to the top of the tile, otherwise it will move through the tile
 
@@ -845,6 +992,23 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         else if (transform.position.y > currentTile.GetHeight() + transform.localScale.y / 2)
         {
             transform.position -= new Vector3(0, 0.5f, 0) * Time.deltaTime;
+        }
+    }
+
+    //Checks which speed that should be applied for movement
+    float ActiveSpeed(Tile tile) 
+    {
+        if(BossThreat >= 1) 
+        {
+            return runSpeed;
+        }
+        else if (tile.Type == TileType.Lake) 
+        {
+            return waterSpeed;
+        }
+        else 
+        {
+            return walkSpeed;
         }
     }
 
@@ -875,6 +1039,62 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         return info;
     }
 
+
+    //Started making the popup logic
+    public void InstantiatePopUp() 
+    { 
+        AnimalGUIInfo displayInfo = GetAnimalGUIInformation();
+        if(popUpBubble != null && !HasPopupBubble) 
+        { 
+            GameObject bubble = Instantiate(popUpBubble, transform);
+            bubble.transform.position = new Vector3(transform.position.x - 2, transform.position.y + 3, transform.position.z);
+            bubble.transform.SetParent(transform, false);
+            //GetSetChildrenTMP(bubble, displayInfo);
+            PopupScript bubblePopup = bubble.GetComponent<PopupScript>();
+            if (bubblePopup != null)
+            {
+                bubblePopup.SetPopupValues(displayInfo);
+            }
+            HasPopupBubble = true;
+            bubble.transform.LookAt(Camera.main.transform);
+            StartCoroutine(PopRemove(bubble));
+        }
+    }
+
+    //void GetSetChildrenTMP(GameObject popup, AnimalGUIInfo info) 
+    //{
+    //    TextMeshPro Title = transform.Find("Background/ForeGroundBackground/Title_TMP").GetComponent<TextMeshPro>();
+    //    TextMeshPro happiness = transform.Find("Background/ForeGroundBackground/Happiness_TMP").GetComponent<TextMeshPro>();
+    //    TextMeshPro hunger = transform.Find("Background/ForeGroundBackground/Hunger_TMP").GetComponent<TextMeshPro>();
+    //    TextMeshPro sleepy = transform.Find("Background/ForeGroundBackground/Sleepy_TMP").GetComponent<TextMeshPro>();
+    //    TextMeshPro tired = transform.Find("Background/ForeGroundBackground/Tired_TMP").GetComponent<TextMeshPro>();
+    //    TextMeshPro mating = transform.Find("Background/ForeGroundBackground/Mating_TMP").GetComponent<TextMeshPro>();
+
+    //    if (Title == null || happiness == null || hunger == null || sleepy ==null || tired == null || mating == null) 
+    //    {
+    //        Debug.Log("GetSetChildrenTMP; didnet get the textmeshpro to values");
+    //        return;
+    //    }
+    //    Title.text = "Animal";
+    //    hunger.text += info.Hunger.ToString();
+    //    sleepy.text += info.Tired.ToString();
+    //    tired.text += info.Tired.ToString();
+    //    mating.text += info.MatingSeason.ToString();
+    //}
+
+    IEnumerator PopRemove(GameObject bubble) 
+    {
+        yield return new WaitForSeconds(10);
+        HasPopupBubble = false;
+        DestroyPopUp(bubble);
+        
+    }
+
+    void DestroyPopUp(GameObject bubble) 
+    {
+        Destroy(bubble);
+    }
+
     //If we decide to have animals lose health
     public void TakeDMG(float amount) 
     { 
@@ -892,7 +1112,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     }
 
     //For later standstill when deity to call it
-    public void InvokeStandStill() 
+    public void InvokeStandStill(float time) 
     {
         StandStill();
     }
