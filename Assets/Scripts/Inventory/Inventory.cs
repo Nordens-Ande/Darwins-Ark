@@ -13,7 +13,14 @@ public class Inventory : MonoBehaviour
     [SerializeField, ReadOnly] int maxSlots = 16;
     [SerializeField, ReadOnly] List<InventorySlot> slots = new List<InventorySlot>();
 
-    public System.Action OnInventoryChanged;
+    public event System.Action OnInventoryChanged;
+    public event System.Action<InventorySlot[]> OnInventoryAdded;
+    public event System.Action<InventorySlot[]> OnInventoryRemoved;
+
+    // getters and setters
+    public List<InventorySlot> Slots => slots;
+    public int MaxSlots => maxSlots;
+
 
     private void Awake()
     {
@@ -31,7 +38,6 @@ public class Inventory : MonoBehaviour
     // true if the full amount we wanted to add could be added, else false
     public bool AddSeed(Seed seedToAdd, int amount = 1)
     {
-
         // we try to add the seed to an existing slot that has the same seed
         foreach (var slot in slots)
         {
@@ -113,9 +119,7 @@ public class Inventory : MonoBehaviour
 
 
 
-    // getters and setters
-    public List<InventorySlot> Slots => slots;
-    public int MaxSlots => maxSlots;
+
 
 
 
