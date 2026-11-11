@@ -29,6 +29,7 @@ public class InputModeController : SingletonManager<InputModeController>
     private InputActionMap cameraMap;
     //private InputActionMap itemMap;
     private InputActionMap systemMap;
+    private InputActionMap selectingMap;
 
     // When this button is pressed we enter the alternative control mode, where it may fallback to another subset of controls.
     private InputAction alternativeActionOverride;
@@ -47,6 +48,7 @@ public class InputModeController : SingletonManager<InputModeController>
         cameraMap = inputActions.FindActionMap("Camera", true);
         //itemMap = inputActions.FindActionMap("Item", true);
         systemMap = inputActions.FindActionMap("System", true);
+        selectingMap = inputActions.FindActionMap("Selecting", true);
 
         alternativeActionOverride = systemMap.FindAction("AlternativeOverride", true);
     }
@@ -69,6 +71,7 @@ public class InputModeController : SingletonManager<InputModeController>
         terraformMap.Disable();
         cameraMap.Disable();
         systemMap.Disable();
+        selectingMap.Disable();
 
         isAlternativeActionActive = false;
     }
@@ -94,6 +97,7 @@ public class InputModeController : SingletonManager<InputModeController>
             case GameMode.Game:
                 cameraMap.Enable();
                 terraformMap.Disable();
+                selectingMap.Enable();
                 break;
 
             //case GameMode.Deity:
@@ -103,6 +107,7 @@ public class InputModeController : SingletonManager<InputModeController>
             case GameMode.Terraform:
                 cameraMap.Disable();
                 terraformMap.Enable();
+                selectingMap.Disable();
                 break;
 
             //case GameMode.Planting:

@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class VFXManager : SingletonManager<VFXManager>
 {
-    public static VFXManager instance = null;
+    //public static VFXManager instance = null;
 
-    private Dictionary<VFXenum, ParticleSystem> particleDictonary;
+    private Dictionary<VFXenum, ParticleSystem> particleDictonary = new Dictionary<VFXenum, ParticleSystem>();
     [SerializeField] private List<VFX_KeyAndParticle> contentList = new List<VFX_KeyAndParticle>();
 
     //List for particlesystems that should play indenfinently
@@ -67,6 +67,19 @@ public class VFXManager : SingletonManager<VFXManager>
         }
     }
 
+    public void GetSetAndDestroyVFX(VFXenum key, Vector3 position, Vector3 rotation)
+    {
+        particleDictonary.TryGetValue(key, out var particle);
+
+        if (particle != null)
+        {
+            Vector3 spawnPoint = position;
+            ParticleSystem obj = Instantiate(particle, spawnPoint, Quaternion.Euler(rotation));
+            obj.Play();
+            StartCoroutine(DestroyParticleSystem(obj));
+        }
+    }
+
     IEnumerator DestroyParticleSystem(ParticleSystem particle)
     {
         while (particle.isPlaying || particle.IsAlive())
@@ -80,13 +93,16 @@ public class VFXManager : SingletonManager<VFXManager>
     //New method for subscribing to the vfx manager to continously play a particlesystem without destroying it 
     //Has the subscriber pattern and makes sure that only vfx manager handles the particlesystems logic
     public void Subscribe_ContinousPlay(GameObject obj, ParticleSystem particleSystem) 
-    { 
-        subscriberList.TryAdd(obj, particleSystem);
-        subscriberList.TryGetValue(obj, out var particle);
-        if(particle != null) 
+    {
+        if (subscriberList.TryGetValue(obj, out var test) != false) return; //Makes sure the obj isnet subsrcibed
+        if (particleSystem != null)
         {
-            particleSystem.Play();
+            ParticleSystem particles = Instantiate(particleSystem, obj.transform.position, Quaternion.identity);
+            subscriberList.TryAdd(obj, particles);
         }
+
+        subscriberList.TryGetValue(obj, out var particle);
+        particle.Play();
     }
 
     public void UnSubscribe_StopContiniousPlay(GameObject obj) 

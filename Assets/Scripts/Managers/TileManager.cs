@@ -89,13 +89,13 @@ namespace Assets.Scripts.Environment
             GenerateSaltWater();
 
             // Temp water creation
-            Tile[] sourceWaters = new Tile[] { GetTile(new Vector2Int(0, 0)), GetTile(new Vector2Int(1, 0)), GetTile(new Vector2Int(-1, 0)), GetTile(new Vector2Int(0, 1)), GetTile(new Vector2Int(0, -1)) };
-            foreach (Tile sourceWater in sourceWaters)
-            {
-                sourceWater.WaterHeight = sourceWater.Height - 0.15f;
-                sourceWater.Height = 0;
-                sourceWater.SetType(TileType.Lake);
-            }
+            //Tile[] sourceWaters = new Tile[] { GetTile(new Vector2Int(0, 0)), GetTile(new Vector2Int(1, 0)), GetTile(new Vector2Int(-1, 0)), GetTile(new Vector2Int(0, 1)), GetTile(new Vector2Int(0, -1)) };
+            //foreach (Tile sourceWater in sourceWaters)
+            //{
+            //    sourceWater.WaterHeight = sourceWater.Height - 0.15f;
+            //    sourceWater.Height = 0;
+            //    sourceWater.SetType(TileType.Lake);
+            //}
 
             GenerateSweetWater();
         }
@@ -258,7 +258,7 @@ namespace Assets.Scripts.Environment
             }
         }
 
-        private void GenerateSaltWater()
+        public void GenerateSaltWater()
         {
             if (!createWater)
                 return;
@@ -266,8 +266,13 @@ namespace Assets.Scripts.Environment
             if (oceanObject != null)
                 Destroy(oceanObject);
 
-            List<Vector3> vertices = new List<Vector3>();
-            List<int> triangles = new List<int>();
+            oceanObject = new GameObject("Salt Water Group");
+            oceanObject.transform.parent = transform;
+
+            oceanObject.transform.localPosition = oceanObject.transform.localPosition + new Vector3(0, waterLevel, 0);
+
+            List<Vector3> vertices;
+            List<int> triangles;
 
             void AddFace(Vector3 a, Vector3 b, Vector3 c, Vector3 d)
             {
@@ -289,45 +294,67 @@ namespace Assets.Scripts.Environment
 
             foreach (Chunk chunk in chunks)
             {
+                vertices = new List<Vector3>();
+                triangles = new List<int>();
+
                 HashSet<Vector2Int> saltWater = chunk[TileType.Ocean];
-                foreach (Vector2Int tile in saltWater)
+                
+                if (saltWater.Count < chunkSize * 2)
                 {
-                    Vector3 tilePos = new Vector3(tile.x, 0/*waterLevel*/, tile.y);
+                    foreach (Vector2Int tile in saltWater)
+                    {
+                        Vector3 tilePos = new Vector3(tile.x, 0/*waterLevel*/, tile.y);
+                        AddFace(
+                            new Vector3(-0.5f, 0, 0.5f) + tilePos,  // top-left
+                            new Vector3(+0.5f, 0, 0.5f) + tilePos,  // top-right
+                            new Vector3(+0.5f, 0, -0.5f) + tilePos, // bottom-right
+                            new Vector3(-0.5f, 0, -0.5f) + tilePos  // bottom-left
+                        );
+                    }
+                }
+                else
+                {
+                    Vector3 chunkPos = new Vector3(chunk.position.x - 0.5f, 0, chunk.position.y - 0.5f);
                     AddFace(
-                        new Vector3(-0.5f, 0, 0.5f) + tilePos,  // top-left
-                        new Vector3(+0.5f, 0, 0.5f) + tilePos,  // top-right
-                        new Vector3(+0.5f, 0, -0.5f) + tilePos, // bottom-right
-                        new Vector3(-0.5f, 0, -0.5f) + tilePos  // bottom-left
+                        new Vector3(0, 0, chunkSize) + chunkPos, // top-left
+                        new Vector3(chunkSize, 0, chunkSize) + chunkPos, // top-right
+                        new Vector3(chunkSize, 0, 0) + chunkPos, // bottom-right
+                        new Vector3(0, 0, 0) + chunkPos  // bottom-left
                     );
                 }
 
 
+                GameObject waterChunk = new GameObject($"Salt Water Chunk {chunk.position}", typeof(MeshRenderer), typeof(MeshFilter));
+                waterChunk.transform.parent = oceanObject.transform;
+                //waterChunk.transform.localPosition = new Vector3(chunk.position.x, 0, chunk.position.y);
+                waterChunk.transform.localPosition = Vector3.zero;
+
+                waterChunk.GetComponent<MeshRenderer>().material = waterMaterial;
+
+                Mesh mesh = new Mesh()
+                {
+                    name = "Chunk Mesh"
+                };
+
+                mesh.SetVertices(vertices);
+                mesh.SetTriangles(triangles, 0);
+
+                mesh.RecalculateNormals();
+                mesh.RecalculateBounds();
+
+                waterChunk.GetComponent<MeshFilter>().sharedMesh = mesh;
             }
 
             //waterObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            oceanObject = new GameObject("Salt Water Object", typeof(MeshRenderer), typeof(MeshFilter));
-            oceanObject.transform.parent = transform;
 
-            oceanObject.transform.localPosition = oceanObject.transform.localPosition + new Vector3(0, waterLevel, 0);
+            //oceanObject = new GameObject("Salt Water Object", typeof(MeshRenderer), typeof(MeshFilter));
+
             //waterObject.transform.localScale = new Vector3(chunkGridSize.x * chunkSize, chunkGridSize.y * chunkSize, 1f);
             //waterObject.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
 
 
             // Water Object mesh and material
-            oceanObject.GetComponent<MeshRenderer>().material = waterMaterial;
 
-            Mesh mesh = new Mesh()
-            {
-                name = "Chunk Mesh"
-            };
-
-            mesh.SetVertices(vertices);
-            mesh.SetTriangles(triangles, 0);
-
-            mesh.RecalculateNormals();
-            mesh.RecalculateBounds();
-
-            oceanObject.GetComponent<MeshFilter>().sharedMesh = mesh;
         }
 
         private enum Direction

@@ -65,6 +65,11 @@ namespace Assets.Scripts.Environment
         }
 
         public TileType Type => type;
+
+        public bool IsWater => type == TileType.River || type == TileType.Lake || type == TileType.Ocean;
+        public bool IsSweetWater => type == TileType.River || type == TileType.Lake;
+        public bool IsSaltWater => type == TileType.Ocean;
+
         public Plant CurrentPlant => currentPlant;
 
         public bool IsWetFromRain => isWetFromRain;
@@ -91,6 +96,23 @@ namespace Assets.Scripts.Environment
             this.position = position;
             this.localPosition = localPosition;
             this.type = type;
+
+            isWetFromRain = false;
+            runRainTimer = false;
+            wetTimer = 0;
+            wetDuration = 60; // 1 minute
+
+            windStrength = 0;
+            windDirection = Vector3.zero;
+        }
+        public Tile(Chunk owner, Vector2Int index, Vector3 position, Vector3 localPosition, float lakeWaterHeight)
+        {
+            this.owner = owner;
+            this.index = index;
+            this.position = position;
+            this.localPosition = localPosition;
+            waterHeight = lakeWaterHeight;
+            type = TileType.Lake;
 
             isWetFromRain = false;
             runRainTimer = false;
@@ -173,20 +195,21 @@ namespace Assets.Scripts.Environment
                         isWetFromRain = false;
                         runRainTimer = false;
                         wetTimer = 0;
-                        return;
+                        
                     }
-                    wetTimer += dt;
+                    else
+                    {
+                        wetTimer += dt;
+                    }
                 }
             }
-            if (windStrength <= 0) return;
-            windStrength -= 1 * Time.deltaTime;
+            if (windStrength <= 0) return; // dont return if we add stuff below later
+            windStrength -= 2 * Time.deltaTime;
             if(windStrength <= 0)
             {
                 windStrength = 0;
                 windDirection = Vector3.zero;
             }
-            //if(position.x == 0 && position.z == 0)
-            //    Debug.Log(windStrength);
         }
 
         // This method is called every time the tile gets dirty, currently the tile itself will call this, but it could be more applicable in future to only have the chunk do it

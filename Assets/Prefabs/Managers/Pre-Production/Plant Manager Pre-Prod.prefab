@@ -44,12 +44,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9ec3c0b88bfe8b4a98818505bf079c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlantManager
-  SecondsForPlantToGrow: 10
+  secondsForPlantToGrow: 10
+  closeToWaterModifier: 1
+  waterModiferFastGrowth: 1.25
+  waterModiferSlowGrowth: 1
+  rainTileModifier: 1
+  rainModifierFastGrowth: 1.25
+  rainModifierSlowGrowth: 1
   plantPrefabToSpawn:
-  - {fileID: 3703582345733772566, guid: 9d83281e4b6364a4bbce31d9758ccd88, type: 3}
-  - {fileID: 7175069855558820537, guid: a7db1c59c01addb40b02cf2d8d146946, type: 3}
+  - {fileID: 1766181494306186939, guid: 2700c8bcf7b742345828960a3fd4fdcd, type: 3}
+  - {fileID: 8007457658437779183, guid: c84ebcb70001c434b8ac03a97f2dc046, type: 3}
+  - {fileID: 8075206581100068775, guid: f6d05b96626608f4c8fa7fcc6ffdc279, type: 3}
+  - {fileID: 6195705317854503237, guid: 018f57ef28ea24e4ab7b379c4ad0e014, type: 3}
+  - {fileID: 7566420249821989923, guid: c25bc5b1510c92242aef825496fdfaab, type: 3}
+  - {fileID: 7566420249821989923, guid: c25bc5b1510c92242aef825496fdfaab, type: 3}
+  - {fileID: 7634980928615890909, guid: 189a0cb9d872cf64bb64d15fe7aff536, type: 3}
+  - {fileID: 2735924917173033678, guid: 45cc58d47d22d064899b90f179a85992, type: 3}
   spawnPlantAllTiles: 0
   spawnPlantAllTilesChance: 20
   useRandomGrowthSpeed: 1
+  minGrowthSpeed: 0.5
+  maxGrowthSpeed: 2
   useRandomPlants: 1
+  useRandomPlantRotation: 1
+  minPlantRotation: 0
+  maxPlantRotation: 360
+  useRandomPlantScale: 1
+  minPlantScale: 0.75
+  maxPlantScale: 1.35
+  useRandomOffsetsFromTile: 1
+  maxTileOffset: 0.25
+  massPlantPlantsAsGrown: 1
   plants: []

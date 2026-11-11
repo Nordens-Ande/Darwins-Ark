@@ -66,8 +66,7 @@ public class BossRelocateState : BossAIState
         for (int i = possibleTiles.Count - 1; i > 0; i--)
         {
             int j = UnityEngine.Random.Range(0, i + 1);
-            (possibleTiles[i], possibleTiles[j]) =
-                (possibleTiles[j], possibleTiles[i]);
+            (possibleTiles[i], possibleTiles[j]) = (possibleTiles[j], possibleTiles[i]);
         }
 
         Tile startTile = tileManager.GetTile(boss.transform.position);

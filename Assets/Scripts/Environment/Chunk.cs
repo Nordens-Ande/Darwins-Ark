@@ -9,6 +9,7 @@ namespace Assets.Scripts.Environment
     public class Chunk
     {
         private IslandNoise noise = null;
+        private LakeGenerator lakeGenerator = null;
 
         private Tile[,] tiles;
         private Dictionary<TileType, HashSet<Vector2Int>> tileTypes;
@@ -38,6 +39,7 @@ namespace Assets.Scripts.Environment
         public Chunk(Vector2 position, int size)
         {
             noise = IslandNoise.Instance;
+            lakeGenerator = LakeGenerator.Instance;
 
             this.position = position;
             this.size = size;
@@ -57,10 +59,20 @@ namespace Assets.Scripts.Environment
                     TileType type = TileType.Ocean; //type is assigned to avoid compile-time error
 
                     float y = useNoise ? noise.GetHeight(x + position.x, z + position.y, out type) : 0f;
-                    tiles[x, z] = new Tile(this, new Vector2Int(x, z), new Vector3(x + position.x, y, z + position.y), new Vector3(x, y, z), type);
+
+                    // Currently we are checking every tile if it could be a lake (even the ocean) this could be optimized
+                    if (lakeGenerator != null && lakeGenerator.IsLake(Mathf.RoundToInt(x + position.x), Mathf.RoundToInt(z + position.y)))
+                    {
+                        float waterHeight = lakeGenerator.GetLakeWaterHeight(Mathf.RoundToInt(x + position.x), Mathf.RoundToInt(z + position.y));
+                        tiles[x, z] = new Tile(this, new Vector2Int(x, z), new Vector3(x + position.x, waterHeight - 0.65f, z + position.y), new Vector3(x, waterHeight - 0.65f, z), waterHeight);
+                    }
+                    else
+                    {
+                        tiles[x, z] = new Tile(this, new Vector2Int(x, z), new Vector3(x + position.x, y, z + position.y), new Vector3(x, y, z), type);
+                    }
 
                     Vector2Int gridPosition = new Vector2Int((int)tiles[x, z].Position.x, (int)tiles[x, z].Position.z);
-                    tileTypes[type].Add(gridPosition);
+                    tileTypes[tiles[x, z].Type].Add(gridPosition);
                 }
             }
         }
@@ -146,11 +158,12 @@ namespace Assets.Scripts.Environment
                     //Tile tile = GetTile(x, z, Space.Self);
                     Tile tile = tiles[x, z];
                     // Rules for Tile conversion
-                    if (tile.Height > tile.WaterHeight /*&& tile.Type != TileType.Grass*/)
+                    if (tile.IsSweetWater && tile.Height > tile.WaterHeight)
                     {
                         tile.SetType(TileType.Grass);
                     }
-                    if (tile.Type == TileType.River)
+
+                    if (tile.HasPlant && tile.IsWater)
                     {
                         tile.ClearPlant();
                     }

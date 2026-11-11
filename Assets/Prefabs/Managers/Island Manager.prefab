@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 1585283368217137284}
   - component: {fileID: 3712244531883561027}
   - component: {fileID: 5928225880126638516}
+  - component: {fileID: 3353877339190323039}
   m_Layer: 0
   m_Name: Island Manager
   m_TagString: Untagged
@@ -48,10 +49,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Environment.TileManager
   chunkObjects: []
   chunkSize: 8
-  chunkGridSize: {x: 8, y: 8}
+  chunkGridSize: {x: 18, y: 18}
   createWater: 1
   waterLevel: 0.45
+  waterFlowDistance: 6
   waterMaterial: {fileID: 2100000, guid: bbfea793355d22b4998dbc051bcd2de8, type: 2}
+  oceanObject: {fileID: 0}
+  waterObject: {fileID: 0}
 --- !u!114 &3712244531883561027
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -80,10 +84,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Environment.IslandNoise
   seed: -1
   islandRadius: 18
-  coastlineFrequency: 1
-  coastlineVariation: 0.15
+  coastlineFrequency: 0.65
+  coastlineVariation: 0.65
   coastlineNoiseLevels:
-    largeScaler: 2
+    largeScaler: 1.56
     largeOffset: 0
     mediumScaler: 4
     mediumOffset: 100
@@ -98,3 +102,28 @@ MonoBehaviour:
     mediumOffset: 100
     smallScaler: 0.08
     smallOffset: 200
+  slopeOceanFloor: 1
+--- !u!114 &3353877339190323039
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8073856895723802328}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 385de3d7865cf75429a4edda55be6ba6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.Environment.LakeGenerator
+  seedOffset: 0
+  lakeMask: 02000000
+  lakeIterations: 6
+  initialLakeChance: 0.4
+  resolveLakeAmount: 1
+  minLakeObjectCount: 2
+  maxLakeTileCount: 22
+  lakeNeighborhood: 0
+  customNeighborhood: []
+  MaxLakeNeighborsForLakeToLand: 3
+  MinLakeNeighborsForLandToLake: 5
+  drawGizmo: 0

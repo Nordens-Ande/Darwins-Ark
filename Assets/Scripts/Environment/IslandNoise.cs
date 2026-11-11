@@ -1,8 +1,12 @@
 using Assets.Scripts.Environment;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.UIElements;
 
 namespace Assets.Scripts.Environment
@@ -38,6 +42,7 @@ namespace Assets.Scripts.Environment
         }
 
         private TileManager tileManager;
+        private LakeGenerator lakeGenerator;
 
         [SerializeField] private int seed = -1;
 
@@ -70,17 +75,33 @@ namespace Assets.Scripts.Environment
         [Header("Ocean")]
         [SerializeField] private bool slopeOceanFloor = true;
 
+        public int Seed => seed;
+
         public float MaxIslandRadius => islandRadius * (1 + coastlineVariation);
 
-        void Start()
+        protected override void Awake()
         {
-            tileManager = TileManager.Instance;
+            base.Awake();
 
             if (seed < 0)
             {
                 //seed = (int)System.DateTime.Now.Ticks;
                 seed = UnityEngine.Random.Range(short.MinValue, short.MaxValue);
             }
+
+            UnityEngine.Random.InitState(seed);
+        }
+
+        void Start()
+        {
+            tileManager = TileManager.Instance;
+            lakeGenerator = LakeGenerator.Instance;
+
+            //if (seed < 0)
+            //{
+            //    //seed = (int)System.DateTime.Now.Ticks;
+            //    seed = UnityEngine.Random.Range(short.MinValue, short.MaxValue);
+            //}
         }
 
         // Update is called once per frame
@@ -124,7 +145,7 @@ namespace Assets.Scripts.Environment
         //    return 1f - Mathf.SmoothStep(0.98f, 1.0f, distance01);
         //}
 
-        float GetTerrainHeight(Vector2 worldPos)
+        private float GetTerrainHeight(Vector2 worldPos)
         {
             //float large = Mathf.PerlinNoise(worldPos.x * 0.1f + seed, worldPos.y * 0.1f + seed);
 
@@ -222,11 +243,25 @@ namespace Assets.Scripts.Environment
 
             return heightResult;
         }
+
+
 #if UNITY_EDITOR
         private void OnValidate()
         {
             if (!Application.isPlaying || tileManager == null)
                 return;
+
+            UnityEngine.Random.InitState(seed);
+
+            //lakeGenerator = new LakeGenerator(this);
+            
+            if (lakeGenerator != null)
+            {
+                lakeGenerator.GenerateLakes();
+
+                if (lakeGenerator.resolveLakeAmount)
+                    lakeGenerator.ResolveLakes();
+            }
 
             for (int i = 0; i < tileManager.chunks.Count; i++)
             {
@@ -245,6 +280,8 @@ namespace Assets.Scripts.Environment
 
                 tileManager.chunks[i].isDirty = true;
             }
+
+            tileManager.GenerateSaltWater();
         }
 #endif
     }
