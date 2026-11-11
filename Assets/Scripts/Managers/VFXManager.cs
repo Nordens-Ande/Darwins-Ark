@@ -67,6 +67,19 @@ public class VFXManager : SingletonManager<VFXManager>
         }
     }
 
+    public void GetSetAndDestroyVFX(VFXenum key, Vector3 position, Vector3 rotation)
+    {
+        particleDictonary.TryGetValue(key, out var particle);
+
+        if (particle != null)
+        {
+            Vector3 spawnPoint = position;
+            ParticleSystem obj = Instantiate(particle, spawnPoint, Quaternion.Euler(rotation));
+            obj.Play();
+            StartCoroutine(DestroyParticleSystem(obj));
+        }
+    }
+
     IEnumerator DestroyParticleSystem(ParticleSystem particle)
     {
         while (particle.isPlaying || particle.IsAlive())

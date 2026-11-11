@@ -693,7 +693,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     {
         plant.EatPlant();
         soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.cowEat), 1, 100, 0.1f);
-        vfxManager.GetSetAndDestroyVFX(VFXenum.animal_eat, transform.position);
+        vfxManager.GetSetAndDestroyVFX(VFXenum.animal_eat, transform.position, new Vector3(-90, 0, 0));
         hunger = 0;
         choosenPlant = null;
         Poop();
@@ -717,6 +717,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     {
         if (!hasSetExit) 
         {
+            vfxManager.UnSubscribe_StopContiniousPlay(this.gameObject);
             leaveVec = new Vector3(0.1f + Random.Range(-1, 1), 0, 0.1f + Random.Range(-1, 1));
             hasSetExit = true;
         }
