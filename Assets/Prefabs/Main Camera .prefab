@@ -154,7 +154,8 @@ MonoBehaviour:
   acceleration: 12
   maxSpeed: 40
   zoomModifer: 3
-  cameraBoundsMargin: 10
+  cameraBoundsMargin: -5
+  camerBoundsOffset: {x: -15, y: -15}
   zoomSpeed: 40
   minZoom: 4
   maxZoom: 15
@@ -169,26 +170,26 @@ MonoBehaviour:
   movementAction:
     m_Name: Movement
     m_Type: 0
-    m_ExpectedControlType: 
-    m_Id: 03122205-fe3d-403b-acc3-af9882089e10
+    m_ExpectedControlType: Vector2
+    m_Id: be684bda-6355-4012-9126-b92182b803e0
     m_Processors: 
     m_Interactions: 
     m_SingletonActionBindings: []
-    m_Flags: 0
+    m_Flags: 1
   zoomAction:
     m_Name: Zoom
-    m_Type: 0
+    m_Type: 1
     m_ExpectedControlType: 
-    m_Id: 8ee49db4-ba42-4133-8a86-d0128c1f7e46
+    m_Id: 46673838-86b9-45de-8e42-a6bfa6266c1c
     m_Processors: 
     m_Interactions: 
     m_SingletonActionBindings: []
     m_Flags: 0
   angleAction:
     m_Name: Angle
-    m_Type: 0
+    m_Type: 1
     m_ExpectedControlType: 
-    m_Id: 2a064b08-210e-41ef-aa50-5e30378f340d
+    m_Id: 809fc3ee-4a2a-480d-8676-24fb314c5563
     m_Processors: 
     m_Interactions: 
     m_SingletonActionBindings: []

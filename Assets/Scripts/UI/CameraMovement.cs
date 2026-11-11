@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using Assets.Scripts.Environment;
 using System.Collections;
+using Unity.Mathematics;
+using System;
 
 // This is the main script for how the camera moves around
 // the script is supposed to be attached to the camera object in unity
@@ -12,7 +14,8 @@ using System.Collections;
 public class CameraMovement : MonoBehaviour
 {
     public static CameraMovement Instance { get; private set; }
-    TileManager tileManager;
+    private TileManager tileManager;
+    private IslandNoise noise;
 
     Camera cam = null;
     [Header("Movement Settings")]
@@ -21,6 +24,7 @@ public class CameraMovement : MonoBehaviour
     [SerializeField] private float maxSpeed = 40f;
     [SerializeField] private float zoomModifer = 3.0f; // final speed multiplication
     [SerializeField] private float cameraBoundsMargin = 10f; // how far outside the island the camera can go before it stops moving
+    [SerializeField] private Vector2 camerBoundsOffset = new Vector2(0, -10);
     [Space]
     [Header("Zoom Settings")]
     [SerializeField] private float zoomSpeed = 40f;
@@ -76,6 +80,7 @@ public class CameraMovement : MonoBehaviour
     private void Start()
     {
         tileManager = TileManager.Instance;
+        noise = IslandNoise.Instance;
         cam = GetComponent<Camera>();
         cam.nearClipPlane = -50.0f; //we dont clip the camera to the ground
         cam.farClipPlane = 300.0f; 
@@ -276,22 +281,22 @@ public class CameraMovement : MonoBehaviour
 
     private Vector3 GetClampedPosition(Vector3 position)
     {
-        if (tileManager != null)
+        //if (tileManager != null)
+        //{
+        //    int chunkSize = tileManager.ChunkSize;
+        //    Vector2Int gridSize = tileManager.ChunkGridSize;
+
+        //    
+        //}
+        if (noise != null)
         {
-            int chunkSize = tileManager.ChunkSize;
-            Vector2Int gridSize = tileManager.ChunkGridSize;
+            float radius = noise.MaxIslandRadius;
+            
 
-            float halfWidth = (gridSize.x * chunkSize) / 2f;
-            float halfHeight = (gridSize.y * chunkSize) / 2f;
-
-            float minX = -halfWidth;
-            float maxX = halfWidth;
-            float minZ = -halfHeight;
-            float maxZ = halfHeight;
-
-            position.x = Mathf.Clamp(position.x, minX - cameraBoundsMargin, maxX + cameraBoundsMargin);
-            position.z = Mathf.Clamp(position.z, minZ - cameraBoundsMargin, maxZ + cameraBoundsMargin);
+            position.x = Mathf.Clamp(position.x, -radius - cameraBoundsMargin + camerBoundsOffset.x, radius + cameraBoundsMargin + camerBoundsOffset.x);
+            position.z = Mathf.Clamp(position.z, -radius - cameraBoundsMargin + camerBoundsOffset.y, radius + cameraBoundsMargin + camerBoundsOffset.y);
         }
+
         return position;
     }
 
