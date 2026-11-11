@@ -34,7 +34,7 @@ public class UICloudSpawner : MonoBehaviour
     [Tooltip("Higher value = fewer clouds")]
     [SerializeField] private float pixelsPerCloud = 120f;
 
-    [Header("Cloud Size")]
+    [Header("Cloud Edge Size")]                  // Cloud Size Edge?
     [SerializeField]
     private Vector2 minCloudSize =
         new Vector2(60f, 40f);
@@ -42,6 +42,15 @@ public class UICloudSpawner : MonoBehaviour
     [SerializeField]
     private Vector2 maxCloudSize =
         new Vector2(120f, 80f);
+
+    [Header("Cloud Fill Size")]
+    [SerializeField]                      // Different clouds depending on fill or edge?
+    private Vector2 minFillCloudSize =
+        new Vector2(100f, 70f);
+
+    [SerializeField]
+    private Vector2 maxFillCloudSize =
+        new Vector2(200f, 150f);
 
     [Header("Cloud Placement")]
     [SerializeField] private float edgeOffset = 15f;
@@ -434,6 +443,8 @@ public class UICloudSpawner : MonoBehaviour
             CreateCloud(
                 cloudGroup,
                 $"EdgeCloud_{index}"
+                , minCloudSize,
+                maxCloudSize
             );
 
         float t =
@@ -521,7 +532,9 @@ public class UICloudSpawner : MonoBehaviour
 
     private RectTransform CreateCloud(
     RectTransform cloudGroup,
-    string cloudName)
+    string cloudName,
+    Vector2 minSize, Vector2 maxSize
+    )
     {
         GameObject cloud =
             new GameObject(
@@ -602,6 +615,8 @@ public class UICloudSpawner : MonoBehaviour
             CreateCloud(
                 cloudGroup,
                 "FillCloud"
+                , minFillCloudSize,
+                maxFillCloudSize
             );
 
         float halfWidth =
