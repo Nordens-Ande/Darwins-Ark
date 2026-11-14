@@ -9,10 +9,10 @@ public class SoundManager : SingletonManager<SoundManager>
 {
 
     //public static SoundManager Instance = null;
-    [SerializeField] private AudioClip backgroundMusic;
+    [SerializeField] private AudioClip backgroundMusic = null;
     [SerializeField] private AudioSource backgroundMusicPlayer; //Where the backgroundmusic will be played 
     [SerializeField] private List<AudioClip> backgroundMusicList = new List<AudioClip>();
-    private List<AudioClip> tempBackgroundList = new List<AudioClip>();
+    [SerializeField]private List<AudioClip> tempBackgroundList = new List<AudioClip>();
     [SerializeField] private int silenceOffsetMin = 5;
     [SerializeField] private int silenceOffsetMax = 20;
     private bool backgroundMusicIsPlaying = false;
@@ -20,7 +20,7 @@ public class SoundManager : SingletonManager<SoundManager>
     private float currentSongLeangth = 0;
     private float songLeangthMax;
 
-    [SerializeField] private bool debugMusicShuffleSkip = false;
+    [SerializeField] private bool PlayNextSong = false;
 
     //List that holds all the audio in form of scriptable objects created 
     [SerializeField] private List<SO_SoundEffect> soundEffectsList;
@@ -33,6 +33,7 @@ public class SoundManager : SingletonManager<SoundManager>
 
     private void Start()
     {
+        tempBackgroundList.AddRange(backgroundMusicList);
         foreach (SO_SoundEffect audio in soundEffectsList)
         {
             if (audio.Clip == null) continue;
@@ -46,7 +47,6 @@ public class SoundManager : SingletonManager<SoundManager>
     {
         isShuffling = true;
         songLeangthMax = backgroundMusic.length;
-        tempBackgroundList.AddRange(backgroundMusicList);
         StartCoroutine(ShuffleSongs());
         ShuffleBackgroundMusic();
         //StartBackgroundMusic(1f);
@@ -67,7 +67,7 @@ public class SoundManager : SingletonManager<SoundManager>
                 isShuffling = true;
                 backgroundMusicIsPlaying = false;
                 currentSongLeangth = 0;
-                StopBackgroundMusic();
+                //StopBackgroundMusic();
                 StartCoroutine(ShuffleSongs());
 
             }
@@ -78,6 +78,7 @@ public class SoundManager : SingletonManager<SoundManager>
     IEnumerator ShuffleSongs() 
     {
         tempBackgroundList.Remove(backgroundMusic);
+        StopBackgroundMusic();
 
         yield return new WaitForSeconds(Random.Range(silenceOffsetMin, silenceOffsetMax));
 
@@ -97,7 +98,7 @@ public class SoundManager : SingletonManager<SoundManager>
             backgroundMusic = clip;
             songLeangthMax = clip.length;
             StartBackgroundMusic(1f);
-            backgroundMusicIsPlaying = false;
+            backgroundMusicIsPlaying = true;
             isShuffling = false;
         }
 
@@ -205,10 +206,10 @@ public class SoundManager : SingletonManager<SoundManager>
     {
         ShuffleBackgroundMusic();
 
-        if (debugMusicShuffleSkip) 
-        { 
-            currentSongLeangth = songLeangthMax;
-            debugMusicShuffleSkip = false;
+        if (PlayNextSong) 
+        {
+            InstantiateShuffle();
+            PlayNextSong = false;
         }
     }
 }

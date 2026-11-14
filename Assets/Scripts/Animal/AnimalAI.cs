@@ -140,6 +140,9 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     [Header("Popup bubble")]
     [SerializeField] private GameObject popUpBubble;
     private bool HasPopupBubble = false;
+    private GameObject currentPopUpBubble = null;
+    private Canvas canvas;
+    private List<GameObject> popupBubbles = new List<GameObject>();
 
     //Deity
     private int lightningHitCount = 0;
@@ -249,6 +252,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
     void Start()
     {
+        canvas = FindAnyObjectByType<Canvas>();
         MutationRate = 10;
         walkSpeed = 0.75f;
         runSpeed = 1.3f;
@@ -348,11 +352,15 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
             tired += 2;
             matingSeason += 1;
 
-            Happiness = Happiness - hunger / 10;
+            
+            if(hunger > 70) 
+            {
+                Happiness -= 10;
+            }
 
             clockCycleTimeCurrent = 0;
 
-            if(hunger > 60) 
+            if(hunger < 60 && Happiness < 100) 
             {
                 Happiness++;
             }
@@ -465,6 +473,14 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
                 activePathTarget = activePath[pathStage].Position;
                 PathfindingWalk();
             }
+            else 
+            {
+                hasSetPath = false;
+                isIdle = true;
+                pathStage = 0;
+                Idle();
+                return;
+            }
         }
     }
 
@@ -488,6 +504,14 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
                     pathStage = 0;
                     activePathTarget = activePath[pathStage].Position;
                     hasSetPath = true;
+                }
+                else 
+                {
+                    hasSetPath = false;
+                    isIdle = true;
+                    pathStage = 0;
+                    Idle();
+                    return;
                 }
             }
             //Checks distance between position and target in the list
@@ -1051,50 +1075,70 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
 
     //Started making the popup logic
-    public void InstantiatePopUp() 
-    { 
+    //public void InstantiatePopUp() 
+    //{ 
+    //    AnimalGUIInfo displayInfo = GetAnimalGUIInformation();
+    //    if(popUpBubble != null && !HasPopupBubble) 
+    //    { 
+    //        //PopupScript popScript = popUpBubble.GetComponent<>
+    //        GameObject bubble = Instantiate(popUpBubble, transform);
+    //        bubble.transform.position = new Vector3(transform.position.x - 2, transform.position.y + 3, transform.position.z);
+    //        bubble.transform.SetParent(transform, false);
+    //        //GetSetChildrenTMP(bubble, displayInfo);
+    //        PopupScript bubblePopup = bubble.GetComponent<PopupScript>();
+    //        if (bubblePopup != null)
+    //        {
+    //            bubblePopup.SetPopupValues(displayInfo);
+    //        }
+    //        HasPopupBubble = true;
+    //        bubble.transform.LookAt(Camera.main.transform);
+    //        currentPopUpBubble = bubble;
+    //        StartCoroutine(PopRemove(bubble));
+    //    }
+    //    else if (HasPopupBubble) 
+    //    {
+    //        Destroy(currentPopUpBubble);
+    //    }
+    //}
+
+    //Improved popuplogic where popup is on canvas
+    public void InstantiatePopUp()
+    {
         AnimalGUIInfo displayInfo = GetAnimalGUIInformation();
-        if(popUpBubble != null && !HasPopupBubble) 
-        { 
-            GameObject bubble = Instantiate(popUpBubble, transform);
-            bubble.transform.position = new Vector3(transform.position.x - 2, transform.position.y + 3, transform.position.z);
-            bubble.transform.SetParent(transform, false);
-            //GetSetChildrenTMP(bubble, displayInfo);
-            PopupScript bubblePopup = bubble.GetComponent<PopupScript>();
-            if (bubblePopup != null)
+        if (popUpBubble != null && !HasPopupBubble)
+        {
+            PopupScript popScript = popUpBubble.GetComponent<PopupScript>();
+            if (popScript != null)
             {
-                bubblePopup.SetPopupValues(displayInfo);
+                GameObject bubble = Instantiate(popUpBubble, canvas.transform);
+                PopupScript bubblePopup = bubble.GetComponent<PopupScript>();
+                if (bubblePopup != null)
+                {
+                    bubblePopup.Target = this.gameObject.transform;
+                    bubblePopup.AddAnimalToButton(this.gameObject);
+                    bubblePopup.SetPopupValues(displayInfo);
+                }
+                HasPopupBubble = true;
+                currentPopUpBubble = bubble;
+                popupBubbles.Add(bubble);
+                StartCoroutine(PopRemove(bubble));
             }
-            HasPopupBubble = true;
-            bubble.transform.LookAt(Camera.main.transform);
-            StartCoroutine(PopRemove(bubble));
+        }
+        else if (HasPopupBubble)
+        {
+            foreach(var bubble in popupBubbles) 
+            { 
+                Destroy(bubble);
+            }
+            HasPopupBubble= false;
         }
     }
 
-    //void GetSetChildrenTMP(GameObject popup, AnimalGUIInfo info) 
-    //{
-    //    TextMeshPro Title = transform.Find("Background/ForeGroundBackground/Title_TMP").GetComponent<TextMeshPro>();
-    //    TextMeshPro happiness = transform.Find("Background/ForeGroundBackground/Happiness_TMP").GetComponent<TextMeshPro>();
-    //    TextMeshPro hunger = transform.Find("Background/ForeGroundBackground/Hunger_TMP").GetComponent<TextMeshPro>();
-    //    TextMeshPro sleepy = transform.Find("Background/ForeGroundBackground/Sleepy_TMP").GetComponent<TextMeshPro>();
-    //    TextMeshPro tired = transform.Find("Background/ForeGroundBackground/Tired_TMP").GetComponent<TextMeshPro>();
-    //    TextMeshPro mating = transform.Find("Background/ForeGroundBackground/Mating_TMP").GetComponent<TextMeshPro>();
-
-    //    if (Title == null || happiness == null || hunger == null || sleepy ==null || tired == null || mating == null) 
-    //    {
-    //        Debug.Log("GetSetChildrenTMP; didnet get the textmeshpro to values");
-    //        return;
-    //    }
-    //    Title.text = "Animal";
-    //    hunger.text += info.Hunger.ToString();
-    //    sleepy.text += info.Tired.ToString();
-    //    tired.text += info.Tired.ToString();
-    //    mating.text += info.MatingSeason.ToString();
-    //}
 
     IEnumerator PopRemove(GameObject bubble) 
     {
         yield return new WaitForSeconds(10);
+        currentPopUpBubble = null;
         HasPopupBubble = false;
         DestroyPopUp(bubble);
         
@@ -1125,5 +1169,10 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     public void InvokeStandStill(float time) 
     {
         StandStill();
+    }
+
+    public void InvokeMutation() 
+    { 
+        hasMutated = true;
     }
 }

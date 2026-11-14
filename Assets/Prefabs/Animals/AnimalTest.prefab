@@ -156,7 +156,7 @@ MonoBehaviour:
   - {fileID: 5212644513495774897, guid: a7db1c59c01addb40b02cf2d8d146946, type: 3}
   poopPrefab: {fileID: 5218845567725868596, guid: 4d2b5e6ca07d5264486edc0abacee57d, type: 3}
   TestMutation: 0
-  popUpBubble: {fileID: 3064282692239602218, guid: 67bdeac5ab4a8f54d9c20f5f1d0267c0, type: 3}
+  popUpBubble: {fileID: 47702109965185963, guid: 3a20d3b360b3acd40ac22a55f5304343, type: 3}
 --- !u!114 &-6405640087756652402
 MonoBehaviour:
   m_ObjectHideFlags: 0

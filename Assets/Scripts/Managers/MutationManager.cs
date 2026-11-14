@@ -12,6 +12,8 @@ public class MutationManager : SingletonManager<MutationManager>
     [SerializeField] private ParticleSystem mutationParticleSystem;
     SeedManager seedManager = SeedManager.Instance;
 
+    private Vector3 dumpPostion = new Vector3(0,50,0);
+
     public List<SO_AnimalMutation> MutationList 
     {
         get => mutationsList;
@@ -96,13 +98,13 @@ public class MutationManager : SingletonManager<MutationManager>
     //Mutates the plant prefab so the visual effects and logic will be visualised
     Plant AssignNewPlantMutation(Plant plant) 
     {
-        Plant newplant = Instantiate(plant);
+        Plant newplant = Instantiate(plant, dumpPostion, Quaternion.identity);
         //Renderer renderer = newplant.GetComponent<Renderer>();
 
-        GameObject seed = Instantiate(plant.SeedPrefab);
-        GameObject sprout = Instantiate(plant.SproutPrefab);
-        GameObject growthling = Instantiate(plant.GrowthlingPrefab);
-        GameObject grown = Instantiate(plant.GrownPrefab);
+        GameObject seed = Instantiate(plant.SeedPrefab, dumpPostion, Quaternion.identity);
+        GameObject sprout = Instantiate(plant.SproutPrefab, dumpPostion, Quaternion.identity);
+        GameObject growthling = Instantiate(plant.GrowthlingPrefab, dumpPostion, Quaternion.identity);
+        GameObject grown = Instantiate(plant.GrownPrefab, dumpPostion, Quaternion.identity);
 
         newplant.SeedPrefab = seed;
         newplant.SproutPrefab = sprout;
