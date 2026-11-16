@@ -3,6 +3,7 @@ using UnityEngine;
 using Assets.Scripts.Environment;
 using System;
 using System.Net;
+using System.Linq;
 
 [Serializable]
 public class BossEscapeState : BossAIState
@@ -43,13 +44,10 @@ public class BossEscapeState : BossAIState
             float weight = 1f / direction.magnitude;
             averageDir += direction.normalized * weight;
         }
-        averageDir = Vector3.Normalize(averageDir);
-        Vector3 directionToEscape = -averageDir;
 
-        List<Tile> path = FindReachableTile(directionToEscape, animals);
+        List<Tile> path = FindReachableTile(averageDir, animals);
         if(path != null)
         {
-            Debug.Log("found path in boss escape its enterable");
             boss.MovementScript.CurrentPath = path;
             return true;
         }
@@ -64,39 +62,54 @@ public class BossEscapeState : BossAIState
     /// </summary>
     /// <param name="direction">Escape direction</param>
     /// <returns>Path to the reachable tile</returns>
-    private List<Tile> FindReachableTile(Vector3 direction, List<AnimalAI> animals) // use surroundtiles
+    private List<Tile> FindReachableTile(Vector3 direction, List<AnimalAI> animals)
     {
+        Vector3 animalAveragePosition = boss.transform.position + direction;
+        List<Tile> surroundingTiles = GetSurroundingTiles();
+        List<Tile> surroundingTilesOrdered = surroundingTiles.OrderByDescending(tile => Vector3.Distance(animalAveragePosition, tile.Position)).ToList();
+
         List<Tile> path;
-
-        Vector3 startTile = boss.transform.position + (direction * escapeDistance);
-
-        for (int i = 0; i < searchRange; i++)
+        for (int i = 0; i < surroundingTilesOrdered.Count; i++)
         {
-            Vector2 position = startTile + direction * i;
-            Tile tile = tileManager.GetTile(position);
-
-            if (tile.Type != TileType.Grass && tile.Type != TileType.River && tile.Type != TileType.Concrete) continue;
-
-            if (tile == null)
-            {
-                Debug.Log("no escape tile found for boss");
-                continue;
-            }
-            else
-            {
-
-                Debug.Log("boss pos: " + boss.transform.position);
-                Debug.Log("escape tile position for boss" + tile.Position);
-                
-            }
-            path = boss.MovementScript.PathFinder.GetPathAStar(tileManager.GetTile(boss.transform.position), tile, boss.MovementScript.IsBossTraversable, boss.MovementScript.MaxHeightDifference, (escapeDistance + searchRange) * 2);
-            if (path != null)
+            path = boss.MovementScript.PathFinder.GetPathAStar(tileManager.GetTile(boss.transform.position), surroundingTilesOrdered[i], boss.MovementScript.IsBossTraversable, boss.MovementScript.MaxHeightDifference, escapeDistance + searchRange * 2);
+            if(path != null)
             {
                 return path;
             }
         }
-        //if no path found return null, this will make the state "unEnterable" and second best scoring state will be selected instead
         return null;
+        
+
+
+        //Vector3 startTile = boss.transform.position + (direction * escapeDistance);
+
+        //for (int i = 0; i < searchRange; i++)
+        //{
+        //    Vector2 position = startTile + direction * i;
+        //    Tile tile = tileManager.GetTile(position);
+
+        //    if (tile.Type != TileType.Grass && tile.Type != TileType.River && tile.Type != TileType.Concrete) continue;
+
+        //    if (tile == null)
+        //    {
+        //        Debug.Log("no escape tile found for boss");
+        //        continue;
+        //    }
+        //    else
+        //    {
+
+        //        Debug.Log("boss pos: " + boss.transform.position);
+        //        Debug.Log("escape tile position for boss" + tile.Position);
+                
+        //    }
+        //    path = boss.MovementScript.PathFinder.GetPathAStar(tileManager.GetTile(boss.transform.position), tile, boss.MovementScript.IsBossTraversable, boss.MovementScript.MaxHeightDifference, (escapeDistance + searchRange) * 2);
+        //    if (path != null)
+        //    {
+        //        return path;
+        //    }
+        //}
+        ////if no path found return null, this will make the state "unEnterable" and second best scoring state will be selected instead
+        //return null;
     }
 
     private List<Tile> GetSurroundingTiles() //maybe better solution, do this pal, makes smarter escape, choose th etile that is furthest and pathfindable

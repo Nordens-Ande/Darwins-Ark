@@ -25,6 +25,6 @@ public class UIButtonToggle : MonoBehaviour
     }
     public void ToggleBoss()
     {
-        BossManager.Instance.SpawnBoss();
+        BossManager.Instance.SpawnBossWave();
     }
 }
