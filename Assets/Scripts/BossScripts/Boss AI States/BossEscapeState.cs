@@ -28,7 +28,7 @@ public class BossEscapeState : BossAIState
 
     public override bool OnEnterState()
     {
-        Debug.Log("tried to enter escape");
+        //Debug.Log("tried to enter escape");
         TaskCompleted = false;
 
         tilesEscaped = 0;
@@ -142,10 +142,10 @@ public class BossEscapeState : BossAIState
         if (reachedNextTile)
         {
             tilesEscaped += 1;
-            Debug.Log("escape 1 tile");
+            //Debug.Log("escape 1 tile");
             if(tilesEscaped >= escapeDistance)
             {
-                Debug.Log("escape distance reached");
+                //Debug.Log("escape distance reached");
                 CanBeInterupted = true;
             }
             //else //for later to reroll tile, if new animals are closer as we progress, make it smart pal

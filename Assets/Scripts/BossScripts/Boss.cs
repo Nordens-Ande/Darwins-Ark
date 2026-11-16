@@ -246,7 +246,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
                     currentState.OnExitState();
                     if(currentState.OnEnterState())
                     {
-                        Debug.Log("reentered same state " + currentState.ToString());   
+                        //Debug.Log("reentered same state " + currentState.ToString());   
                         break;
                     }
                 }
@@ -258,7 +258,7 @@ public class Boss : MonoBehaviour, IBoatSpawning
             }
             else if (statesOrderedByScore[i].OnEnterState())
             {
-                Debug.Log("new boss state " + statesOrderedByScore[i].ToString());
+                //Debug.Log("new boss state " + statesOrderedByScore[i].ToString());
                 currentState.OnExitState();
                 currentState = statesOrderedByScore[i];
                 //Debug.Log("currentState changed to: " + currentState.ToString());
