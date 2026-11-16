@@ -3,7 +3,6 @@ using System.Linq;
 using UnityEditor;
 using UnityEditorInternal;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
 
 [CustomEditor(typeof(Boss))]
 public class BossEditor : Editor

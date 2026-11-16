@@ -3,9 +3,7 @@ using UnityEngine;
 using Assets.Scripts.Environment;
 using System.Collections.Generic;
 using UnityEditor;
-using static UnityEngine.InputManagerEntry;
 using System.Linq;
-using static TMPro.TMP_Compatibility;
 
 public class WindDeityManager : SingletonManager<WindDeityManager>
 {
