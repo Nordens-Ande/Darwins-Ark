@@ -18,4 +18,4 @@ MonoBehaviour:
   walkSpeed: -0.3
   runSpeed: -0.1
   hungerDeteration: 15
-  localsize: -0.8
+  localsize: -0.3

@@ -51,4 +51,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 215b80482f4b0714f815ca95095ba90d, type: 2}
   - {fileID: 11400000, guid: 9fdba42a5f8192d44b6929bd6ce24bff, type: 2}
   - {fileID: 11400000, guid: d945a81ce5f84d944962e645b740b041, type: 2}
+  plantMutationsList:
+  - {fileID: 11400000, guid: 77333d29d2a2ddb4ab99daff9d275dfb, type: 2}
+  - {fileID: 11400000, guid: 3e35f7ff4cb6dc947bd31c665a7919b3, type: 2}
+  - {fileID: 11400000, guid: ebb3b590edad8b34aa15d5472aaa799c, type: 2}
+  - {fileID: 11400000, guid: 8153abbdc0e36734d9bb16a567104e0b, type: 2}
+  - {fileID: 11400000, guid: e89b16af4d10b49438dec47b9db3dfce, type: 2}
   mutationParticleSystem: {fileID: 0}

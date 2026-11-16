@@ -8,7 +8,11 @@ using Unity.VisualScripting;
 public class MutationManager : SingletonManager<MutationManager>
 {
     //public static MutationManager Instance = null;
+    [Header("Animal mutations")]
     [SerializeField] private List<SO_AnimalMutation> mutationsList = new List<SO_AnimalMutation>();
+
+    [Header("Plant mutations")]
+    [SerializeField] private List<SO_PlantMutations> plantMutationsList = new List<SO_PlantMutations>();
     [SerializeField] private ParticleSystem mutationParticleSystem;
     SeedManager seedManager = SeedManager.Instance;
 
@@ -20,13 +24,6 @@ public class MutationManager : SingletonManager<MutationManager>
         set => mutationsList = value;
     }
 
-    //private void Awake()
-    //{
-    //    if (MutationManager.instance == null)
-    //    {
-    //        MutationManager.instance = this;
-    //    }
-    //}
 
     SO_AnimalMutation RandomMutation() 
     {
@@ -106,6 +103,8 @@ public class MutationManager : SingletonManager<MutationManager>
         GameObject growthling = Instantiate(plant.GrowthlingPrefab, dumpPostion, Quaternion.identity);
         GameObject grown = Instantiate(plant.GrownPrefab, dumpPostion, Quaternion.identity);
 
+        SO_PlantMutations choosenMutation = RandomPlantMutation();
+
         newplant.SeedPrefab = seed;
         newplant.SproutPrefab = sprout;
         newplant.GrowthlingPrefab = growthling;
@@ -115,6 +114,7 @@ public class MutationManager : SingletonManager<MutationManager>
         Renderer rendSproout = newplant.SeedPrefab.GetComponent<Renderer>();
         Renderer rendGrowthling = newplant.GrowthlingPrefab.GetComponent<Renderer>();
         Renderer rendGrowth = newplant.GrownPrefab.GetComponent<Renderer>();
+
         if (newplant == null)
         {
             Debug.Log("plant not there");
@@ -128,22 +128,22 @@ public class MutationManager : SingletonManager<MutationManager>
         }
         //TODO i also need the different prefab stages to be able to change its color and visuals. They need to be gettable
 
-        newplant.GrowthSpeed = 2;
-        newplant.PlantSmellRadiusValue = 2;
-
-        //rendSeed.AddComponent<Renderer>().material.color = Color.red;
-        //rendGrowthling.AddComponent<Renderer>().material.color = Color.red;
-        //rendGrowth.AddComponent<Renderer>().material.color = Color.red;
-        //rendSproout.AddComponent<Renderer>().material.color = Color.red;
-        rendSeed.material.color = Color.red;
-        rendSproout.material.color = Color.red;
-        rendGrowthling.material.color = Color.red;
-        rendGrowth.material.color = Color.red;
-        newplant.Health += 10;
-        newplant.IsCloseToWaterRange = 10;
+        newplant.GrowthSpeed += choosenMutation.GrowthSpeed;
+        newplant.PlantSmellRadiusValue += choosenMutation.PlantSmellRadiusValue;
+        rendSproout.material.color = choosenMutation.Color;
+        rendGrowthling.material.color = choosenMutation.Color;
+        rendGrowth.material.color = choosenMutation.Color;
+        newplant.Health += choosenMutation.Health;
+        newplant.IsCloseToWaterRange = choosenMutation.IsCloseToWaterRange;
 
         Debug.Log("Sucsesfull seed mutation");
         return newplant;
+    }
+
+    SO_PlantMutations RandomPlantMutation() 
+    {
+        SO_PlantMutations plant = plantMutationsList[Random.Range(0, plantMutationsList.Count)];
+        return plant;
     }
 
     IEnumerator DestroyParticleSystem(ParticleSystem particle) 

@@ -9,5 +9,6 @@ public enum VFXenum
    animal_mate,
    animal_sleep,
    animal_eat,
+   anima_Mutation
    //OSV
 }

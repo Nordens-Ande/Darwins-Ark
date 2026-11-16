@@ -385,7 +385,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         if(currentMutationValue > MutationMax) 
         { 
             mutationManager.MutateAnimal_RandomMutation(this);
-            vfxManager.GetSetAndDestroyVFX(VFXenum.animal_mate, transform.position);
+            vfxManager.GetSetAndDestroyVFX(VFXenum.anima_Mutation, transform.position);
             soundManager.PlaySoundEffectAtVec3(transform.position, soundManager.GetAudioClipFromIndex(AudioType.mutation), 1, 100, 0.1f);
             isMutated = true;
         }
@@ -454,7 +454,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     {
         Tile currentPos = tileManager.GetTile(transform.position);
         Tile targetPos = tileManager.GetTile(target);
-        float maxHeightDifference = 4;
+        float maxHeightDifference = 1;
         int iterations = 0;
         List<Tile> path = new List<Tile>();
         path = pathFinder.GetPathAStar(currentPos, targetPos, TravesableTile, maxHeightDifference, iterations);
@@ -848,6 +848,32 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
             tired = 100;
             lightningHitCount++;
         }
+
+        //Needs work
+        else //All animals scared of lightning
+        {
+            currentIdleTime = maxIdleTime;
+            Vector3 walkAwayFromLightning = (transform.position.normalized - tile.Tile.Position.normalized);
+            Vector3 walkpoint = new Vector3((int)walkAwayFromLightning.x * 50, transform.position.y, (int)walkAwayFromLightning.z * 50);
+            Vector3 temp = walkpoint;
+            activePath = PathfindingMovement(temp);
+
+            if (activePath != null)
+            {
+                pathStage = 0;
+                activePathTarget = activePath[pathStage].Position;
+                hasSetPath = true;
+            }
+            else
+            {
+                hasSetPath = false;
+                isIdle = true;
+                pathStage = 0;
+                Idle();
+                return;
+            }
+
+        }
     }
 
 
@@ -1073,34 +1099,6 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         return info;
     }
 
-
-    //Started making the popup logic
-    //public void InstantiatePopUp() 
-    //{ 
-    //    AnimalGUIInfo displayInfo = GetAnimalGUIInformation();
-    //    if(popUpBubble != null && !HasPopupBubble) 
-    //    { 
-    //        //PopupScript popScript = popUpBubble.GetComponent<>
-    //        GameObject bubble = Instantiate(popUpBubble, transform);
-    //        bubble.transform.position = new Vector3(transform.position.x - 2, transform.position.y + 3, transform.position.z);
-    //        bubble.transform.SetParent(transform, false);
-    //        //GetSetChildrenTMP(bubble, displayInfo);
-    //        PopupScript bubblePopup = bubble.GetComponent<PopupScript>();
-    //        if (bubblePopup != null)
-    //        {
-    //            bubblePopup.SetPopupValues(displayInfo);
-    //        }
-    //        HasPopupBubble = true;
-    //        bubble.transform.LookAt(Camera.main.transform);
-    //        currentPopUpBubble = bubble;
-    //        StartCoroutine(PopRemove(bubble));
-    //    }
-    //    else if (HasPopupBubble) 
-    //    {
-    //        Destroy(currentPopUpBubble);
-    //    }
-    //}
-
     //Improved popuplogic where popup is on canvas
     public void InstantiatePopUp()
     {
@@ -1111,6 +1109,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
             if (popScript != null)
             {
                 GameObject bubble = Instantiate(popUpBubble, canvas.transform);
+                bubble.transform.SetAsFirstSibling();
                 PopupScript bubblePopup = bubble.GetComponent<PopupScript>();
                 if (bubblePopup != null)
                 {

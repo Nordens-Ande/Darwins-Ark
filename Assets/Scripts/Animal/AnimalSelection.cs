@@ -77,9 +77,5 @@ public class AnimalSelection : MonoBehaviour
         {
             isButton.Onclick();
         }
-        else 
-        {
-            Debug.Log("Hit nothing");
-        }
     }
 }
