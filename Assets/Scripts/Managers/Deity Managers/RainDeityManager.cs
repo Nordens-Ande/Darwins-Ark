@@ -33,9 +33,6 @@ public class RainDeityManager : SingletonManager<RainDeityManager>
 
     private int baseCost;
 
-    public event Action OnRainStarted;
-    public event Action OnRainStopped;
-
     private Vector2Int highlightedTile;
     private Vector2Int highlightedTilePrev;
     private HashSet<Vector2Int> highlights = new HashSet<Vector2Int>();
@@ -158,8 +155,6 @@ public class RainDeityManager : SingletonManager<RainDeityManager>
 
 
         rainInstances.Add(new Rain(rainRadius, tile, affectedTiles));
-
-        OnRainStarted?.Invoke();
 
         gameManager.ChangeMode(gameObject, GameMode.Game);
     }
