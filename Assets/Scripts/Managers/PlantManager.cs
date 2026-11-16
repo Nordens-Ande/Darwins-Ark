@@ -52,6 +52,8 @@ public class PlantManager : SingletonManager<PlantManager>
     [Header("List of all Plants")]
     [SerializeField] private List<Plant> plants = new List<Plant>();
 
+    public List<Plant> Plants => plants;
+
     // we dont need this anymore since we inherit from SingletonManager
     //private void Awake()
     //{

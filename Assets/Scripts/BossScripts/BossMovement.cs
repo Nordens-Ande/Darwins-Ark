@@ -2,8 +2,6 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using Assets.Scripts.Environment;
-using static UnityEditor.PlayerSettings;
-using UnityEditor.Experimental.GraphView;
 
 public class BossMovement : MonoBehaviour
 {
