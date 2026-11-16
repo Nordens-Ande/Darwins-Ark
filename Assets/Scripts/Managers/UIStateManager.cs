@@ -1,6 +1,7 @@
 
 using Assets.Enums.GameTransitions;
 using Assets.Scripts.Environment;
+using Assets.Scripts.Events.Data;
 using Assets.Scripts.Managers;
 using UnityEngine;
 
@@ -20,6 +21,18 @@ public class UIStateManager : MonoBehaviour
 
         normalUI.SetActive(true);
         terraformUI.SetActive(false);
+
+        gameManager.OnGameModeChanged += HandleModeChanged;
+    }
+
+    private void HandleModeChanged(GameModeChangedData data)
+    {
+        if(data.NewValue == GameMode.Game)
+        {
+            normalUI.SetActive(true);
+            terraformUI.SetActive(false);
+            //disable other ui
+        }
     }
 
     public void EnterTerraformMode()
@@ -47,8 +60,8 @@ public class UIStateManager : MonoBehaviour
         // TileSelectionManager-------------------
         //tileSelectionManager.ClearSelection();
 
-        normalUI.SetActive(true);
-        terraformUI.SetActive(false);
+        //normalUI.SetActive(true);      // now handled by HandleModeChanged() above
+        //terraformUI.SetActive(false);
 
         //TileManager.Instance.SetChunkGridVisible(false);
         //TileManager.Instance.SetTileGridVisible(false);
@@ -59,6 +72,42 @@ public class UIStateManager : MonoBehaviour
         gameManager.ChangeMode(gameObject, GameMode.Game);
 
         Debug.Log("Exited Terraform Mode");
+    }
+
+    public void EnterWindMode()
+    {
+        //set to wind ui
+        normalUI.SetActive(false);
+        gameManager.ChangeMode(gameObject, GameMode.Wind);
+    }
+
+    public void ExitWindMode()// for exit button maybe?
+    {
+        gameManager.ChangeMode(gameObject, GameMode.Game);
+    }
+
+    public void EnterLightningMode()
+    {
+        //set to Lightning ui
+        normalUI.SetActive(false);
+        gameManager.ChangeMode(gameObject, GameMode.Lightning);
+    }
+
+    public void ExitLightningMode()// for exit button maybe?
+    {
+        gameManager.ChangeMode(gameObject, GameMode.Game);
+    }
+
+    public void EnterRainMode()
+    {
+        //set to rain ui
+        normalUI.SetActive(false);
+        gameManager.ChangeMode(gameObject, GameMode.Rain);
+    }
+
+    public void ExitRainMode() // for exit button maybe?
+    {
+        gameManager.ChangeMode(gameObject, GameMode.Game);
     }
 
     public bool IsTerraforming()

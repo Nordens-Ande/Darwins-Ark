@@ -7,163 +7,208 @@ using System.Runtime.CompilerServices;
 using UnityEngine.Android;
 using System.Threading;
 using Assets.Scripts.Environment;
+using Assets.Enums.GameTransitions;
+using Assets.Scripts.Events.Data;
+using Assets.Scripts.Managers;
+using UnityEngine.InputSystem;
+using UnityEditor;
 
 public class RainDeityManager : SingletonManager<RainDeityManager>
 {
-    private GameObject rainParticleSystemHolder;
-    private Vector3 particleSystemPos = new Vector3(0, 70, 0);
+    private enum RainCreationState
+    {
+        None,
+        SelectTile
+    }
 
-    private ParticleSystem partSystem;
-    private ParticleSystem.EmissionModule emission;
-    private ParticleSystem.MainModule main;
-    private ParticleSystem.VelocityOverLifetimeModule velocity;
-    private ParticleSystem.ShapeModule shape;
+    private bool isActive = false;
+    private RainCreationState state = RainCreationState.None;
 
-    private float emissionRate = 400;
-    private float gravityScale = 1;
-    private float particleSizeX = 0.05f;
-    private float particleSizeY = 0.5f;
-    private float particleLifetime = 5;
+    private float rainRadius = 6;
 
+    private GameManager gameManager;
     private CurrencyManager currencyManager;
+    private MousePositionManager mousePositionManager;
     private TileManager tileManager;
 
     private int baseCost;
 
-    private bool isRaining;
-    private float rainDuration;
-    private float rainTimer;
-
     public event Action OnRainStarted;
     public event Action OnRainStopped;
+
+    private Vector2Int highlightedTile;
+    private Vector2Int highlightedTilePrev;
+    private HashSet<Vector2Int> highlights = new HashSet<Vector2Int>();
 
     [SerializeField] public bool triggerRain = false; // for testing
 
     public string GetCostString => baseCost.ToString(); //for ui?
 
+    private List<Rain> rainInstances = new List<Rain>();
+
+
     private void Start()
     {
+        gameManager = GameManager.Instance;
+        mousePositionManager = MousePositionManager.Instance;
         currencyManager = CurrencyManager.Instance;
         tileManager = TileManager.Instance;
         baseCost = 10;
-        isRaining = false;
-        rainDuration = 20;
-        rainTimer = 0f;
-
-        rainParticleSystemHolder = new GameObject("Rain Particle System");
-        rainParticleSystemHolder.transform.SetParent(transform);
-        rainParticleSystemHolder.transform.localPosition = particleSystemPos;
-
-        partSystem = rainParticleSystemHolder.AddComponent<ParticleSystem>();
-        SetupParticleSystem();
+        
+        gameManager.OnGameModeChanged += HandleModeChanged;
     }
 
-    private void SetupParticleSystem()
+    private void HandleModeChanged(GameModeChangedData data)
     {
-        if (partSystem == null)
+        GameMode mode = data.NewValue;
+        switch (mode)
         {
-            Debug.LogError("ParticleSystem is null! in rainmanager");
+            case GameMode.Rain:
+                isActive = true;
+                SetGridVisible(true);
+                state = RainCreationState.SelectTile;
+                break;
+            case GameMode.Game:
+                SetGridVisible(false);
+                isActive = false;
+                state = RainCreationState.None;
+                break;
+        }
+    }
+
+    public void SetGridVisible(bool visible)
+    {
+        if (tileManager == null)
+        {
+            Debug.LogError("Could not set grid visibility for tiles, TileManager.Instance does not exist or has not been found.");
             return;
         }
 
-        ParticleSystemRenderer particleRenderer = partSystem.GetComponent<ParticleSystemRenderer>();
-
-        Material particleMaterial = new Material(Shader.Find("Universal Render Pipeline/Particles/Unlit"));
-        if (particleMaterial != null)
+        GameObject cursorGrid = tileManager.transform.Find("Highlight Grid").gameObject;
+        if (cursorGrid != null)
         {
-            particleRenderer.material = particleMaterial;
-
-            particleRenderer.renderMode = ParticleSystemRenderMode.Stretch;
-            particleRenderer.lengthScale = 1f;
-            particleRenderer.velocityScale = 0f;
+            cursorGrid.SetActive(visible);
         }
         else
         {
-            Debug.Log("particle material is null, in rainmanager");
+            Debug.LogWarning($"{cursorGrid.name} object could not set visibility because it was not found.");
         }
-
-        main = partSystem.main;
-        main.startColor = Color.blue;
-        main.startLifetime = particleLifetime;
-        main.maxParticles = 10000;
-
-        main.startSize3D = true;
-        main.startSizeX = particleSizeX;
-        main.startSizeY = particleSizeY;
-        main.startSizeZ = 0.01f;
-
-        main.startSpeed = 0f;
-        main.gravityModifier = gravityScale;
-        main.simulationSpace = ParticleSystemSimulationSpace.World;
-
-        emission = partSystem.emission;
-        emission.enabled = false;
-        emission.rateOverTime = 1000;
-        emission.rateOverDistance = 0;
-        emission.SetBursts(new ParticleSystem.Burst[0]);
-
-        velocity = partSystem.velocityOverLifetime;
-        velocity.enabled = false;
-
-        velocity.space = ParticleSystemSimulationSpace.World;
-
-        velocity.x = 0f;
-        velocity.y = -gravityScale;
-        velocity.z = 0f;
-
-        shape = partSystem.shape;
-        shape.enabled = true;
-        shape.shapeType = ParticleSystemShapeType.Box;
-
-        if(tileManager != null)
-        {
-            shape.scale = new Vector3(tileManager.ChunkGridSize.x * tileManager.ChunkSize, 1, tileManager.ChunkGridSize.y * tileManager.ChunkSize);
-        }
-        else
-        {
-            shape.scale = new Vector3(60f, 1f, 60f);
-        }
-
-        velocity.enabled = true;
-        partSystem.Play();
+        
     }
 
-    public void TriggerRain() // on button press
+    public void HandleSelectTile(InputAction.CallbackContext context)
     {
-        if (isRaining) return;
+        if (!isActive) return;
+        if (state != RainCreationState.SelectTile) return;
+
+        if (!mousePositionManager.TryGetWorldPosition(out Vector3 worldMousePos)) return;
+
+        Tile tile = tileManager.GetTile(worldMousePos);
+        if (tile == null) return;
+
+        if (context.performed)
+        {
+            TriggerRain(tile, FindAffectedTiles(tile));
+        }
+    }
+
+    private List<Tile> FindAffectedTiles(Tile tile)
+    {
+        Vector2 tilePosition = new Vector2(tile.Position.x, tile.Position.z);
+
+        List<Tile> affectedTiles = new List<Tile>();
+
+        int radInt = Mathf.CeilToInt(rainRadius);
+        float radSquared = rainRadius * rainRadius;
+        for (int x = -radInt; x <= radInt; x++)
+        {
+            for (int z = -radInt; z <= radInt; z++)
+            {
+                if (x * x + z * z > radSquared) continue;
+                Tile otherTile = tileManager.GetTile(tilePosition.x + x, tilePosition.y + z);
+                if (otherTile != null) affectedTiles.Add(otherTile);
+            }
+        }
+
+        //foreach(Chunk chunk in tileManager.chunks)
+        //{
+        //    foreach(Tile otherTile in chunk.Tiles)
+        //    {
+        //        if (otherTile == null) continue;
+
+        //        if (tile == otherTile) continue;
+
+        //        Vector2 otherPos = new Vector2(otherTile.Position.x, otherTile.Position.z);
+
+        //        if (Vector2.Distance(otherPos, tilePosition) > lightningEffectRadius) continue;
+
+        //        //maybe add max height difference?
+
+        //        affectedTiles.Add(otherTile);
+        //    }
+        //}
+        return affectedTiles;
+    }
+
+    public void TriggerRain(Tile tile, List<Tile> affectedTiles) // on button press
+    {
         
         //uncomment this later after testing
         //if (!currencyManager.SpendDeityPoints(baseCost)) return;
 
 
+        rainInstances.Add(new Rain(rainRadius, tile, affectedTiles));
+
         OnRainStarted?.Invoke();
 
-        emission.enabled = true;
+        gameManager.ChangeMode(gameObject, GameMode.Game);
+    }
+
+    private void UpdateTileHighlights()
+    {
+        if (!mousePositionManager.TryGetWorldPosition(out Vector3 worldMousePos)) return;
+
+        Tile tile = tileManager.GetTile(worldMousePos);
+        if (tile == null) return;
+
+        highlightedTile = tile.GridPosition;
+
+        if (highlightedTile == highlightedTilePrev) return;
+
+        //get affected tiles
+        List<Tile> affectedTiles = FindAffectedTiles(tile);
+
+        //highlight them
+        highlights.Clear();
+        SetGridVisible(true); // for some reason doesnt work without this ?
+        foreach (Tile affectedTile in affectedTiles)
+        {
+            highlights.Add(affectedTile.GridPosition);
+        }
+        highlights.Add(highlightedTile);
+        tileManager.SetHighlightGridTiles(highlights);
         
-        isRaining = true;
+        highlightedTilePrev = highlightedTile;
     }
 
     private void Update()
     {
-        if (triggerRain)
+        for (int i = rainInstances.Count - 1; i >= 0; i--)
         {
-            TriggerRain();
-            triggerRain = false;
-        }
-        if (!isRaining) return;
+            Rain rain = rainInstances[i];
+            if (rain == null) continue;
 
-        if(rainTimer > rainDuration)
-        {
-            rainTimer = 0;
-            emission.enabled = false;
+            if (rain.RainComplete == true)
+            {
+                rainInstances.RemoveAt(i);
+                continue;
+            }
 
-            isRaining = false;
+            rain.UpdateInstance(Time.deltaTime);
+        }
 
-            OnRainStopped?.Invoke();
-        }
-        else
-        {
-            rainTimer += Time.deltaTime;
-        }
+        if (!isActive) return;
+        if (state != RainCreationState.SelectTile) return;
+        UpdateTileHighlights();
     }
 }

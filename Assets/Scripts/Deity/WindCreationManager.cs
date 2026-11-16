@@ -3,6 +3,8 @@ using Assets.Scripts.Managers;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Assets.Enums.GameTransitions;
+using Assets.Scripts.Events.Data;
 
 public class WindCreationManager : MonoBehaviour
 {
@@ -13,6 +15,7 @@ public class WindCreationManager : MonoBehaviour
         SelectDirection
     }
 
+    private bool isActive = false;
     WindCreationState state = WindCreationState.None;
 
     private GameManager gameManager;
@@ -32,22 +35,34 @@ public class WindCreationManager : MonoBehaviour
         mousePositionManager = MousePositionManager.Instance;
         tileManager = TileManager.Instance;
         windDeityManager = WindDeityManager.Instance;
+
+        gameManager.OnGameModeChanged += HandleModeChanged;
     }
 
-    public void OnCreateWind() // call from ui
+    private void HandleModeChanged(GameModeChangedData data)
     {
-        if (state != WindCreationState.None) return;
-
-        initialTile = null;
-        directionTile = null;
-
-        SetGridVisible(true);
-
-        state = WindCreationState.SelectTile;
+        GameMode mode = data.NewValue;
+        switch (mode)
+        {
+            case GameMode.Wind:
+                isActive = true;
+                SetGridVisible(true);
+                initialTile = null;
+                directionTile = null;
+                state = WindCreationState.SelectTile;
+                break;
+            case GameMode.Game:
+                SetGridVisible(false);
+                isActive = false;
+                break;
+        }
     }
 
-    private void HandleSelectTile()
+    public void HandleSelectTile(InputAction.CallbackContext context)
     {
+        if (!isActive) return;
+        if (state != WindCreationState.SelectTile) return;
+
         if (mousePositionManager == null) Debug.Log("mouseposmanager null. from wind creation manager");
 
         if (!mousePositionManager.TryGetWorldPosition(out Vector3 pos)) return;
@@ -55,10 +70,7 @@ public class WindCreationManager : MonoBehaviour
         Tile tile = tileManager.GetTile(pos);
         if (tile == null) return;
 
-        highlightedTileInitial = tile.GridPosition;
-        tileManager.SetHighlightGridTiles(new HashSet<Vector2Int> { highlightedTileInitial.Value });
-
-        if (!Input.GetMouseButtonDown(0)) return;
+        if (!context.performed) return;
 
         initialTile = tile;
 
@@ -66,19 +78,19 @@ public class WindCreationManager : MonoBehaviour
 
     }
 
-    private void HandleSelectDirection()
+    public void HandleSelectDirection(InputAction.CallbackContext context)
     {
+        if (!isActive) return;
+        if (state != WindCreationState.SelectDirection) return;
+        
         if (!mousePositionManager.TryGetWorldPosition(out Vector3 pos)) return;
 
         Tile tile = tileManager.GetTile(pos);
         if (tile == null) return;
 
-        highlightedTileDirection = tile.GridPosition;
-        tileManager.SetHighlightGridTiles(new HashSet<Vector2Int> { highlightedTileInitial.Value, highlightedTileDirection.Value });
-
         if (tile == initialTile) return;
 
-        if (!Input.GetMouseButtonDown(0)) return;
+        if (!context.performed) return;
 
         directionTile = tile;
 
@@ -89,7 +101,7 @@ public class WindCreationManager : MonoBehaviour
         initialTile = null;
         directionTile = null;
         state = WindCreationState.None;
-        SetGridVisible(false);
+        gameManager.ChangeMode(gameObject, GameMode.Game);
     }
 
     public void SetGridVisible(bool visible)
@@ -111,11 +123,29 @@ public class WindCreationManager : MonoBehaviour
         }
     }
 
+    private void UpdateHighlightedTile()
+    {
+        if (!mousePositionManager.TryGetWorldPosition(out Vector3 worldMousePos)) return;
+
+        Tile tile = tileManager.GetTile(worldMousePos);
+        if (tile == null) return;
+
+        SetGridVisible(true);
+        if(state == WindCreationState.SelectTile)
+        {
+            highlightedTileInitial = tile.GridPosition;
+            tileManager.SetHighlightGridTiles(new HashSet<Vector2Int> { highlightedTileInitial.Value });
+        }
+        else if (state == WindCreationState.SelectDirection)
+        {
+            highlightedTileDirection = tile.GridPosition;
+            tileManager.SetHighlightGridTiles(new HashSet<Vector2Int> { highlightedTileInitial.Value, highlightedTileDirection.Value });
+        }
+    }
+
     void Update()
     {
-        if(state == WindCreationState.None) return;
-
-        if (state == WindCreationState.SelectTile) HandleSelectTile();
-        if (state == WindCreationState.SelectDirection) HandleSelectDirection();
+        if (!isActive) return;
+        UpdateHighlightedTile();
     }
 }

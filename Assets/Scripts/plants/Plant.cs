@@ -54,6 +54,9 @@ public class Plant : MonoBehaviour
 
     void Start()
     {
+        PlantParticleSystem particleSystem = gameObject.GetComponent<PlantParticleSystem>();
+        if (particleSystem == null) gameObject.AddComponent<PlantParticleSystem>();
+
         updateVisulas();
     }
 

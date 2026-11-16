@@ -455,7 +455,15 @@ PrefabInstance:
     - target: {fileID: 2359242660973088191, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 388268491}
+      objectReference: {fileID: 1077366069}
+    - target: {fileID: 2359242660973088191, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: EnterWindMode
+      objectReference: {fileID: 0}
+    - target: {fileID: 2359242660973088191, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: UIStateManager, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 2592037811632828041, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
@@ -555,14 +563,14 @@ PrefabInstance:
     - target: {fileID: 6013628543586171937, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 1890176985}
+      objectReference: {fileID: 1077366069}
     - target: {fileID: 6013628543586171937, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnCreateLightning
+      value: EnterLightningMode
       objectReference: {fileID: 0}
     - target: {fileID: 6013628543586171937, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: LightningDeityManager, Assembly-CSharp
+      value: UIStateManager, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 6013628543586171937, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
@@ -575,7 +583,15 @@ PrefabInstance:
     - target: {fileID: 7627115596303852835, guid: c28093db3f3fc164c817751265095100, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 388268488}
+      objectReference: {fileID: 1077366069}
+    - target: {fileID: 7627115596303852835, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: EnterRainMode
+      objectReference: {fileID: 0}
+    - target: {fileID: 7627115596303852835, guid: c28093db3f3fc164c817751265095100, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: UIStateManager, Assembly-CSharp
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -937,6 +953,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4b9a4b2a32b13aa43b558a94a670222b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UIButtonToggle
+--- !u!114 &1077366069 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1623426267153610148, guid: c10ebdafd916ec546875c1b285015a12, type: 3}
+  m_PrefabInstance: {fileID: 631922138}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1077366064}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: db741cbac62da8841975bb208ccd823b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIStateManager
 --- !u!1 &1205895019 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6453027670666206484, guid: c28093db3f3fc164c817751265095100, type: 3}
@@ -1614,6 +1641,46 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.size
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[8].m_ActionId
+      value: 4836c63f-de90-4230-a0ae-bfcdf077eabf
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_ActionId
+      value: 811c48d5-af8a-4df0-a713-0865cb2d525f
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[8].m_ActionName
+      value: 'Selecting/Selecting[/Mouse/leftButton]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_ActionName
+      value: 'Deity/New action[/Mouse/leftButton]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.size
+      value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[0].m_Mode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[1].m_Mode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[2].m_Mode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[3].m_Mode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
       propertyPath: m_ActionEvents.Array.data[0].m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 550361600}
@@ -1629,6 +1696,86 @@ PrefabInstance:
       propertyPath: m_ActionEvents.Array.data[3].m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 550361599}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 388268491}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[1].m_Target
+      value: 
+      objectReference: {fileID: 388268491}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[2].m_Target
+      value: 
+      objectReference: {fileID: 388268488}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[3].m_Target
+      value: 
+      objectReference: {fileID: 1890176985}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[0].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[1].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[2].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[3].m_CallState
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: HandleSelectTile
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
+      value: HandleSelectDirection
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[2].m_MethodName
+      value: HandleSelectTile
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[3].m_MethodName
+      value: HandleSelectTile
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: WindCreationManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[1].m_TargetAssemblyTypeName
+      value: WindCreationManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[2].m_TargetAssemblyTypeName
+      value: RainDeityManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[3].m_TargetAssemblyTypeName
+      value: LightningDeityManager, Assembly-CSharp
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[1].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[2].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[3].m_Arguments.m_ObjectArgumentAssemblyTypeName
+      value: UnityEngine.Object, UnityEngine
+      objectReference: {fileID: 0}
     - target: {fileID: 8819656911034563407, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
       propertyPath: m_Name
       value: Player Input

@@ -378,6 +378,34 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Deity",
+            "id": "40fcdd0d-27b2-4602-885a-1b37a53d981c",
+            "actions": [
+                {
+                    "name": "DeitySelect",
+                    "type": "Button",
+                    "id": "811c48d5-af8a-4df0-a713-0865cb2d525f",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "49994f39-1f7e-497b-be5c-6a337d10a9ec",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "DeitySelect",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []
