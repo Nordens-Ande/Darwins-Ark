@@ -84,7 +84,6 @@ namespace Assets.Scripts.Environment
             GenerateGrid(transform, 0.003f, heighlightGridName, Color.blue);
 
             //SetChunkGridVisible(false);
-            SubscribeToRainDeity();
 
             GenerateSaltWater();
 
@@ -667,20 +666,6 @@ namespace Assets.Scripts.Environment
 
             if (gridMesh != null)
                 gridMesh.RemoveTile(tile);
-        }
-
-        private void SubscribeToRainDeity()
-        {
-            if (rainDeityManager == null) return;
-
-            foreach (Chunk chunk in chunks)
-            {
-                foreach (Tile tile in chunk.Tiles)
-                {
-                    rainDeityManager.OnRainStarted += tile.RainStarted;
-                    rainDeityManager.OnRainStopped += tile.RainStopped;
-                }
-            }
         }
 
         private void Update()

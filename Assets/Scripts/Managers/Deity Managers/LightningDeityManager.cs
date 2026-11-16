@@ -5,6 +5,9 @@ using System.Collections.Generic;
 using System.Collections;
 using Unity.VisualScripting;
 using System;
+using Assets.Enums.GameTransitions;
+using Assets.Scripts.Events.Data;
+using UnityEngine.InputSystem;
 
 public class LightningDeityManager : SingletonManager<LightningDeityManager>
 {
@@ -14,9 +17,10 @@ public class LightningDeityManager : SingletonManager<LightningDeityManager>
         SelectTile
     }
 
-    LightningCreationState state = LightningCreationState.None;
+    private bool isActive = false;
+    private LightningCreationState state = LightningCreationState.None;
 
-    [SerializeField] Material material;
+    [SerializeField] private Material material;
 
     private List<Lightning> lightnings = new List<Lightning>();
 
@@ -28,7 +32,9 @@ public class LightningDeityManager : SingletonManager<LightningDeityManager>
 
     public event Action<LightningEventData> OnLightningTriggered;
 
-    private Vector2Int? highlightedTile;
+    private Vector2Int highlightedTile;
+    private Vector2Int highlightedTilePrev;
+    private HashSet<Vector2Int> highlights = new HashSet<Vector2Int>();
 
     void Start()
     {
@@ -37,25 +43,37 @@ public class LightningDeityManager : SingletonManager<LightningDeityManager>
         tileManager = TileManager.Instance;
 
         state = LightningCreationState.None;
+        gameManager.OnGameModeChanged += HandleModeChanged;
     }
 
-    public void OnCreateLightning()
+    private void HandleModeChanged(GameModeChangedData data)
     {
-        SetGridVisible(true);
-        state = LightningCreationState.SelectTile;
+        GameMode mode = data.NewValue;
+        switch(mode)
+        {
+            case GameMode.Lightning:
+                isActive = true;
+                SetGridVisible(true);
+                state = LightningCreationState.SelectTile;
+                break;
+            case GameMode.Game:
+                SetGridVisible(false);
+                isActive = false;
+                break;
+        }
     }
 
-    private void HandleSelectTile()
+    public void HandleSelectTile(InputAction.CallbackContext context)
     {
+        if (!isActive) return;
+        if (state != LightningCreationState.SelectTile) return;
+
         if (!mousePositionManager.TryGetWorldPosition(out Vector3 worldMousePos)) return;
 
         Tile tile = tileManager.GetTile(worldMousePos);
         if(tile == null) return;
 
-        highlightedTile = tile.GridPosition;
-        tileManager.SetHighlightGridTiles(new HashSet<Vector2Int> { highlightedTile.Value });
-
-        if (Input.GetMouseButtonDown(0))
+        if (context.performed)
         {
             TriggerLightning(FindAffectedTiles(tile), tile);
         }
@@ -65,8 +83,9 @@ public class LightningDeityManager : SingletonManager<LightningDeityManager>
     {
         Lightning lightning = new Lightning(material, transform, tile, affectedTiles);
         lightnings.Add(lightning);
-        SetGridVisible(false);
+
         state = LightningCreationState.None;
+        gameManager.ChangeMode(gameObject, GameMode.Game);
     }
 
     private List<Tile> FindAffectedTiles(Tile tile)
@@ -74,23 +93,36 @@ public class LightningDeityManager : SingletonManager<LightningDeityManager>
         Vector2 tilePosition = new Vector2(tile.Position.x, tile.Position.z);
         
         List<Tile> affectedTiles = new List<Tile>();
-        foreach(Chunk chunk in tileManager.chunks)
+
+        int radInt = Mathf.CeilToInt(lightningEffectRadius);
+        float radSquared = lightningEffectRadius * lightningEffectRadius;
+        for(int x = -radInt; x <= radInt; x++)
         {
-            foreach(Tile otherTile in chunk.Tiles)
+            for (int z = -radInt; z <= radInt; z++)
             {
-                if (otherTile == null) continue;
-                
-                if (tile == otherTile) continue;
-
-                Vector2 otherPos = new Vector2(otherTile.Position.x, otherTile.Position.z);
-
-                if (Vector2.Distance(otherPos, tilePosition) > lightningEffectRadius) continue;
-                
-                //maybe add max height difference?
-                
-                affectedTiles.Add(otherTile);
+                if (x * x + z * z > radSquared) continue;
+                Tile otherTile = tileManager.GetTile(tilePosition.x + x, tilePosition.y + z);
+                if(otherTile != null) affectedTiles.Add(otherTile);
             }
         }
+
+        //foreach(Chunk chunk in tileManager.chunks)
+        //{
+        //    foreach(Tile otherTile in chunk.Tiles)
+        //    {
+        //        if (otherTile == null) continue;
+                
+        //        if (tile == otherTile) continue;
+
+        //        Vector2 otherPos = new Vector2(otherTile.Position.x, otherTile.Position.z);
+
+        //        if (Vector2.Distance(otherPos, tilePosition) > lightningEffectRadius) continue;
+                
+        //        //maybe add max height difference?
+                
+        //        affectedTiles.Add(otherTile);
+        //    }
+        //}
         return affectedTiles;
     }
 
@@ -113,6 +145,32 @@ public class LightningDeityManager : SingletonManager<LightningDeityManager>
         }
     }
 
+    private void UpdateTileHighlights()
+    {
+        if (!mousePositionManager.TryGetWorldPosition(out Vector3 worldMousePos)) return;
+
+        Tile tile = tileManager.GetTile(worldMousePos);
+        if (tile == null) return;
+
+        highlightedTile = tile.GridPosition;
+
+        if (highlightedTile == highlightedTilePrev) return;
+
+        //get affected tiles
+        List<Tile> affectedTiles = FindAffectedTiles(tile);
+
+        //highlight them
+        highlights.Clear();
+        foreach (Tile affectedTile in affectedTiles)
+        {
+            highlights.Add(affectedTile.GridPosition);
+        }
+        highlights.Add(highlightedTile);
+
+        tileManager.SetHighlightGridTiles(highlights);
+        highlightedTilePrev = highlightedTile;
+    }
+
     void Update()
     {
         if(lightnings.Count > 0)
@@ -131,7 +189,8 @@ public class LightningDeityManager : SingletonManager<LightningDeityManager>
             }
         }
         
-        if (state == LightningCreationState.None) return;
-        else if (state == LightningCreationState.SelectTile) HandleSelectTile();
+        if (!isActive) return;
+        if (state != LightningCreationState.SelectTile) return;
+        UpdateTileHighlights();
     }
 }

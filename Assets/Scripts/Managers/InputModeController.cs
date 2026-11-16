@@ -30,6 +30,7 @@ public class InputModeController : SingletonManager<InputModeController>
     //private InputActionMap itemMap;
     private InputActionMap systemMap;
     private InputActionMap selectingMap;
+    private InputActionMap deityMap;
 
     // When this button is pressed we enter the alternative control mode, where it may fallback to another subset of controls.
     private InputAction alternativeActionOverride;
@@ -49,6 +50,7 @@ public class InputModeController : SingletonManager<InputModeController>
         //itemMap = inputActions.FindActionMap("Item", true);
         systemMap = inputActions.FindActionMap("System", true);
         selectingMap = inputActions.FindActionMap("Selecting", true);
+        deityMap = inputActions.FindActionMap("Deity", true);
 
         alternativeActionOverride = systemMap.FindAction("AlternativeOverride", true);
     }
@@ -72,6 +74,7 @@ public class InputModeController : SingletonManager<InputModeController>
         cameraMap.Disable();
         systemMap.Disable();
         selectingMap.Disable();
+        deityMap.Disable();
 
         isAlternativeActionActive = false;
     }
@@ -98,16 +101,35 @@ public class InputModeController : SingletonManager<InputModeController>
                 cameraMap.Enable();
                 terraformMap.Disable();
                 selectingMap.Enable();
+                deityMap.Disable();
                 break;
 
-            //case GameMode.Deity:
+            case GameMode.Wind:
+                cameraMap.Disable();
+                terraformMap.Disable();
+                selectingMap.Disable();
+                deityMap.Enable();
+                break;
 
-            //    break;
+            case GameMode.Rain:
+                cameraMap.Disable();
+                terraformMap.Disable();
+                selectingMap.Disable();
+                deityMap.Enable();
+                break;
+
+            case GameMode.Lightning:
+                cameraMap.Disable();
+                terraformMap.Disable();
+                selectingMap.Disable();
+                deityMap.Enable();
+                break;
 
             case GameMode.Terraform:
                 cameraMap.Disable();
                 terraformMap.Enable();
                 selectingMap.Disable();
+                deityMap.Disable();
                 break;
 
             //case GameMode.Planting:

@@ -21,8 +21,9 @@ namespace Assets.Scripts.Environment
         [SerializeField] private Plant currentPlant = null; //this is the plant that is currently on this tile, if any
 
         //rain
+        private int activeRainInstances;
         private bool isWetFromRain;
-        private bool runRainTimer;
+
         private float wetTimer;
         private float wetDuration;
 
@@ -98,7 +99,6 @@ namespace Assets.Scripts.Environment
             this.type = type;
 
             isWetFromRain = false;
-            runRainTimer = false;
             wetTimer = 0;
             wetDuration = 60; // 1 minute
 
@@ -115,7 +115,6 @@ namespace Assets.Scripts.Environment
             type = TileType.Lake;
 
             isWetFromRain = false;
-            runRainTimer = false;
             wetTimer = 0;
             wetDuration = 60; // 1 minute
 
@@ -163,13 +162,17 @@ namespace Assets.Scripts.Environment
 
         public void RainStarted()
         {
+            activeRainInstances++;
             isWetFromRain = true;
+            wetTimer = 0;
         }
 
         public void RainStopped()
         {
-            runRainTimer = true;
-            wetTimer = 0;
+            if (activeRainInstances >= 0) return;
+            activeRainInstances--;
+            if(activeRainInstances == 0)
+                wetTimer = 0;
         }
 
         public void ApplyWindEffect(float windStrength, Vector2 windDirection, float maxWindStrength) // maybe wrong need double check later!
@@ -186,21 +189,18 @@ namespace Assets.Scripts.Environment
 
         public void Update(float dt)
         {
-            if(isWetFromRain)
+            if(isWetFromRain && activeRainInstances == 0)
             {
-                if(runRainTimer)
+                if (wetTimer >= wetDuration)
                 {
-                    if(wetTimer >= wetDuration)
-                    {
-                        isWetFromRain = false;
-                        runRainTimer = false;
-                        wetTimer = 0;
-                        
-                    }
-                    else
-                    {
-                        wetTimer += dt;
-                    }
+                    isWetFromRain = false;
+
+                    wetTimer = 0;
+
+                }
+                else
+                {
+                    wetTimer += dt;
                 }
             }
             if (windStrength <= 0) return; // dont return if we add stuff below later

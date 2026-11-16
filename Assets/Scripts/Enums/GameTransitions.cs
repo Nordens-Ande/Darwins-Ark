@@ -13,8 +13,10 @@ namespace Assets.Enums.GameTransitions
     public enum GameMode
     {
         Game,
-        Deity,
         Terraform,
-        Planting
+        Planting,
+        Wind,
+        Lightning,
+        Rain
     }
 }
