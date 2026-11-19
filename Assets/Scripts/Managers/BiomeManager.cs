@@ -519,8 +519,9 @@ namespace Assets.Scripts.Environment
                 if (!newBiome.HasValue) return;
 
                 int half = CountTiles(source) / 2;
+                int full = CountTiles(source);
                 activeBiomes.Add(newBiome.Value);
-                StartCoroutine(BiomeChangeRoutine(newBiome.Value, source, half));
+                StartCoroutine(BiomeChangeRoutine(newBiome.Value, source, full));
             }
             else
             {

@@ -13,7 +13,6 @@ public class VFXManager : SingletonManager<VFXManager>
     //List for particlesystems that should play indenfinently
     //All gameobjects that subscribes will have particleeffects play untill they unsubscribe
     private Dictionary<GameObject, ParticleSystem> subscriberList = new Dictionary<GameObject, ParticleSystem>();
-
     //Error when i made the dictonary serializable, this is a work around
     [Serializable]
     public struct VFX_KeyAndParticle 
@@ -25,16 +24,10 @@ public class VFXManager : SingletonManager<VFXManager>
         public ParticleSystem Value => value;
     }
 
-    //private void Awake()
-    //{
-    //    if (contentList != null)
-    //    {
-    //        foreach (var content in contentList)
-    //        {
-    //            particleDictonary.TryAdd(content.Key, content.Value);
-    //        }
-    //    }
-    //}
+    [SerializeField] private bool debugShake = false;
+    [SerializeField] private float time = 0.15f;
+    [SerializeField] private float power = 1f;
+
     private void Start()
     {
         if (contentList != null)
@@ -113,6 +106,36 @@ public class VFXManager : SingletonManager<VFXManager>
             particleSystem.Stop();
             subscriberList.Remove(obj);
             Destroy(particleSystem.gameObject);
+        }
+    }
+
+    public void ShakeCamera(float time, float power) 
+    {
+        StartCoroutine(CamShake(time, power));
+    }
+
+    IEnumerator CamShake(float time, float power) 
+    {
+        float currentTime = 0;
+        Camera cam = Camera.main;
+        Vector3 orginTransform = cam.transform.localPosition;
+        while (currentTime < time) 
+        {
+            float xOffset = UnityEngine.Random.Range(-0.5f, 0.5f);
+            float yOffset = UnityEngine.Random.Range(-0.5f, 0.5f);
+            cam.transform.localPosition += new Vector3(xOffset * power, yOffset * power, 0);
+            currentTime += Time.deltaTime;
+            yield return null;
+        }
+        cam.transform.localPosition = orginTransform;
+    }
+
+    private void Update()
+    {
+        if (debugShake) 
+        {
+            ShakeCamera(time, power);
+            debugShake = false;
         }
     }
 }
