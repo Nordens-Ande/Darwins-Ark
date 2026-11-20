@@ -1,3 +1,4 @@
+using Assets.Scripts.Environment;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,6 +10,8 @@ public class VFXManager : SingletonManager<VFXManager>
 
     private Dictionary<VFXenum, ParticleSystem> particleDictonary = new Dictionary<VFXenum, ParticleSystem>();
     [SerializeField] private List<VFX_KeyAndParticle> contentList = new List<VFX_KeyAndParticle>();
+    [SerializeField] private List<CamVFX> camEffectList = new List<CamVFX>();
+    private Dictionary<BiomeType, ParticleSystem> camVfxDictonary = new Dictionary<BiomeType, ParticleSystem>();
 
     //List for particlesystems that should play indenfinently
     //All gameobjects that subscribes will have particleeffects play untill they unsubscribe
@@ -24,12 +27,30 @@ public class VFXManager : SingletonManager<VFXManager>
         public ParticleSystem Value => value;
     }
 
+    [Serializable]
+    public struct CamVFX 
+    {
+        [SerializeField] private BiomeType key;
+        [SerializeField] private ParticleSystem value;
+        public BiomeType Key => key;
+        public ParticleSystem Value => value;
+    }
+
     [SerializeField] private bool debugShake = false;
     [SerializeField] private float time = 0.15f;
     [SerializeField] private float power = 1f;
 
+    ParticleSystem cameraParticleSystem = null;
+    BiomeManager biomeManager;
+    Camera cam;
+
     private void Start()
     {
+        cam = Camera.main;
+        biomeManager = BiomeManager.Instance;
+        biomeManager.OnBiomeChange += SetBiomeCameraVFX;
+
+
         if (contentList != null)
         {
             foreach (var content in contentList)
@@ -37,6 +58,15 @@ public class VFXManager : SingletonManager<VFXManager>
                 particleDictonary.TryAdd(content.Key, content.Value);
             }
         }
+
+        if (camEffectList != null) 
+        {
+            foreach (var camEffect in camEffectList) 
+            {
+                camVfxDictonary.TryAdd(camEffect.Key, camEffect.Value);
+            }
+        }
+        SetBiomeCameraVFX(BiomeType.Normal);
 
     }
 
@@ -128,6 +158,26 @@ public class VFXManager : SingletonManager<VFXManager>
             yield return null;
         }
         cam.transform.localPosition = orginTransform;
+    }
+
+    public void SetBiomeCameraVFX(BiomeType type) 
+    { 
+        if(cam.transform.childCount != 0) 
+        {
+            Destroy(cam.transform.GetChild(0).gameObject);
+        }
+
+        ParticleSystem part = new ParticleSystem();
+        if(camVfxDictonary.ContainsKey(type)) 
+        { 
+            part = camVfxDictonary[type];
+            ParticleSystem sys = Instantiate(part, cam.transform);
+            sys.transform.position = new Vector3(cam.transform.position.x, cam.transform.position.y * 3, cam.transform.position.z);
+            
+            //sys.transform.rotation = cam.transform.rotation;
+            sys.transform.SetParent(cam.transform);
+        }
+        
     }
 
     private void Update()

@@ -9,6 +9,8 @@ namespace Assets.Scripts.Environment
         Normal, // just the green grass
         Infected,
         Autumn,
+        Ice,
+        fire
 
         // if you add a new biome you have to make it in List<BiomeDefinition> 
     }
@@ -40,6 +42,9 @@ namespace Assets.Scripts.Environment
         {
             new BiomeDefinition(BiomeType.Infected, Color.purple),
             new BiomeDefinition(BiomeType.Autumn, new Color(1f, 0.55f, 0.1f)),
+            new BiomeDefinition(BiomeType.fire, Color.indianRed), 
+            new BiomeDefinition(BiomeType.Ice, Color.aliceBlue),
+            new BiomeDefinition(BiomeType.Normal, Color.lawnGreen)
         };
 
         [Tooltip("Higher = rounder patches with fewer holes. 1 = fully random growth.")]
@@ -75,6 +80,8 @@ namespace Assets.Scripts.Environment
             new Vector2Int(0, -1), new Vector2Int(-1, -1), new Vector2Int(-1, 0), new Vector2Int(-1, 1)
         };
 
+        //Event for other scripts 
+        public event System.Action<BiomeType> OnBiomeChange;
 
         private void Start()
         {
@@ -240,7 +247,7 @@ namespace Assets.Scripts.Environment
                         }
                     }
                 }
-
+                
                 yield return null;
             }
         }
@@ -516,10 +523,11 @@ namespace Assets.Scripts.Environment
                 // First change: take exactly half of the grass
                 BiomeType source = activeBiomes[0];
                 BiomeType? newBiome = PickNewBiome(source);
-                if (!newBiome.HasValue) return;
+                if (!newBiome.HasValue) return; 
 
                 int half = CountTiles(source) / 2;
                 int full = CountTiles(source);
+                activeBiomes.Clear();
                 activeBiomes.Add(newBiome.Value);
                 StartCoroutine(BiomeChangeRoutine(newBiome.Value, source, full));
             }
@@ -543,6 +551,7 @@ namespace Assets.Scripts.Environment
             isTransitioning = true;
             yield return SpreadBiomeRoutine(newBiome, count, transitionSeconds, source, null);
             isTransitioning = false;
+            OnBiomeChange?.Invoke(newBiome);
             timerSeconds = 0f;   // the interval counts from when the swap finishes
         }
     }

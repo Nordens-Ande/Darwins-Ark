@@ -53,3 +53,17 @@ MonoBehaviour:
     value: {fileID: 4712550921873573123, guid: ba9277c10dbc97f4eab9f891d06f2627, type: 3}
   - key: 3
     value: {fileID: 2667141410444527748, guid: 1202763950c1c5d46b8470dd8e78138f, type: 3}
+  camEffectList:
+  - key: 0
+    value: {fileID: 6070248541787132462, guid: 837d395345a36034894a01a882adbba4, type: 3}
+  - key: 3
+    value: {fileID: 5582782654677431851, guid: f1fa9eb96b3ba084d8c7f4f71dc7a97a, type: 3}
+  - key: 1
+    value: {fileID: 4849272866118556910, guid: 35cdc1294aa04dd4dbf9efd557882a6c, type: 3}
+  - key: 4
+    value: {fileID: 4156224053523429174, guid: 1e1e9abc3a4d6cd4c847989f4d1b3a15, type: 3}
+  - key: 2
+    value: {fileID: 3730663479782333759, guid: 56d8b8ad9932a7c46a40f1ae4b62f098, type: 3}
+  debugShake: 0
+  time: 0.15
+  power: 1

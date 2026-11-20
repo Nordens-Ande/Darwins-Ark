@@ -1029,13 +1029,10 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     public void AnimalWalkMoveTowards(Vector3 point, float speed) 
     {
         transform.LookAt(new Vector3(point.x, transform.position.y, point.z));
-        //transform.LookAt(point);
 
         //Makes sure the animal stays at the tileheight its on
-        //Vector2 currentPostion = new Vector2((int)transform.position.x,(int) transform.position.z);
         Vector2 currentPostion = new Vector2(transform.position.x, transform.position.z);
         Tile currentTile = tileManager.GetTile(currentPostion);
-        //Vector3 newPoint = new Vector3(point.x, currentTile.position.y + transform.localScale.y / 2, point.z);
         Vector3 newPoint = new Vector3(point.x, currentTile.GetHeight() + transform.localScale.y / 2, point.z);
 
         //Test speed
@@ -1132,7 +1129,6 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
             HasPopupBubble= false;
         }
     }
-
 
     IEnumerator PopRemove(GameObject bubble) 
     {

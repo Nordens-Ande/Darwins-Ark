@@ -51,10 +51,16 @@ MonoBehaviour:
     color: {r: 0.627451, g: 0.1254902, b: 0.9411765, a: 1}
   - type: 2
     color: {r: 1, g: 0.55, b: 0.1, a: 1}
-  overwriteOtherBiomes: 0
+  - type: 0
+    color: {r: 0.4862745, g: 0.9882353, b: 0, a: 1}
+  - type: 3
+    color: {r: 0.25050196, g: 0.8792453, b: 0.84936875, a: 1}
+  - type: 4
+    color: {r: 0.93207544, g: 0.34692988, b: 0.18113914, a: 1}
   compactness: 6
   fillHoles: 1
-  tryToSpreadBiome: 0
-  debugBiome: 1
-  debugTileCount: 900
-  debugDuration: 20
+  minutesUntilFirstChange: 5
+  minutesBetweenChanges: 5
+  transitionSeconds: 30
+  timerSeconds: 0
+  triggerChangeNow: 0

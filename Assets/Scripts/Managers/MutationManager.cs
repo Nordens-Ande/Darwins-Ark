@@ -4,36 +4,84 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using Unity.VisualScripting;
+using Assets.Scripts.Environment;
 
 public class MutationManager : SingletonManager<MutationManager>
 {
     //public static MutationManager Instance = null;
     [Header("Animal mutations")]
-    [SerializeField] private List<SO_AnimalMutation> mutationsList = new List<SO_AnimalMutation>();
+    private Dictionary<BiomeType, List<SO_AnimalMutation>> mutationAnimalDictonary = new Dictionary<BiomeType, List<SO_AnimalMutation>>();
+    [SerializeField] private List<SO_AnimalMutation> normalAnimalMutation = new List<SO_AnimalMutation>();
+    [SerializeField] private List<SO_AnimalMutation> infectedAnimalMutation = new List<SO_AnimalMutation>();
+    [SerializeField] private List<SO_AnimalMutation> fireAnimalMutation = new List<SO_AnimalMutation>();
+    [SerializeField] private List<SO_AnimalMutation> iceAnimalMutation = new List<SO_AnimalMutation>();
+    [SerializeField] private List<SO_AnimalMutation> autumnAnimalMutation = new List<SO_AnimalMutation>();
+    private List<SO_AnimalMutation> currentMutationList = new List<SO_AnimalMutation>();
+    
 
     [Header("Plant mutations")]
+    private Dictionary<BiomeType, List<SO_PlantMutations>> mutationPlantDictonary = new Dictionary<BiomeType, List<SO_PlantMutations>>();
     [SerializeField] private List<SO_PlantMutations> plantMutationsList = new List<SO_PlantMutations>();
+    [SerializeField] private List<SO_PlantMutations> normalPlantMutation = new List<SO_PlantMutations>();
+    [SerializeField] private List<SO_PlantMutations> infectedPlantMutation = new List<SO_PlantMutations>();
+    [SerializeField] private List<SO_PlantMutations> firePlantMutation = new List<SO_PlantMutations>();
+    [SerializeField] private List<SO_PlantMutations> icePlantMutation = new List<SO_PlantMutations>();
+    [SerializeField] private List<SO_PlantMutations> autumnPlantMutation = new List<SO_PlantMutations>();
     [SerializeField] private ParticleSystem mutationParticleSystem;
     SeedManager seedManager = SeedManager.Instance;
+    BiomeManager bioManger;
 
     private Vector3 dumpPostion = new Vector3(0,50,0);
 
-    public List<SO_AnimalMutation> MutationList 
+    private BiomeType currentBiome = BiomeType.Normal;
+
+    private void Start()
     {
-        get => mutationsList;
-        set => mutationsList = value;
+        bioManger = BiomeManager.Instance;
+        mutationAnimalDictonary.Add(BiomeType.Normal, normalAnimalMutation);
+        mutationAnimalDictonary.Add(BiomeType.Infected, infectedAnimalMutation);
+        mutationAnimalDictonary.Add(BiomeType.fire, fireAnimalMutation);
+        mutationAnimalDictonary.Add(BiomeType.Ice, iceAnimalMutation);
+        mutationAnimalDictonary.Add(BiomeType.Autumn, autumnAnimalMutation);
+
+        mutationPlantDictonary.Add(BiomeType.Normal, normalPlantMutation);
+        mutationPlantDictonary.Add(BiomeType.Infected, infectedPlantMutation);
+        mutationPlantDictonary.Add(BiomeType.fire, firePlantMutation);
+        mutationPlantDictonary.Add(BiomeType.Ice, icePlantMutation);
+        mutationPlantDictonary.Add(BiomeType.Autumn, autumnPlantMutation);
+        bioManger.OnBiomeChange += ChangeCurrentBiome;
     }
 
+    //public List<SO_AnimalMutation> MutationList 
+    //{
+    //    get => mutationsList;
+    //    set => mutationsList = value;
+    //}
+
+    List<SO_AnimalMutation> GetBiomeMutationList(BiomeType biomType) 
+    {
+        if (mutationAnimalDictonary.ContainsKey(biomType)) 
+        {
+            return mutationAnimalDictonary[biomType];
+        }
+        else 
+        {
+            Debug.LogWarning("MutationManger: GetBiomeMutationList: Dosent contain biomemutation list for current biome");
+            return normalAnimalMutation;
+        }
+    }
 
     SO_AnimalMutation RandomMutation() 
     {
+        List<SO_AnimalMutation> mutationsList = GetBiomeMutationList(currentBiome);
         SO_AnimalMutation mutation = mutationsList[Random.Range(0, mutationsList.Count)];
+        currentMutationList = mutationsList;
         return mutation;
     }
     public void MutateAnimal_SetMutation(AnimalAI thisAnimal, SO_AnimalMutation thisMutation)
     {
         if (thisAnimal.IsMutated) { return; }
-        if (mutationsList.Count != 0)
+        if (currentMutationList.Count != 0)
         {
             SO_AnimalMutation mutation = thisMutation;
             Renderer animalRenderer = thisAnimal.AnimalObj.GetComponent<Renderer>();
@@ -46,9 +94,11 @@ public class MutationManager : SingletonManager<MutationManager>
             thisAnimal.WalkSpeed += mutation.WalkSpeed;
             thisAnimal.RunSpeed += mutation.RunSpeed;
             thisAnimal.transform.localScale = new Vector3
-                (thisAnimal.transform.localScale.x + mutation.Localsize,
+            (
+                 thisAnimal.transform.localScale.x + mutation.Localsize,
                  thisAnimal.transform.localScale.y + mutation.Localsize,
-                 thisAnimal.transform.localScale.z + mutation.Localsize);
+                 thisAnimal.transform.localScale.z + mutation.Localsize
+            );
 
             //thisAnimal.HasMutated = true;
         }
@@ -142,8 +192,27 @@ public class MutationManager : SingletonManager<MutationManager>
 
     SO_PlantMutations RandomPlantMutation() 
     {
-        SO_PlantMutations plant = plantMutationsList[Random.Range(0, plantMutationsList.Count)];
-        return plant;
+        List<SO_PlantMutations> mutationsList = new List<SO_PlantMutations>();  
+        if (mutationPlantDictonary.ContainsKey(currentBiome)) 
+        { 
+            mutationsList = mutationPlantDictonary[currentBiome];
+            if(mutationsList.Count > 0) 
+            {
+                SO_PlantMutations plant = mutationsList[Random.Range(0, mutationsList.Count)];
+                return plant;
+            }
+            else 
+            {
+                Debug.LogWarning("MutationManager: RandomPlantMutation: The currentbiomelist dosent have mutations");
+                return plantMutationsList[0];
+            }
+        }
+        else 
+        {
+            Debug.LogWarning("MutationManager: RandomPlantMutation: The current biome dosent have a mutationlist");
+            return plantMutationsList[0];
+        }
+
     }
 
     IEnumerator DestroyParticleSystem(ParticleSystem particle) 
@@ -159,6 +228,12 @@ public class MutationManager : SingletonManager<MutationManager>
     {
         SO_AnimalMutation mutation = RandomMutation();
         MutateAnimal_SetMutation(thisAnimal, mutation);
+    }
+
+    public void ChangeCurrentBiome(BiomeType biomeType) 
+    {
+        Debug.LogWarning("Biome has changed to: " + biomeType.ToString());
+        currentBiome = biomeType;
     }
 }
 
