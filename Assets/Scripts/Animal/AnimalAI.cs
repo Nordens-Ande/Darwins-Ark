@@ -8,6 +8,7 @@ using System.Linq;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem.EnhancedTouch;
 //using UnityEngine.Tilemaps;
 
 public class AnimalAI : MonoBehaviour, IBoatSpawning
@@ -44,16 +45,12 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     //InternalTimer
     [SerializeField] private float maxIdleTime = 5f;
     [SerializeField, ReadOnly] private float currentIdleTime = 0;
-
     [SerializeField] private float maxAttackTime = 2;
     [SerializeField, ReadOnly] private float currentAttackTime = 0;
-
     [SerializeField] private float clockCycleTime = 10; //How long before points deteriate
     [SerializeField, ReadOnly] private float clockCycleTimeCurrent;
-
     [SerializeField] private float sleepTimeMax = 10;
     [SerializeField, ReadOnly] private float currentSleepTime = 0;
-
     private float standStillTimerMax = 0;
     private float standstillTimerCurrent = 0;
 
@@ -83,6 +80,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     private BossManager bossManager;
     private GameManager gameManager;
     private LightningDeityManager lightningDeityManager;
+    private BiomeManager biomeManger;
 
     //Boat Spawning
     private bool unloaded = false;
@@ -106,6 +104,9 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     //Mutations
     private bool hasMutated = false;
     private bool isMutated = false;
+    private BiomeType elementType = BiomeType.Normal;
+    private AnimalGUIInfo initialValues;
+    private AnimalGUIInfo currentValues;
 
     //MatingSeason
     private bool hasMate = false;
@@ -250,6 +251,23 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         set => animalObj = value;
     }
 
+    public BiomeType ElementType 
+    {
+        get => elementType; 
+        set => elementType = value;
+    }
+
+    public  AnimalGUIInfo InitialValues 
+    { 
+        get => initialValues;
+        set => initialValues = value;
+    }
+    public AnimalGUIInfo CurrentValues 
+    { 
+        get => currentValues;
+        set => currentValues = value;
+    }
+
     void Start()
     {
         canvas = FindAnyObjectByType<Canvas>();
@@ -260,6 +278,8 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         hungerDeteration = 10;
         lightningHitCount = 0;
         transform.localPosition = Vector3.zero;
+        initialValues = new AnimalGUIInfo(walkSpeed, runSpeed, damage, health, hungerDeteration, MutationRate, hunger, bossThreat, Happiness, matingSeason, tired);
+        currentValues = initialValues;
         tileManager = TileManager.Instance;
         mutationManager = MutationManager.Instance;
         animalManager = AnimalManager.Instance;
@@ -268,6 +288,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
         bossManager = BossManager.Instance;
         gameManager = GameManager.Instance;
         lightningDeityManager = LightningDeityManager.Instance;
+        biomeManger = BiomeManager.Instance;
         activeBosses = new List<Boss>();
         //maxAttackTime = 2;
         tileCheckSize = 1;
@@ -280,6 +301,7 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
 
         tileManager.ChunksCleaned += IslandIsTerraformed;
         lightningDeityManager.OnLightningTriggered += HitByLightning; //Added as subscriber to lightning
+        biomeManger.OnBiomeChange += ResetValuesOnBiomeChange;
 
         InstantiateUtilityBrain();
     }
@@ -1169,5 +1191,17 @@ public class AnimalAI : MonoBehaviour, IBoatSpawning
     public void InvokeMutation() 
     { 
         hasMutated = true;
+    }
+
+    public void NewInitialValue(float walkSpeed, float runSpeed, float damage, float health, float 
+        hungerDeteration, float MutationRate, float hunger, float bossThreat, float Happiness, float matingSeason, float tired) 
+    {
+        initialValues = new AnimalGUIInfo(walkSpeed, runSpeed, damage, health, hungerDeteration, MutationRate, hunger, bossThreat, Happiness, matingSeason, tired);
+    }
+
+    void ResetValuesOnBiomeChange(BiomeType type) 
+    { 
+        float changeValue = biomeManger.BiomeEffect.GetValueChange(type, elementType);
+        biomeManger.BiomeEffect.ResetAnimalValue(changeValue, this);
     }
 }

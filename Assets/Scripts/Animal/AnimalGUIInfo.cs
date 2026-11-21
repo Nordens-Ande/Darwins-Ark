@@ -17,12 +17,36 @@ public class AnimalGUIInfo
     private float matingSeason;
     private float tired;
 
-    public float WalkSpeed => walkSpeed;
-    public float RunSpeed => runSpeed;
-    public float Damage => damage;
-    public float Health => health;
-    public float HungerDeteration => hungerDeteration;
-    public float MutationRate => mutationRate;
+    public float WalkSpeed 
+    { 
+        get => walkSpeed;
+        set => walkSpeed = value;
+    } 
+    public float RunSpeed 
+    {
+        get => runSpeed;
+        set => runSpeed = value;
+    }
+    public float Damage
+    { 
+        get => damage;
+        set => damage = value;
+    }
+    public float Health 
+    { 
+        get => health;
+        set => health = value;
+    }
+    public float HungerDeteration
+    { 
+         get => hungerDeteration;
+         set => hungerDeteration = value;
+    }
+    public float MutationRate 
+    { 
+        get => mutationRate; 
+        set => mutationRate = value;
+    }
     public float Hunger => hunger;
     public float Tired => tired;
     public float MatingSeason => matingSeason;

@@ -100,6 +100,10 @@ public class MutationManager : SingletonManager<MutationManager>
                  thisAnimal.transform.localScale.z + mutation.Localsize
             );
 
+            thisAnimal.ElementType = currentBiome;
+            thisAnimal.NewInitialValue(thisAnimal.WalkSpeed, thisAnimal.RunSpeed, thisAnimal.DMG, thisAnimal.Health, thisAnimal.HungerDeteration, 
+                thisAnimal.MutationRatefloat, thisAnimal.Hunger, thisAnimal.BossThreat, thisAnimal.GetHappiness(), thisAnimal.MatingSeason, thisAnimal.Tired);
+
             //thisAnimal.HasMutated = true;
         }
 

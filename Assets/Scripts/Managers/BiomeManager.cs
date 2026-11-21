@@ -63,6 +63,8 @@ namespace Assets.Scripts.Environment
         private bool isTransitioning = false;
         private bool tilesRegistered = false;
 
+        private BiomeEffect biomeEffect; //For getting, applying changes to animal/plants
+        public BiomeEffect BiomeEffect => biomeEffect;
 
 
         // Only tiles that are NOT Normal are stored. Key = world grid position.
@@ -86,6 +88,7 @@ namespace Assets.Scripts.Environment
         private void Start()
         {
             RebuildColorLookup();
+            biomeEffect = new BiomeEffect();
         }
 
         private void OnValidate()
