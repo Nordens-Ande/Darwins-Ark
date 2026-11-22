@@ -1,3 +1,5 @@
+using Assets.Scripts.Environment;
+using System;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using UnityEngine;
@@ -11,30 +13,23 @@ public class HappeningManager : SingletonManager<SoundManager>
     [SerializeField, ReadOnly] private float internalClockCycle;
     [SerializeField, ReadOnly] private float currentClockCycle;
     [SerializeField, ReadOnly] private float clockSpeed;
-
-
     private bool HasCurrentHappening = false;
-
     [Header("Bird attack")]
     [SerializeField] private GameObject birdPrefab;
     [SerializeField] private float birdHealth;
-
+    [SerializeField] private int birdAmount;
     [Header("Fog of war")]
     [SerializeField] private GameObject particleEffect;
     [SerializeField] private float intensity;
-
+    [SerializeField] private float leangth;
     [Header("EarthQuake")]
     [SerializeField] int amountEffectedTiles;
-
     [Header("Wild fire")]
     [SerializeField] int effectedPlants;
     [SerializeField] GameObject fireParticleEffect;
-
     [Header("Drought")]
     [SerializeField] private int plantsWithDrought;
     [SerializeField] private float droughtEffect;
-
-
     private List<Happening> possibleHappinings = new List<Happening>();
     private Happening currentHappening = null;
 
@@ -49,7 +44,7 @@ public class HappeningManager : SingletonManager<SoundManager>
     {
         ClockCycle();
         currentHappening.Update();
-        currentHappening.Reset(HasCurrentHappening);
+        currentHappening.Stop(HasCurrentHappening);
     }
 
     void ClockCycle() 
@@ -70,45 +65,74 @@ public class HappeningManager : SingletonManager<SoundManager>
     {
         if (possibleHappinings.Count > 0 && HasCurrentHappening)
         {
-            int randomHappening = Random.Range(0, possibleHappinings.Count);
+            int randomHappening = UnityEngine.Random.Range(0, possibleHappinings.Count);
             currentHappening = possibleHappinings[randomHappening];
         }
     }
 }
 
 //All possible happenings classes
-public abstract class Happening 
+public abstract class Happening : MonoBehaviour
 {
     //Updates the logic of the happening
     public abstract void Update();
 
     //Sees if the logic is done and then reset so the happening is marked as complete
-    public abstract void Reset(bool reset);
+    public abstract void Stop(bool reset);
 }
 
+//Fogs the screen for harder vision
 public class FogOfWar : Happening
 {
     private GameObject particleEffect;
     private float intensity;
+    private float leangth;
+    private bool HasInstatiatedEffect = false;
+    private float currentTime = 0;
+    private bool Done;
+    private GameObject instantiatedObj = null;
 
-    public FogOfWar(GameObject particleEffect, float intensity)
+    public FogOfWar(GameObject particleEffect, float intensity, float leangth)
     {
         this.particleEffect = particleEffect;
         this.intensity = intensity;
+        this.leangth = leangth;
     }
 
     public override void Update()
     {
-
+        if (!HasInstatiatedEffect) 
+        { 
+            Camera cam = Camera.main;
+            GameObject effect = Instantiate(particleEffect, cam.transform);
+            effect.transform.SetParent(cam.transform, false);
+            HasInstatiatedEffect=true;
+        }
+        if (HasInstatiatedEffect) 
+        {
+            currentTime += Time.deltaTime;
+            if (currentTime > leangth) 
+            { 
+                Done = true;
+            }
+        }
     }
-    public override void Reset(bool reset)
+    public override void Stop(bool reset)
     {
-        reset = false;
+        if (Done) 
+        {
+            Destroy(instantiatedObj.gameObject);
+            reset = false;
+        }
     }
 }
+
+//Changes the tiles height
 public class EarthQuake : Happening
 {
     private int amountEffectedTiles;
+    private List<Tile> effectedTiles = new List<Tile>();
+    private bool canStart = false;
 
     public EarthQuake(int amountEffectedTiles) 
     { 
@@ -116,39 +140,86 @@ public class EarthQuake : Happening
     }
     public override void Update()
     {
-
+        if (!canStart) 
+        {
+            TileManager tilemanager = TileManager.Instance;
+            foreach(Chunk chunk in tilemanager.chunks) 
+            { 
+                foreach(Tile tile in chunk.Tiles) 
+                { 
+                    System.Random random = new System.Random();
+                    int frequency = random.Next(0, 10);
+                    if(effectedTiles.Count < amountEffectedTiles && frequency > 7) 
+                    { 
+                        effectedTiles.Add(tile);
+                    }
+                    
+                }
+            }
+            canStart = true;
+        }
+        if (canStart) 
+        { 
+            foreach (Tile tile in effectedTiles) 
+            {
+                //Modify y axis
+            }
+        }
     }
-    public override void Reset(bool reset)
+    public override void Stop(bool reset)
     {
         reset = false;
     }
 }
 
+//Instantiates birds with logic to steal plants and hurt animals
 public class BirdAttack : Happening
 {
     private GameObject birdPrefab;
-    private float birdHealth;
+    private int birdAmount;
+    private bool started = false;
+    private Vector3 startPos;
+    private List<GameObject> birdList = new List<GameObject>();
 
-    public BirdAttack(GameObject birdPrefab, float birdHealth)
+    public BirdAttack(GameObject birdPrefab, int birdAmount)
     {
         this.birdPrefab = birdPrefab;
-        this.birdHealth = birdHealth;
+        this.birdAmount = birdAmount;
     }
 
     public override void Update()
     {
+        if (!started) 
+        { 
+            for(int i = 0; i < birdAmount; i++) 
+            { 
+                GameObject bird = Instantiate(birdPrefab, startPos, Quaternion.identity);
+                birdList.Add(bird);
+            }
+            started = true;
+        }
     }
 
-    public override void Reset(bool reset)
+    public override void Stop(bool reset)
     {
-        reset = false;
+        if(birdList.Count == 0) 
+        {
+            reset = false;
+        }
     }
 }
 
+//Effects the plants and damages them over time if there isnet rain on them
 public class WildFire : Happening
 {
     private int effectedPlants;
     private GameObject fireEffect;
+    private bool canStart = false; 
+    private List<Plant> effectedPlantsList = new List<Plant>();
+    //private List<GameObject> effectsList = new List<GameObject>();
+    private Dictionary<Plant, GameObject> EffectsDictonary = new Dictionary<Plant, GameObject>();
+    private float currentTime = 0;
+    private float deterioationTime = 10;
 
     public WildFire(int effectedPlants, GameObject fireEffect)
     { 
@@ -158,13 +229,70 @@ public class WildFire : Happening
 
     public override void Update()
     {
+        if (!canStart) 
+        {
+            PlantManager plant = PlantManager.Instance;
+            foreach(Plant activePlant in plant.Plants) 
+            {
+                if (activePlant.CanBeEaten && effectedPlants > effectedPlantsList.Count) 
+                { 
+                    effectedPlantsList.Add(activePlant);
+                }
+
+                if (effectedPlantsList.Count > 0) 
+                {
+                    GameObject effect = Instantiate(fireEffect, activePlant.transform);
+                    EffectsDictonary.TryAdd(activePlant, effect);
+                }
+            }
+        }
+        if (canStart) 
+        {
+            currentTime += Time.deltaTime;
+            if (currentTime > deterioationTime) 
+            { 
+                foreach(Plant plant in effectedPlantsList) 
+                {
+                    if (plant.IsCloseToWater) //Is this how rain was assured?
+                    {
+                        EffectsDictonary.TryGetValue(plant, out var obj);
+                        if (obj != null) 
+                        {
+                            Destroy(obj.gameObject);
+                            EffectsDictonary.Remove(plant);
+                        }
+                        effectedPlantsList.Remove(plant);
+                    }
+
+                    if(plant == null) 
+                    { 
+                        effectedPlantsList.Remove(plant);
+                    }
+                    plant.DamagePlant(10f);
+                }
+                currentTime = 0;
+            }
+        }
 
     }
-    public override void Reset(bool reset)
+    public override void Stop(bool reset)
     {
+        if(effectedPlantsList.Count == 0) 
+        {
+            foreach(Plant plant in effectedPlantsList) 
+            {
+                EffectsDictonary.TryGetValue(plant, out var obj);
+                Destroy(obj.gameObject);
+            }
+            effectedPlantsList.Clear();
+            EffectsDictonary.Clear();
+            reset = false;
+        }
         reset = false;
     }
 }
+
+//Effects plants so you need more water for each plant
 public class Drought : Happening
 {
     private int plantsWithDrought;
@@ -179,7 +307,7 @@ public class Drought : Happening
     {
 
     }
-    public override void Reset(bool reset)
+    public override void Stop(bool reset)
     {
         reset = false;
     }
