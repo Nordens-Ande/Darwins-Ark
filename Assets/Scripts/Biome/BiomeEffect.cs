@@ -120,7 +120,7 @@ public class BiomeEffect
         thisAnimal.CurrentValues.Health += charge * 10;
         thisAnimal.CurrentValues.Damage += charge * 10;
         thisAnimal.CurrentValues.MutationRate += charge;
-        thisAnimal.CurrentValues.HungerDeteration += charge * 10;
+        thisAnimal.CurrentValues.HungerDeteration -= charge * 10;
     }
 
     //Think its a okay way, this dosent change the defult but applies the current changes
