@@ -16,6 +16,7 @@ public class VFXManager : SingletonManager<VFXManager>
     //List for particlesystems that should play indenfinently
     //All gameobjects that subscribes will have particleeffects play untill they unsubscribe
     private Dictionary<GameObject, ParticleSystem> subscriberList = new Dictionary<GameObject, ParticleSystem>();
+    [SerializeField] private bool ScreenEffect = false;
     //Error when i made the dictonary serializable, this is a work around
     [Serializable]
     public struct VFX_KeyAndParticle 
@@ -48,7 +49,10 @@ public class VFXManager : SingletonManager<VFXManager>
     {
         cam = Camera.main;
         biomeManager = BiomeManager.Instance;
-        biomeManager.OnBiomeChange += SetBiomeCameraVFX;
+        if (ScreenEffect)
+        {
+            biomeManager.OnBiomeChange += SetBiomeCameraVFX;
+        }
 
 
         if (contentList != null)
@@ -66,7 +70,10 @@ public class VFXManager : SingletonManager<VFXManager>
                 camVfxDictonary.TryAdd(camEffect.Key, camEffect.Value);
             }
         }
-        SetBiomeCameraVFX(BiomeType.Normal);
+        if (ScreenEffect)
+        {
+            SetBiomeCameraVFX(BiomeType.Normal);
+        }
 
     }
 
