@@ -1,6 +1,7 @@
 using Assets.Scripts.Environment;
 using UnityEngine;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 public class BossManager : SingletonManager<BossManager>
@@ -36,11 +37,20 @@ public class BossManager : SingletonManager<BossManager>
         animalManager = AnimalManager.Instance;
         tileManager = TileManager.Instance;
         bossList = new List<Boss>();
+        StartCoroutine(InitialBossWave());
+    }
+
+    private IEnumerator InitialBossWave()
+    {
+        yield return new WaitForSeconds(1);
         nextWave = DecideNextBossWave();
     }
 
     public void SpawnBossWave()
     {
+        if (nextWave == null) return;
+        if (nextWave.Count <= 0) return;
+
         foreach(BossTypes bossType in nextWave)
         {
             switch(bossType)

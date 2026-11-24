@@ -11,7 +11,7 @@ public class AnimalManager : MonoBehaviour
     private BossManager bossManager = BossManager.Instance;
     private BoatManager boatManager = BoatManager.Instance;
     [SerializeField] GameObject animalPrefab;
-    List<AnimalAI> animals;
+    List<AnimalAI> animals = new List<AnimalAI>();
 
     //timer
     float spawnTimer = 10000;
