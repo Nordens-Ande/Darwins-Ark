@@ -1660,6 +1660,39 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+--- !u!114 &2028429420 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5218102155610698157, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+  m_PrefabInstance: {fileID: 2028429419}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6627c4e18ae4c1949852a8374c85ce3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LightningDeityManager
+--- !u!114 &2028429421 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7040246200480507033, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+  m_PrefabInstance: {fileID: 2028429419}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 99a92350d1706994dad74bf108608b90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RainDeityManager
+--- !u!114 &2028429422 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6673440682305440526, guid: e836e73abba0fde4ca0bb10563b34ac1, type: 3}
+  m_PrefabInstance: {fileID: 2028429419}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da01ae59d0cf9004796ff8404a00b1a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WindCreationManager
 --- !u!1 &2029357346
 GameObject:
   m_ObjectHideFlags: 0
@@ -1957,6 +1990,38 @@ PrefabInstance:
       propertyPath: m_ActionEvents.Array.data[3].m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
       objectReference: {fileID: 550361599}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 2028429422}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[1].m_Target
+      value: 
+      objectReference: {fileID: 2028429422}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[2].m_Target
+      value: 
+      objectReference: {fileID: 2028429421}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[3].m_Target
+      value: 
+      objectReference: {fileID: 2028429420}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: HandleSelectTile
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[1].m_MethodName
+      value: HandleSelectDirection
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[2].m_MethodName
+      value: HandleSelectTile
+      objectReference: {fileID: 0}
+    - target: {fileID: 5778042028044558613, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
+      propertyPath: m_ActionEvents.Array.data[9].m_PersistentCalls.m_Calls.Array.data[3].m_MethodName
+      value: HandleSelectTile
+      objectReference: {fileID: 0}
     - target: {fileID: 8819656911034563407, guid: fb3cd1171aa74ac469c9b2ccc76dec92, type: 3}
       propertyPath: m_Name
       value: Player Input

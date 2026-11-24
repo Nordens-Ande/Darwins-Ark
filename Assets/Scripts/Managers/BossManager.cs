@@ -9,7 +9,7 @@ public class BossManager : SingletonManager<BossManager>
     {
         PlantAttacker,
         ConcreteMaker,
-        RiverAttacker
+        AnimalAttacker
     }
 
     private PlantManager plantManager;
@@ -48,7 +48,7 @@ public class BossManager : SingletonManager<BossManager>
                 case BossTypes.PlantAttacker:
                     SpawnBoss(bossPrefab);
                     break;
-                case BossTypes.RiverAttacker:
+                case BossTypes.AnimalAttacker:
                     SpawnBoss(bossPrefab);
                     break;
                 case BossTypes.ConcreteMaker: 

@@ -161,6 +161,7 @@ public class LightningDeityManager : SingletonManager<LightningDeityManager>
 
         //highlight them
         highlights.Clear();
+        SetGridVisible(true);
         foreach (Tile affectedTile in affectedTiles)
         {
             highlights.Add(affectedTile.GridPosition);
