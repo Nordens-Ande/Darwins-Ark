@@ -189,6 +189,8 @@ public class MutationManager : SingletonManager<MutationManager>
         rendGrowth.material.color = choosenMutation.Color;
         newplant.Health += choosenMutation.Health;
         newplant.IsCloseToWaterRange = choosenMutation.IsCloseToWaterRange;
+        newplant.EffectType = currentBiome;
+        newplant.NewInitialValues(newplant.Health, newplant.IsCloseToWaterRange, newplant.GrowthSpeed, newplant.PlantSmellRadiusValue);
 
         Debug.Log("Sucsesfull seed mutation");
         return newplant;

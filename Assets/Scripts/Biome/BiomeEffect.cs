@@ -133,4 +133,28 @@ public class BiomeEffect
         thisAnimal.MutationRatefloat = thisAnimal.CurrentValues.MutationRate;
         thisAnimal.HungerDeteration = thisAnimal.CurrentValues.HungerDeteration;
     }
+
+    public void ResetPlantValue(float charge, Plant plant) 
+    {
+        ApplyCharge_Plant(charge, plant);
+        ApplyChange_Plant(plant);
+
+    }
+
+    public void ApplyCharge_Plant(float charge, Plant plant) 
+    { 
+        plant.CurrentValues = plant.InitialValues;
+        plant.CurrentValues.Health += charge;
+        plant.CurrentValues.IsCloseToWaterRange += charge;
+        plant.CurrentValues.growthspeed += charge;
+        plant.CurrentValues.PlantSmellRadius += charge;
+    }
+
+    public void ApplyChange_Plant(Plant plant) 
+    { 
+        plant.Health = plant.CurrentValues.Health;
+        plant.IsCloseToWaterRange = plant.CurrentValues.IsCloseToWaterRange;
+        plant.GrowthSpeed = plant.CurrentValues.growthspeed;
+        plant.PlantSmellRadiusValue = plant.CurrentValues.PlantSmellRadius;
+    }
 }

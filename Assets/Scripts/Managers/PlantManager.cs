@@ -54,6 +54,8 @@ public class PlantManager : SingletonManager<PlantManager>
 
     public List<Plant> Plants => plants;
 
+    BiomeManager biomeManager;
+
     // we dont need this anymore since we inherit from SingletonManager
     //private void Awake()
     //{
@@ -64,6 +66,8 @@ public class PlantManager : SingletonManager<PlantManager>
     void Start()
     {
         tileManager = TileManager.Instance;
+        biomeManager = BiomeManager.Instance;
+        biomeManager.OnBiomeChange += DestroySmallPlants;
 
         StartCoroutine(SpawnPlantsAfter1Frame());
     }
@@ -316,5 +320,17 @@ public class PlantManager : SingletonManager<PlantManager>
     public IEnumerable<Plant> GetPlants()
     {
         return plants;
+    }
+
+    //Destroys smaller plants in biomechange
+    public void DestroySmallPlants(BiomeType type) 
+    { 
+        foreach(Plant plant in plants) 
+        {
+            if (!plant.CanBeEaten) 
+            { 
+                Destroy(plant.gameObject);
+            }
+        }
     }
 }

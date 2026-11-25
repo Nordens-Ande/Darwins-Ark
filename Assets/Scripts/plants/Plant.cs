@@ -35,10 +35,28 @@ public class Plant : MonoBehaviour
     [SerializeField] GameObject grownPrefab;
     [Space]
 
+    private PlantValues initialValues;
+    private PlantValues currentValues;
+    private BiomeType effectType = BiomeType.Normal;
 
+    public PlantValues InitialValues 
+    { 
+        get => initialValues; 
+        set => initialValues = value;
+    }
 
+    public PlantValues CurrentValues 
+    { 
+        get => currentValues; 
+        set => currentValues = value;
+    }
+    public BiomeType EffectType 
+    {
+        get => effectType; 
+        set => effectType = value;
+    }
 
-
+    BiomeManager biomeManager;
 
     private GameObject currentModelInstance; // this is the model currently used for the plant
     public Tile CurrentTile => currentTile; // this is the tile that the plant is currently on
@@ -54,10 +72,13 @@ public class Plant : MonoBehaviour
 
     void Start()
     {
+        biomeManager = BiomeManager.Instance;
         PlantParticleSystem particleSystem = gameObject.GetComponent<PlantParticleSystem>();
         if (particleSystem == null) gameObject.AddComponent<PlantParticleSystem>();
-
+        initialValues = new PlantValues(health, IsCloseToWaterRange, GrowthSpeed, PlantSmellRadius);
+        CurrentValues = initialValues;
         updateVisulas();
+        biomeManager.OnBiomeChange += OnBiomeChangePlant;
     }
 
     private void Update()
@@ -284,12 +305,16 @@ public class Plant : MonoBehaviour
             );
     }
 
+    public void OnBiomeChangePlant(BiomeType type) 
+    {
+        float charge = biomeManager.BiomeEffect.GetValueChange(type, effectType);
+        biomeManager.BiomeEffect.ResetPlantValue(charge, this);
+    }
 
-
-
-
-
-
+    public void NewInitialValues(float health, float isclosetowaterrange, float growthspeed, float plantsmellradius) 
+    {
+        initialValues = new PlantValues(health, isclosetowaterrange, growthspeed, plantsmellradius);
+    }
 
     ///////////////////// <summary>
     ///////////////////// This is where getters are loctaed
