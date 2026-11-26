@@ -14,7 +14,7 @@ public interface IBossAIState
 }
 
 [Serializable]
-public abstract class BossAIState : IBossAIState
+public abstract class BossAIState : MonoBehaviour, IBossAIState
 {
     [NonSerialized]
     protected Boss boss;
@@ -32,11 +32,6 @@ public abstract class BossAIState : IBossAIState
     {
         get { return taskCompleted; }
         set { taskCompleted = value; }
-    }
-
-    public BossAIState(Boss boss)
-    {
-        this.boss = boss;
     }
 
     public abstract void Initialize(Boss boss);

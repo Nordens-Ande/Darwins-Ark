@@ -10,13 +10,6 @@ public class BossAttackPlantState : BossAIState
 
     float attackTimer;
 
-    public BossAttackPlantState(Boss boss) : base(boss)
-    {
-        container = new BossAttackPlantContainer();
-        atPlantTile = false;
-        attackTimer = 0;
-    }
-
     public override void Initialize(Boss boss)
     {
         this.boss = boss;

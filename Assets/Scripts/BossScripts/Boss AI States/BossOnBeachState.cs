@@ -6,10 +6,6 @@ using UnityEngine;
 public class BossOnBeachState : BossAIState
 {
     TileManager tileManager = TileManager.Instance;
-    public BossOnBeachState(Boss boss) : base(boss)
-    {
-        container = new BossOnBeachContainer();
-    }
 
     public override void Initialize(Boss boss)
     {

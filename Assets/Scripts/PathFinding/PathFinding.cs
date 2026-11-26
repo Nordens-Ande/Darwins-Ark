@@ -358,7 +358,7 @@ public class PathFinding
         {
             foreach(Tile tile in chunk.Tiles)
             {
-                if(tile.Type == TileType.Grass || tile.Type == TileType.Concrete)
+                if(tile.Type == TileType.Grass || tile.Type == TileType.Concrete || tile.Type == TileType.Lake || tile.Type == TileType.River)
                 {
                     availableTiles.Add(tile);
                 }

@@ -11,11 +11,6 @@ public class BossRelocateState : BossAIState
     float minRelocateDistance = 10;
     float maxRelocateDistance = 20;
 
-    public BossRelocateState(Boss boss) : base(boss)
-    {
-        container = new BossRelocateContainer();
-    }
-
     public override void Initialize(Boss boss)
     {
         this.boss = boss;

@@ -14,11 +14,6 @@ public class BossEscapeState : BossAIState
 
     private int tilesEscaped;
 
-    public BossEscapeState(Boss boss) : base(boss)
-    {
-        container = new BossEscapeContainer();
-    }
-
     public override void Initialize(Boss boss)
     {
         this.boss = boss;
@@ -112,7 +107,7 @@ public class BossEscapeState : BossAIState
         //return null;
     }
 
-    private List<Tile> GetSurroundingTiles() //maybe better solution, do this pal, makes smarter escape, choose th etile that is furthest and pathfindable
+    private List<Tile> GetSurroundingTiles()
     {
         List<Tile> tiles = new List<Tile>();
         Tile currentTile = tileManager.GetTile(boss.transform.position);

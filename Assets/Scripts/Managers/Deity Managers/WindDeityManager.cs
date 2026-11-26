@@ -78,72 +78,6 @@ public class WindDeityManager : SingletonManager<WindDeityManager>
         tilesAffectedByWind.Add(anchorPoint);
         return tilesAffectedByWind;
     }
-
-    //private Dictionary<int, List<Tile>> FindWindStrips(Tile anchorPoint, Vector2 direction) // old version where tiles are separated into strips by x and z position. didnt work for diagonal directions
-    //{
-    //    //List<List<Tile>> windStrips = new List<List<Tile>>();
-    //    Dictionary<int, List<Tile>> windStrips = new Dictionary<int, List<Tile>>();
-
-    //    List<Tile> tilesAffectedByWind = FindTilesInWindZone(anchorPoint, direction);
-
-    //    if (tilesAffectedByWind.Count <= 0) return null;
-
-    //    (int, int) rangeX = tileManager.GetTilePositionRangeX();
-    //    (int, int) rangeZ = tileManager.GetTilePositionRangeZ();
-
-    //    if (Math.Abs(direction.x) > Math.Abs(direction.y))
-    //    {
-    //        int minZ = rangeZ.Item1;
-    //        int maxZ = rangeZ.Item2;
-    //        //z low to high
-    //        //x increasing
-    //        for (int i = rangeX.Item1; i < rangeX.Item2; i++)
-    //        {
-    //            int listIndex = 0;
-    //            for (int j = minZ; j < maxZ; j++)
-    //            {
-    //                Tile tile = tileManager.GetTile(i, j);
-    //                if (tilesAffectedByWind.Contains(tile))
-    //                {
-    //                    if (!windStrips.ContainsKey(listIndex))
-    //                    {
-    //                        windStrips[listIndex] = new List<Tile>();
-    //                    }
-
-    //                    windStrips[listIndex].Add(tile);
-    //                    listIndex++;
-    //                }
-    //            }
-    //        }
-    //    }
-    //    else
-    //    {
-    //        int minX = rangeX.Item1;
-    //        int maxX = rangeX.Item2;
-    //        //x low to high
-    //        //z increasing
-    //        for (int i = rangeZ.Item1; i < rangeZ.Item2; i++)
-    //        {
-    //            int listIndex = 0;
-    //            for (int j = minX; j < maxX; j++)
-    //            {
-    //                Tile tile = tileManager.GetTile(j, i);
-    //                if (tilesAffectedByWind.Contains(tile))
-    //                {
-    //                    if (!windStrips.ContainsKey(listIndex))
-    //                    {
-    //                        windStrips[listIndex] = new List<Tile>();
-    //                    }
-
-    //                    windStrips[listIndex].Add(tile);
-    //                    listIndex++;
-    //                }
-    //            }
-    //        }
-    //    }
-    //    return windStrips;
-    //}
-
     private Dictionary<int, SortedDictionary<int, List<Tile>>> FindWindStrips(Tile anchorPoint, Vector2 direction)
     {
         //List<List<Tile>> windStrips = new List<List<Tile>>();
@@ -175,13 +109,13 @@ public class WindDeityManager : SingletonManager<WindDeityManager>
 
             if(!windStrips[stripIndex].ContainsKey(tileIndex))
             {
-                
                 windStrips[stripIndex][tileIndex] = new List<Tile>();
             }
             windStrips[stripIndex][tileIndex].Add(tile);
         }
 
-        //this is debug
+        //this is debug below
+
         //bool tilefound = false;
         //foreach(Tile tile in tilesAffectedByWind)
         //{
