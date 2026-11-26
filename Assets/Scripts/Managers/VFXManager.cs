@@ -3,21 +3,29 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Experimental.GlobalIllumination;
 
 public class VFXManager : SingletonManager<VFXManager>
 {
-    //public static VFXManager instance = null;
+    //Ligth effects
+    [SerializeField] private Light originalLight;
+    private Color originalLight_Color;
+    private float originalLight_Intensity;
+    private float originalLight_Multiplier;
 
+    //Particle effects
     private Dictionary<VFXenum, ParticleSystem> particleDictonary = new Dictionary<VFXenum, ParticleSystem>();
     [SerializeField] private List<VFX_KeyAndParticle> contentList = new List<VFX_KeyAndParticle>();
+
+    //Camera effects
     [SerializeField] private List<CamVFX> camEffectList = new List<CamVFX>();
     private Dictionary<BiomeType, ParticleSystem> camVfxDictonary = new Dictionary<BiomeType, ParticleSystem>();
+    [SerializeField] private bool ScreenEffect = false;
 
     //List for particlesystems that should play indenfinently
     //All gameobjects that subscribes will have particleeffects play untill they unsubscribe
     private Dictionary<GameObject, ParticleSystem> subscriberList = new Dictionary<GameObject, ParticleSystem>();
-    [SerializeField] private bool ScreenEffect = false;
-    //Error when i made the dictonary serializable, this is a work around
+
     [Serializable]
     public struct VFX_KeyAndParticle 
     {
@@ -37,6 +45,7 @@ public class VFXManager : SingletonManager<VFXManager>
         public ParticleSystem Value => value;
     }
 
+    //Debugging the shake function
     [SerializeField] private bool debugShake = false;
     [SerializeField] private float time = 0.15f;
     [SerializeField] private float power = 1f;
@@ -47,6 +56,11 @@ public class VFXManager : SingletonManager<VFXManager>
 
     private void Start()
     {
+        if (originalLight != null)
+        {
+            SetStartLightValues();
+        }
+
         cam = Camera.main;
         biomeManager = BiomeManager.Instance;
         if (ScreenEffect)
@@ -75,6 +89,14 @@ public class VFXManager : SingletonManager<VFXManager>
             SetBiomeCameraVFX(BiomeType.Normal);
         }
 
+
+    }
+
+    void SetStartLightValues() 
+    {
+        originalLight_Color = originalLight.color;
+        originalLight_Intensity = originalLight.intensity;
+        originalLight_Multiplier = originalLight.bounceIntensity;
     }
 
     public ParticleSystem GetParticleSystem(VFXenum key) 

@@ -1,8 +1,10 @@
 using Assets.Scripts.Environment;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Xml.Serialization;
 using UnityEngine;
+using UnityEngine.VFX;
 
 public class HappeningManager : SingletonManager<SoundManager>
 {
@@ -13,6 +15,12 @@ public class HappeningManager : SingletonManager<SoundManager>
     [SerializeField, ReadOnly] private float internalClockCycle;
     [SerializeField, ReadOnly] private float currentClockCycle;
     [SerializeField, ReadOnly] private float clockSpeed;
+    [Header("Set interval between happenings in minutes")]
+    [SerializeField] private int setIntervalSpeed; //Will be used instead of random intervals 
+    [Header("Randomness in timer interval in minutes")]
+    [SerializeField] private bool RandomHappeningInterval; //If random interval is true then there is a ranom minute interval between happenings
+    [SerializeField] private int minRandomInterval;
+    [SerializeField] private int maxRandomInterval;
     private bool HasCurrentHappening = false;
     [Header("Bird attack")]
     [SerializeField] private GameObject birdPrefab;
@@ -36,15 +44,15 @@ public class HappeningManager : SingletonManager<SoundManager>
 
     void Start()
     {
-        
+        PopulateHappenings(possibleHappinings);
+        HasCurrentHappening = false;
+        internalClockCycle = setIntervalSpeed; // every five minutes
     }
 
     // Update is called once per frame
     void Update()
     {
         ClockCycle();
-        currentHappening.Update();
-        currentHappening.Stop(HasCurrentHappening);
     }
 
     void ClockCycle() 
@@ -54,11 +62,33 @@ public class HappeningManager : SingletonManager<SoundManager>
             currentClockCycle += clockSpeed * Time.deltaTime;
             if (currentClockCycle > internalClockCycle)
             {
-                HasCurrentHappening = true;
-                TriggerHappening();
+                SetNewHappening();
             }
         }
+        else 
+        {
+            currentHappening.Update();
+            currentHappening.Stop(HasCurrentHappening);
+        }
 
+    }
+
+    void SetNewHappening() 
+    {
+        if (RandomHappeningInterval)
+        {
+            HasCurrentHappening = true;
+            TriggerHappening();
+            currentClockCycle = 0;
+            int newClockCycleMax = UnityEngine.Random.Range(minRandomInterval * 60, maxRandomInterval * 60); // between 3min and 5min a happening will accure 
+            internalClockCycle = newClockCycleMax;
+        }
+        else
+        {
+            HasCurrentHappening = true;
+            TriggerHappening();
+            currentClockCycle = 0;
+        }
     }
 
     void TriggerHappening() 
@@ -67,7 +97,22 @@ public class HappeningManager : SingletonManager<SoundManager>
         {
             int randomHappening = UnityEngine.Random.Range(0, possibleHappinings.Count);
             currentHappening = possibleHappinings[randomHappening];
+            HasCurrentHappening = true;
         }
+    }
+
+    void PopulateHappenings(List<Happening> list) 
+    {
+        BirdAttack birdAttack = new BirdAttack(birdPrefab, birdAmount);
+        FogOfWar fogOfWar = new FogOfWar(particleEffect, intensity, leangth);
+        EarthQuake earthQuake = new EarthQuake(amountEffectedTiles);
+        WildFire wildFire = new WildFire(effectedPlants, fireParticleEffect);
+        Drought drought = new Drought(plantsWithDrought, droughtEffect);
+        list.Add(birdAttack);
+        list.Add(fogOfWar);
+        list.Add(earthQuake);
+        list.Add(wildFire);
+        list.Add(drought);
     }
 }
 
@@ -132,40 +177,44 @@ public class EarthQuake : Happening
 {
     private int amountEffectedTiles;
     private List<Tile> effectedTiles = new List<Tile>();
-    private bool canStart = false;
-
     public EarthQuake(int amountEffectedTiles) 
     { 
         this.amountEffectedTiles = amountEffectedTiles;
     }
     public override void Update()
     {
-        if (!canStart) 
+        TileManager tilemanager = TileManager.Instance;
+        VFXManager vfx = VFXManager.Instance;
+        float time = 0.5f;
+        float intensity = 1f;
+        vfx.ShakeCamera(time, intensity); //Shake the camare to give simulation that the ground shakes
+        StartCoroutine(EarthQuakeModify(tilemanager, effectedTiles)); 
+    }
+
+    //Enumarator for earthquake to have a little delay between camera shake and modification of tiles
+    IEnumerator EarthQuakeModify(TileManager tilemanager,List<Tile> effectedTiles) 
+    { 
+        //The delay should allow the camera shake to start to give feeling that camera shakes first and then followed by ground shift
+        yield return new WaitForSeconds(0.3f);
+        foreach (Chunk chunk in tilemanager.chunks)
         {
-            TileManager tilemanager = TileManager.Instance;
-            foreach(Chunk chunk in tilemanager.chunks) 
-            { 
-                foreach(Tile tile in chunk.Tiles) 
-                { 
+            foreach (Tile tile in chunk.Tiles)
+            {
+                if (tile.Type == TileType.Grass)
+                {
                     System.Random random = new System.Random();
                     int frequency = random.Next(0, 10);
-                    if(effectedTiles.Count < amountEffectedTiles && frequency > 7) 
-                    { 
+                    if (effectedTiles.Count < amountEffectedTiles && frequency > 7)
+                    {
                         effectedTiles.Add(tile);
+                        chunk.ModifyTile((int)tile.Position.x, (int)tile.Position.z, UnityEngine.Random.Range(-2, 2));
                     }
-                    
                 }
-            }
-            canStart = true;
-        }
-        if (canStart) 
-        { 
-            foreach (Tile tile in effectedTiles) 
-            {
-                //Modify y axis
             }
         }
     }
+
+    //Should stop immediatly after finishing so it will just execute then stop
     public override void Stop(bool reset)
     {
         reset = false;
@@ -297,6 +346,10 @@ public class Drought : Happening
 {
     private int plantsWithDrought;
     private float droughtEffect;
+    private bool start = false;
+    private float internalTimerMax = 240; //4 minutes
+    private float currentTimer = 0; 
+
     public Drought(int plantWithDrought, float droughtEffect)
     {
         this.droughtEffect = droughtEffect;
@@ -305,11 +358,28 @@ public class Drought : Happening
 
     public override void Update()
     {
-
+        if (!start) 
+        { 
+            PlantManager plantmanager = PlantManager.Instance;
+            foreach(Plant plant in plantmanager.Plants) 
+            {
+                plant.IsCloseToWaterRange = 0.1f;
+            }
+        }
+        currentTimer += Time.deltaTime;
+      
     }
     public override void Stop(bool reset)
     {
-        reset = false;
+        if (currentTimer > internalTimerMax)
+        {
+            PlantManager plantman = PlantManager.Instance;
+            foreach(Plant p in plantman.Plants) 
+            {
+                p.IsCloseToWaterRange = p.InitialValues.IsCloseToWaterRange;
+            }
+            reset = false;
+        }
     }
 }
 
