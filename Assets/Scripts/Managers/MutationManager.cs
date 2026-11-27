@@ -30,6 +30,7 @@ public class MutationManager : SingletonManager<MutationManager>
     [SerializeField] private ParticleSystem mutationParticleSystem;
     SeedManager seedManager = SeedManager.Instance;
     BiomeManager bioManger;
+    private WaveFunctionCollapse wfc;
 
     private Vector3 dumpPostion = new Vector3(0,50,0);
 
@@ -37,6 +38,7 @@ public class MutationManager : SingletonManager<MutationManager>
 
     private void Start()
     {
+        wfc = new WaveFunctionCollapse();
         bioManger = BiomeManager.Instance;
         mutationAnimalDictonary.Add(BiomeType.Normal, normalAnimalMutation);
         mutationAnimalDictonary.Add(BiomeType.Infected, infectedAnimalMutation);
@@ -87,7 +89,9 @@ public class MutationManager : SingletonManager<MutationManager>
             Renderer animalRenderer = thisAnimal.AnimalObj.GetComponent<Renderer>();
             if (animalRenderer != null)
             {
-                animalRenderer.material.color = mutation.MaterialColor;
+                //animalRenderer.material.color = mutation.MaterialColor;
+
+                wfc.DebugWFC(animalRenderer.material.color, mutation.MaterialColor, thisAnimal.AnimalObj); //Applies wfc
             }
             thisAnimal.DMG += mutation.Damage;
             thisAnimal.Health += mutation.Health;
@@ -186,7 +190,9 @@ public class MutationManager : SingletonManager<MutationManager>
         newplant.PlantSmellRadiusValue += choosenMutation.PlantSmellRadiusValue;
         rendSproout.material.color = choosenMutation.Color;
         rendGrowthling.material.color = choosenMutation.Color;
-        rendGrowth.material.color = choosenMutation.Color;
+        //rendGrowth.material.color = choosenMutation.Color;
+        wfc.DebugWFC(rendGrowth.material.color, choosenMutation.Color, newplant.GrownPrefab);
+
         newplant.Health += choosenMutation.Health;
         newplant.IsCloseToWaterRange = choosenMutation.IsCloseToWaterRange;
         newplant.EffectType = currentBiome;

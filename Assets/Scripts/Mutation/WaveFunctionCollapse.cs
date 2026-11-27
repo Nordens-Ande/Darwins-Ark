@@ -353,7 +353,7 @@ public class WaveFunctionCollapse : MonoBehaviour
     /// 
 
     //Debug feature, making textures inside this scripts to see if it works
-    void DebugCreateTextures(Texture2D fatherTex, Texture2D motherTex) 
+    void DebugCreateTextures(Texture2D fatherTex, Texture2D motherTex, Color fatherColor, Color mothercolor) 
     {
         Texture2D texture = new Texture2D(textureSize, textureSize);
 
@@ -361,8 +361,8 @@ public class WaveFunctionCollapse : MonoBehaviour
         { 
             for (int j = 0; j < texture.height; j++) 
             {
-                fatherTex.SetPixel(i, j, Color.blue);
-                motherTex.SetPixel(i, j, Color.red);
+                fatherTex.SetPixel(i, j, fatherColor);
+                motherTex.SetPixel(i, j, mothercolor);
             }
         }
         fatherTex.Apply();
@@ -380,19 +380,19 @@ public class WaveFunctionCollapse : MonoBehaviour
         return motherTex;
     }
 
-    void DebugSetobjColor(GameObject obj)
+    void ApplyCreatedTexture(GameObject obj)
     {
         Renderer renderer = obj.GetComponent<Renderer>();
         newTexture.filterMode = FilterMode.Point;
         renderer.material.mainTexture = newTexture;
     }
 
-    public void DebugWFC()
+    public void DebugWFC(Color fatherColor, Color motherColor, GameObject targetObj)
     {
         List<WFCcell> isnetCollapsedCells = new List<WFCcell>();
         Texture2D fatherTex = DebugCreateFather();
         Texture2D motherTex = DebugCreateMother();
-        DebugCreateTextures(fatherTex, motherTex);
+        DebugCreateTextures(fatherTex, motherTex, fatherColor, motherColor);
 
         WFCcell[,] cells = new WFCcell[fatherTex.width, fatherTex.height];
         GetPossibleColors(fatherTex, motherTex, cells, isnetCollapsedCells);
@@ -421,16 +421,17 @@ public class WaveFunctionCollapse : MonoBehaviour
 
         PaintTheFinalResult(cells, fatherTex.width, fatherTex.height);
         CreateNewTexture(fatherTex, cells);
-        DebugSetobjColor(debugObj);
+        //DebugSetobjColor(debugObj);
+        ApplyCreatedTexture(targetObj);
 
     }
 
-    private void Update()
-    {
-        if (activateDebug == true)
-        {
-            activateDebug = false;
-            DebugWFC();
-        }
-    }
+    //private void Update()
+    //{
+    //    if (activateDebug == true)
+    //    {
+    //        activateDebug = false;
+    //        DebugWFC();
+    //    }
+    //}
 }
